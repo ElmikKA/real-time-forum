@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <style>
+        #register {
+            background-color: rgb(206, 206, 206);
+            /* display: inline-block; */
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    mainpage
+
+    <button onclick="toggleRegister()">register</button>
+    <br>
+    <br>
+    <br>
+
+    <!-- register -->
+    <div id="register" class="hidden">
+        <form id="registrationForm">
+            <label for="username">Username</label>
+            <input placeholder="Enter Username" name="username" required type="text">
+            <br>
+
+            <label for="age">Age</label>
+            <input type="number" name="age" required placeholder="Age">
+            <br>
+
+            <label for="gender">gender</label>
+            <input placeholder="Enter gender" name="gender" required type="text">
+            <br>
+
+            <label for="firstName">first name</label>
+            <input placeholder="Enter first name" name="firstName" required type="text">
+            <br>
+            <label for="lastName">last name</label>
+            <input placeholder="Enter last name" name="lastName" required type="text">
+            <br>
+            <label for="email">e-mail</label>
+            <input placeholder="Enter E-mail" name="email" required type="text">
+            <br>
+            <label for="password">password</label>
+            <input type="text" name="password" placeholder="Password" required>
+
+            <br>
+            <button type="button" onclick="registerUser()">register</button>
+            <p id="registerMessage"></p>
+        </form>
+
+    </div>
+
+    <script>
+        function toggleRegister() {
+            const registerDiv = document.getElementById('register')
+            registerDiv.classList.toggle('hidden')
+        }
+
+        function registerUser() {
+            const form = document.getElementById('registrationForm')
+            const message = document.getElementById('registerMessage')
+            if (form.checkValidity()) {
+                message.innerHTML = "";
+                const formData = new FormData(form);
+                fetch('/api/register', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => response.json()
+                    )
+                    .then(data => {
+                        if (data.error) {
+                            message.innerHTML = 'Error: ' + data.message
+                        } else {
+                            console.log('registered');
+                            toggleRegister()
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error registering user:', error);
+                    });
+
+
+            } else {
+                message.innerHTML = "please check your answers"
+            }
+        }
+    </script>
+    <!-- <script src="../static/js/index.js"></script> -->
+</body>
+
+
+</html>

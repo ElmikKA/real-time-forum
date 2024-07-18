@@ -24,6 +24,14 @@ body, html {
     display: flex;
 }
 
+dialog{
+    display: none;
+}
+
+dialog[open] {
+    display: flex;
+}
+
 /* Header Section */
 #header-section {
     display: flex;
@@ -241,6 +249,11 @@ input {
     border-radius: 10px;
 }
 
+.post-layout:hover {
+    background:rgba(111, 185, 129, 0.495);
+    cursor: pointer;
+}
+
 .post-layout h3 {
     color: white;
 }
@@ -291,4 +304,5 @@ input {
     width: 30px;
     margin-left: 10px;
     margin-bottom: 10px;
+    margin-top: 10px;
 }

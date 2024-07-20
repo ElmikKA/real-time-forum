@@ -9,7 +9,8 @@
 
 <body>
     <style>
-        #register {
+        #register,
+        #login {
             background-color: rgb(206, 206, 206);
             /* display: inline-block; */
         }
@@ -21,6 +22,7 @@
     mainpage
 
     <button onclick="toggleRegister()">register</button>
+    <button onclick="toggleLogin()">login</button>
     <br>
     <br>
     <br>
@@ -56,13 +58,33 @@
             <button type="button" onclick="registerUser()">register</button>
             <p id="registerMessage"></p>
         </form>
+    </div>
+
+
+    <!-- Login -->
+    <div id="login" class="hidden">
+        <form id="loginForm">
+            <label for="user">username/email</label>
+            <input type="text" name="user" required placeholder="username/email">
+            <br>
+            <label for="password">password</label>
+            <input type="text" name="password" required placeholder="password">
+            <br>
+            <button type="button" onclick="login()">login</button>
+            <p id="loginMessage"></p>
+        </form>
 
     </div>
+
 
     <script>
         function toggleRegister() {
             const registerDiv = document.getElementById('register')
             registerDiv.classList.toggle('hidden')
+        }
+        function toggleLogin() {
+            const loginDiv = document.getElementById('login')
+            loginDiv.classList.toggle('hidden')
         }
 
         function registerUser() {
@@ -92,6 +114,33 @@
 
             } else {
                 message.innerHTML = "please check your answers"
+            }
+        }
+
+        function login() {
+            const form = document.getElementById('loginForm')
+            const message = document.getElementById('loginMessage')
+            if (form.checkValidity()) {
+                message.innerHTML = ""
+                const formData = new FormData(form)
+                fetch('/api/login', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            message.innerHTML = 'Error: ' + data.message
+                        } else {
+                            console.log('logged in')
+                            toggleLogin()
+                        }
+                    })
+                    .catch(error => {
+                        console.log('error registering user: ', error)
+                    })
+            } else {
+                message.innerHTML = 'check the answers'
             }
         }
     </script>

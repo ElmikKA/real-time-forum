@@ -6,9 +6,12 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
+
+	"RTForum/functions"
 )
 
-func Mainpage(w http.ResponseWriter, r *http.Request) {
+func (app *application) Mainpage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
@@ -19,34 +22,52 @@ func Mainpage(w http.ResponseWriter, r *http.Request) {
 }
 
 type Response struct {
-	Error   bool   `json:"error"`
-	Message string `json:"message"`
+	Error    bool   `json:"error"`
+	Message  string `json:"message"`
+	LoggedIn bool   `json:"loggedIn"`
 }
 
-func Register(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
+func (app *application) Register(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 		err := r.ParseMultipartForm(10 << 20)
-
 		if err != nil {
 			fmt.Println("error", err)
 		}
-		fmt.Println(r.Form)
-		fmt.Println("form:", r.Form.Get("username"))
+		age, _ := strconv.Atoi(r.FormValue("age"))
 
-		username := r.Form.Get("username")
+		user := functions.Users{
+			Name:      r.Form.Get("username"),
+			Age:       age,
+			Gender:    r.Form.Get("gender"),
+			FirstName: r.Form.Get("firstName"),
+			LastName:  r.Form.Get("lastName"),
+			Email:     r.Form.Get("email"),
+			Password:  r.Form.Get("password"),
+		}
+		exists, err := functions.CheckUserExists(app.db, user.Name, user.Email)
 
-		if username == "1" {
+		if err != nil {
 			response := Response{
 				Error:   true,
-				Message: "Username already exists",
+				Message: "unable to check database",
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(response)
+		}
+
+		if exists {
+			response := Response{
+				Error:   true,
+				Message: "Username or email already in use",
 			}
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(response)
 			return
+		} else {
+			functions.AddUser(app.db, user)
 		}
+
 		response := Response{
 			Error:   false,
 			Message: "Registration successful",
@@ -58,8 +79,49 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// func Login(w http.ResponseWriter, r *http.Request) {
-// 	if r.URL.Path == "/api/login" {
+func (app *application) Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		err := r.ParseMultipartForm(10 << 20)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error parsing form: %v", err), http.StatusBadRequest)
+			return
+		}
+		name := r.Form.Get("user")
+		pass := r.Form.Get("password")
+		valid, id, err := functions.CheckLogin(app.db, name, pass)
+		response := Response{}
+		if err != nil {
+			response = Response{
+				Error:   true,
+				Message: "database error",
+			}
+		}
+		if valid {
+			response = Response{
+				Error:   false,
+				Message: "Logged in",
+			}
 
-// 	}
-// }
+			// session
+
+			err = functions.DeleteUserSession(app.db, id)
+			if err != nil {
+				fmt.Println("error deleting session from user")
+			}
+
+			err = app.AddSession(w, r, id)
+			if err != nil {
+				fmt.Println("error adding session")
+				return
+			}
+
+		} else {
+			response = Response{
+				Error:   true,
+				Message: "Invalid credentials",
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}
+}

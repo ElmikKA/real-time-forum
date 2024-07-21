@@ -1,3 +1,5 @@
+const postGridLayout = document.getElementById('post-grid-layout');
+
 const posts = [
     {
         profileName: 'Karl Elmik',
@@ -33,16 +35,41 @@ const posts = [
     }
 ]
 
-export function postLayoutForHtml() {
-    const postGridLayout = document.getElementById('post-grid-layout');
-    
+function openFullPost(post) {
+    const postDialog = document.createElement('dialog');
+    postDialog.classList.add('post-dialog');
+
+    //TODO
+    //There need to be a comment section, likes and dislikes as well
+    postDialog.innerHTML = `
+        <div class="post-dialog-content">
+            <div class="author-and-close-button">
+                <div class='profile-picture-and-name'>
+                    <div class="profile-picture-on-post">
+                        <p>${post.profileName[0]}</p>
+                    </div>
+                    <h2>${post.profileName}</h2>
+                </div>
+                <button class="close-dialog-button" onclick="this.closest('dialog').close()">X</button>
+            </div> 
+            <h1 class="post-title">${post.title}</h1>
+            <p>${post.postText}</p>
+        </div>
+    `;
+
+    document.body.appendChild(postDialog);
+    postDialog.showModal();
+}
+
+function createFullPostLayoutWihDialog() {
     posts.forEach(post => {
-        const postElement = createAPost(post)
+        const postElement = displayPostOnDashboard(post)
+        postElement.addEventListener('click', () => openFullPost(post))
         postGridLayout.appendChild(postElement)
     })
 }
 
-function createAPost(postObj) {
+function displayPostOnDashboard(postObj) {
     const postLayout = document.createElement('div');
     postLayout.classList.add('post-layout');
 
@@ -67,6 +94,9 @@ function createAPost(postObj) {
             <img src="/src/img/Comment.png" class="comment-img">
         </div>
     `;
-
     return postLayout
+}
+
+export function postLayoutForHtml() {
+    createFullPostLayoutWihDialog()
 }

@@ -51,3 +51,40 @@ export function getPosts() {
 export function addPost(post) {
     posts.push(post)
 }
+
+const users = [
+    {
+        nickname: 'Elmek',
+        age: '24',
+        gender: 'male',
+        firstName: 'Karl',
+        lastName: 'Elmik',
+        email: 'some@some.ee',
+        password: 'somesome',
+        online: true,
+    },
+    {
+        nickname: 'MuriMees277',
+        age: '29',
+        gender: 'male',
+        firstName: 'Karl',
+        lastName: 'Elmik',
+        email: 'some@some.ee',
+        password: 'somesome',
+        online: false,
+    },
+    {
+        nickname: 'Murutraktor',
+        age: '22',
+        gender: 'male',
+        firstName: 'Karl',
+        lastName: 'Elmik',
+        email: 'some@some.ee',
+        password: 'somesome',
+        online: true,
+    }
+];
+
+export function getUsers() {
+    return users;
+}

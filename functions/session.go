@@ -3,7 +3,6 @@ package functions
 import (
 	"database/sql"
 	"fmt"
-	"net/http"
 	"time"
 )
 
@@ -48,7 +47,6 @@ func DeleteUserSession(db *sql.DB, id int) error {
 		return err
 	}
 	return nil
-
 }
 
 func GetSessionByCookie(db *sql.DB, cookie string) (Session, error) {
@@ -57,17 +55,7 @@ func GetSessionByCookie(db *sql.DB, cookie string) (Session, error) {
 
 	err := db.QueryRow(query, cookie).Scan(&session.Id, &session.Cookie, &session.Created)
 	if err != nil {
-		// if errors.Is(err, sql.ErrNoRows) {
-		// 	return Session{}, err
-		// }
-		// return Session{}, fmt.Errorf("failed to get session: %v", err)
 		return Session{}, err
 	}
 	return session, nil
-
-}
-
-func CheckRequireLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
-	_, err := r.Cookie("session")
-	return err == nil
 }

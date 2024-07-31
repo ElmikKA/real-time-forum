@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY NOT NULL,
     user_id INTEGER NOT NULL,
+    creator TEXT NOT NULL,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     category TEXT NOT NULL,
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY NOT NULL,
     user_id INTEGER NOT NULL,
+    creator TEXT NOT NULL,
     post_id INTEGER NOT NULL,
     content TEXT NOT NULL,
     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -36,12 +38,14 @@ CREATE TABLE IF NOT EXISTS comments (
 CREATE TABLE IF NOT EXISTS post_likes (
     user_id INTEGER NOT NULL,
     post_id INTEGER NOT NULL,
-    like INTEGER
+    like INTEGER,
+    PRIMARY KEY (post_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS comment_likes (
     user_id INTEGER NOT NULL,
     post_id INTEGER NOT NULL,
     comment_id INTEGER NOT NULL,
-    like integer
+    like integer,
+    PRIMARY KEY (post_id, user_id)
 );

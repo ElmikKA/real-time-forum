@@ -80,3 +80,30 @@ func GetCommentLikes(db *sql.DB, id int) ([]Comment_likes, error) {
 	}
 	return comment_likes, nil
 }
+
+func AddPostLike(db *sql.DB, post_id int, user_id int, like int) error {
+
+	query := `INSERT OR REPLACE INTO post_likes (user_id, post_id, like) 
+	VALUES (?,?,?)`
+
+	_, err := db.Exec(query, user_id, post_id, like)
+	if err != nil {
+		fmt.Println("error adding post likes", err)
+		return err
+	}
+	fmt.Println(user_id, post_id, like)
+	return nil
+}
+
+func AddCommentLike(db *sql.DB, post_id int, comment_id int, user_id int, like int) error {
+
+	query := `INSERT OR REPLACE INTO comment_likes (user_id, post_id,comment_id, like) 
+	VALUES (?,?,?,?)`
+
+	_, err := db.Exec(query, user_id, post_id, comment_id, like)
+	if err != nil {
+		fmt.Println("error adding comment likes", err)
+		return err
+	}
+	return nil
+}

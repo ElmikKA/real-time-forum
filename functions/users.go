@@ -51,3 +51,14 @@ func CheckLogin(db *sql.DB, user, pass string) (bool, int, error) {
 
 	return true, id, nil
 }
+
+func GetUser(db *sql.DB, id int) (Users, error) {
+	var user Users
+	query := `SELECT username, age, gender, fname, lname, email FROM users WHERE id = ?`
+	err := db.QueryRow(query, id).Scan(&user.Name, &user.Age, &user.Gender, &user.FirstName, &user.LastName, &user.Email)
+	if err != nil {
+		fmt.Println("error getting user", err)
+		return user, err
+	}
+	return user, nil
+}

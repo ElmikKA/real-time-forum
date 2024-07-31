@@ -24,7 +24,6 @@ func CreateSession(db *sql.DB, session Session) (int, error) {
 	}
 
 	return session.Id, nil
-
 }
 
 func DeleteSession(db *sql.DB, cookie string) {
@@ -35,7 +34,6 @@ func DeleteSession(db *sql.DB, cookie string) {
 	if err != nil {
 		fmt.Println("error deleting session")
 	}
-
 }
 
 func DeleteUserSession(db *sql.DB, id int) error {

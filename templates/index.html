@@ -23,8 +23,14 @@
 
     <button onclick="toggleRegister()">register</button>
     <button onclick="toggleLogin()">login</button>
+    <button onclick="togglePost()">posting</button>
+    <button onclick="toggleComment()">commenting</button>
     <button onclick="posts()">posts</button>
     <button onclick="post1()">post1</button>
+    <button onclick="changeLike('post',1,0, 1)">like</button>
+    <button onclick="changeLike('post',1,0,-1)">dislike</button>
+    <button onclick="changeLike('comment',1,1, 1)">likeComment</button>
+    <button onclick="changeLike('comment',1,1,-1)">dislikeComment</button>
     <br>
     <br>
     <br>
@@ -80,6 +86,19 @@
 
     <!-- Posts -->
 
+    <div id="postDiv" class="hidden">
+        <input type="text" placeholder="title" id="title"> <br>
+        <input type="text" placeholder="category" id="category"> <br>
+        <input type="text" placeholder="content" id="content"> <br>
+        <button id="createPost" onclick="createPost()">post</button>
+    </div>
+
+    <!-- Comment -->
+
+    <div id="commentDiv" class="hidden">
+        <input type="text" placeholder="content" id="content"> <br>
+        <button id="post" onclick="createNewComment()">comment</button>
+    </div>
 
     <script>
         function toggleRegister() {
@@ -89,6 +108,14 @@
         function toggleLogin() {
             const loginDiv = document.getElementById('login')
             loginDiv.classList.toggle('hidden')
+        }
+        function togglePost() {
+            const postDiv = document.getElementById('postDiv')
+            postDiv.classList.toggle('hidden')
+        }
+        function toggleComment() {
+            const commentDiv = document.getElementById('commentDiv')
+            commentDiv.classList.toggle('hidden')
         }
 
         function registerUser() {
@@ -124,6 +151,9 @@
         }
 
         function login() {
+            document.addEventListener('scroll', event => {
+                console.log(event)
+            })
             const form = document.getElementById('loginForm')
             const message = document.getElementById('loginMessage')
             if (form.checkValidity()) {
@@ -156,6 +186,10 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    if (data['loggedIn'] === false) {
+                        console.log('not logged in')
+                        return
+                    }
                     if (data["posts"] === "success") {
                         console.log(data["data"])
                         console.log(data["loggedIn"])
@@ -182,8 +216,89 @@
                 .then(data => {
                     console.log(data)
                 })
+                .catch(error => {
+                    console.log(error)
+                })
 
         }
+
+        function createPost() {
+            const postDiv = document.getElementById('postDiv')
+            const title = postDiv.querySelector('#title').value
+            const category = postDiv.querySelector('#category').value
+            const content = postDiv.querySelector('#content').value
+
+            const postData = {
+                title: title,
+                category: category,
+                content: content
+            }
+
+            fetch('/api/newPost', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        }
+
+        function createNewComment() {
+            const commentDiv = document.getElementById('commentDiv')
+            const commentData = {
+                content: commentDiv.querySelector('#content').value,
+                post_id: 1, // hardcoded for post id of 1
+            }
+
+            fetch('/api/newComment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(commentData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        }
+
+        function changeLike(type, post_id, comment_id, like) {
+            const likeData = {
+                post: type === "post" ? true : false,
+                post_id: post_id,
+                comment: type === "comment" ? true : false,
+                comment_id: comment_id,
+                like: like,
+            }
+
+            console.log(likeData)
+            fetch('/api/changeLikes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(likeData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        }
+
     </script>
     <!-- <script src="../static/js/index.js"></script> -->
 </body>

@@ -2,26 +2,24 @@ package main
 
 import (
 	"RTForum/database"
-	"RTForum/functions"
 	"database/sql"
 	"log"
 	"net/http"
 )
 
 type application struct {
-	db    *sql.DB
-	users *functions.Users
+	db *sql.DB
 }
 
 func main() {
 	var err error
-	app := application{
-		users: &functions.Users{},
-	}
+	app := application{}
+	// initiates database
 	app.db, err = database.InitDb()
 	if err != nil {
 		log.Fatalf("error connectiong to database: %v", err)
 	}
+	// closes db when everything ends
 	defer app.db.Close()
 
 	srv := &http.Server{

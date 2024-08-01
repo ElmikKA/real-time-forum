@@ -1,5 +1,5 @@
 # /api/register  POST
-`fetch('/api/register', {
+```fetch('/api/register', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
@@ -266,4 +266,4 @@ returnData {
     username: string, (logged in user username)
     like: string, ("success", or "failure")
     loggedIn: bool,
-}
+}```

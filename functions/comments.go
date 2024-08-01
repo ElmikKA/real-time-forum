@@ -19,7 +19,8 @@ type Comment struct {
 }
 
 func GetComments(id int, user_id int) ([]Comment, error) {
-	// query := `SELECT * FROM comments WHERE post_id = ?`
+
+	// selects data from both comments and comment_likes
 	query := `
 	SELECT 
 		c.id,

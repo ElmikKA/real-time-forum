@@ -6,6 +6,8 @@ import (
 )
 
 func CheckLogin(w http.ResponseWriter, r *http.Request) (int, string, bool) {
+
+	// checks the cookie and returns user id and username
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		return 0, "", false

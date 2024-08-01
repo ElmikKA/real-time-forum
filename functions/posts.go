@@ -20,6 +20,8 @@ type Post struct {
 }
 
 func GetPosts(user_id int) ([]Post, error) {
+
+	// selects data from users and post_likes
 	query := `
 	SELECT 
 		p.id,
@@ -60,6 +62,8 @@ func GetPosts(user_id int) ([]Post, error) {
 }
 
 func GetOnePost(id int, user_id int) (Post, error) {
+
+	// selects data from both posts and post_likes
 	query := `
 	SELECT 
 		p.id,
@@ -79,7 +83,6 @@ func GetOnePost(id int, user_id int) (Post, error) {
 		users u ON p.user_id = u.id
 	WHERE p.id = ?
 	`
-	// query := `SELECT * FROM posts WHERE id = ?`
 	var post Post
 	err := Db.QueryRow(query, user_id, user_id, id).Scan(&post.Id, &post.User_id, &post.Creator, &post.Title, &post.Content, &post.Category, &post.CreatedAt, &post.Likes, &post.Dislikes, &post.Liked, &post.Disliked)
 	if err != nil {

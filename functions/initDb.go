@@ -7,6 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// global variable so Db can be accessed anywhere
 var Db *sql.DB
 
 func InitDb() error {

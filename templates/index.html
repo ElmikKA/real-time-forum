@@ -112,7 +112,7 @@
         function registerUser() {
 
             const registerDiv = document.getElementById('registerDiv')
-            const messageDiv = document.getElementById('reisterMessage')
+            const messageDiv = document.getElementById('registerMessage')
             const registerForm = {
                 username: registerDiv.querySelector('#username').value,
                 age: parseInt(registerDiv.querySelector('#age').value),
@@ -134,6 +134,8 @@
                 .then(data => {
                     if (data["register"] !== "success") {
                         messageDiv.innerHTML = data["message"]
+                    } else {
+                        toggleRegister()
                     }
                     console.log(data)
                 })
@@ -161,6 +163,8 @@
                 .then(data => {
                     if (data["login"] !== "success") {
                         message.innerHTML = data["message"]
+                    } else {
+                        toggleLogin()
                     }
                     console.log(data)
                 })

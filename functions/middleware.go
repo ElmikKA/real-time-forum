@@ -25,7 +25,7 @@ func CheckLogin(w http.ResponseWriter, r *http.Request) (int, string, bool) {
 	var username string
 	err = Db.QueryRow(query, cookie.Value).Scan(&id, &username)
 	if err != nil {
-		fmt.Println("error querying db", err)
+		fmt.Println("error querying db checklogin", err)
 		return 0, "", false
 	}
 

@@ -23,8 +23,8 @@ func CheckUserExists(username, email string) (bool, error) {
 	query := "SELECT COUNT(*) FROM users WHERE username = ? OR email = ?"
 	var count int
 	err := Db.QueryRow(query, username, email).Scan(&count)
-
 	if err != nil {
+		fmt.Println("error checking existing user", err)
 		return false, err
 	}
 	return count > 0, nil

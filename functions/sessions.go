@@ -11,9 +11,7 @@ import (
 )
 
 func AddSession(w http.ResponseWriter, r *http.Request, id int) error {
-
 	cookie, err := r.Cookie("session")
-
 	if err != nil {
 		// if no cookie is found, creating one
 		cookie = &http.Cookie{

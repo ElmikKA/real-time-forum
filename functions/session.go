@@ -13,7 +13,6 @@ type Session struct {
 }
 
 func CreateSession(session Session) (int, error) {
-
 	query := `INSERT INTO sessions (id, cookie, createdAt, expiresAt) VALUES (?,?,?,?)`
 
 	_, err := Db.Exec(query, session.Id, session.Cookie, time.Now(), session.Expires)

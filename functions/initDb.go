@@ -10,7 +10,8 @@ import (
 var Db *sql.DB
 
 func InitDb() error {
-	db, err := sql.Open("sqlite3", "./database/forum.db")
+	var err error
+	Db, err = sql.Open("sqlite3", "./database/forum.db")
 	if err != nil {
 		return err
 	}
@@ -20,7 +21,7 @@ func InitDb() error {
 		return err
 	}
 
-	_, err = db.Exec(string(tables))
+	_, err = Db.Exec(string(tables))
 	if err != nil {
 		return err
 	}

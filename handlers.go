@@ -132,6 +132,17 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		responseData["user"], err = functions.GetUser(id)
+
+		if err != nil {
+			fmt.Println("error getting user username", err)
+			responseData["login"] = "failure"
+			responseData["message"] = "error getting username from id"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+
 		// user logged in
 		responseData["login"] = "success"
 		responseData["message"] = "Logged in"
@@ -360,10 +371,6 @@ func newComment(w http.ResponseWriter, r *http.Request) {
 
 		comment.Creator = user.Name
 
-		// marshal for testing purposes so the printed comment is more readable
-		out, _ := json.Marshal(comment)
-		fmt.Println(string(out))
-
 		// adds comment to db
 		err = functions.CreateComment(comment)
 		if err != nil {
@@ -377,7 +384,6 @@ func newComment(w http.ResponseWriter, r *http.Request) {
 		responseData["comment"] = comment
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(responseData)
-
 	}
 }
 

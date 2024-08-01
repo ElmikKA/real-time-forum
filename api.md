@@ -17,9 +17,9 @@ registerForm {
     email: string,
     password: string,
 }
-
+```
 fetch returns:
-
+```
 returnData {
     register: string, ("success" or "failure")
     message: string,
@@ -49,9 +49,9 @@ loginCredentials {
     user: string, (username or email)
     password: string,
 }
-
+```
 fetch returns:
-
+```
 returnData {
     login: string, ("success" or "failure")
     message: string,
@@ -63,9 +63,9 @@ returnData {
 fetch('/api/posts', {
     method: 'GET'
 })
-
+```
 fetch returns:
-
+```
 returnData {
     posts: string, ("success" or "failure")
     id: int, (logged in user id)
@@ -110,9 +110,9 @@ fetch('/api/posts', {
 requestPost {
     id: int, (id of the post you want to open up)
 }
-
+```
 fetch returns:
-
+```
 returnData {
     username: string, (logged in user username)
     id: int, (logged in user id)
@@ -178,9 +178,9 @@ postData {
     category: string,
     content: string,
 }
-
+```
 fetch returns:
-
+```
 <!-- might not be worth using this. On newpage fetch from /api/posts -->
 
 returnData {
@@ -218,9 +218,9 @@ commentData {
     content: string,
     post_id: id, (id of the post being commented on)
 }
-
+```
 fetch returns:
-
+```
 <!-- might not be worth using this. On newpage fetch from /api/posts -->
 
 returnData: {

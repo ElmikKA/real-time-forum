@@ -1,4 +1,4 @@
-import { getPosts } from "../data.js";
+import { getPosts } from "../data/data.js";
 import { openNewPostDialog, openFullPost } from "./postDialog.js";
 
 const postGridLayout = document.getElementById('post-grid-layout');
@@ -25,15 +25,15 @@ export function addPostToUI(post) {
 
 function displayPostOnDashboard(postObj) {
     const postLayout = document.createElement('div');
-    postLayout.classList.add('post-layout');
-    createInnerHTMLForDashboardPost(postLayout, postObj)
+    postLayout.classList.add('card-layout');
+    createInnerHTMLForDashboardCard(postLayout, postObj)
     return postLayout
 }
 
-function createInnerHTMLForDashboardPost(postLayout, postObj) {
+function createInnerHTMLForDashboardCard(postLayout, postObj) {
     postLayout.innerHTML = `
         <div class="show-profile">
-            <div class="profile-picture-on-post">
+            <div class="profile-picture-on-card">
                 <p>${postObj.profileName[0]}</p>
             </div>
             <h2 class="profile-name">${postObj.profileName}</h2>
@@ -42,7 +42,7 @@ function createInnerHTMLForDashboardPost(postLayout, postObj) {
             <h1>${postObj.title}</h1>
         </div>
         <div class="description-div">
-            <h3 class="short-descriptsion-for-post">
+            <h3 class="short-descriptsion-for-card">
                 ${postObj.description}
             </h3>
         </div>

@@ -1,4 +1,4 @@
-import { addPost } from "../data.js";
+import { addPost } from "../data/data.js";
 import { addPostToUI } from "./postUI.js";
 
 export function openFullPost(post) {
@@ -49,7 +49,7 @@ function createInnerHTMLForNewPostDialog(addNewPostDialog) {
     addNewPostDialog.innerHTML = `
         <div class="create-new-post-container">
             <h2>Create New Post</h2>
-            <button class="close-dialog-button" onclick="this.closest('dialog').close()">X</button>
+            <span class="close-dialog-button" onclick="this.closest('dialog').close()">&times;</span>
             <form id="create-post-form">
                 <label for="title">Title</label>
                 <input type="text" id="title" name="title" required>
@@ -73,12 +73,12 @@ function createInnerHTMLForFullPost(postDialog, post) {
         <div class="post-dialog-content">
             <div class="author-and-close-button">
                 <div class='profile-picture-and-name'>
-                    <div class="profile-picture-on-post">
+                    <div class="profile-picture-on-card">
                         <p>${post.profileName[0]}</p>
                     </div>
                     <h2>${post.profileName}</h2>
                 </div>
-                <button class="close-dialog-button" onclick="this.closest('dialog').close()">X</button>
+                <span class="close-dialog-button" onclick="this.closest('dialog').close()">&times;</span>
             </div> 
             <h1 class="post-title">${post.title}</h1>
             <p>${post.postText}</p>

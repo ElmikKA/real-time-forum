@@ -1,6 +1,4 @@
-import { getUsers } from "../data.js";
-
-
+import { getUsers } from "../data/data.js";
 
 export function showAllUsersAtSidebar() {
     const siderbar = document.getElementById('sidebar')
@@ -27,11 +25,15 @@ function generateUsersList() {
     const offlineUsers = users.filter(user => !user.online);
 
     const onlineListItems = onlineUsers.map(user => `
-        <li><span class="status online"></span><a>${user.nickname}</a></li>
+        <li class="user" data-username="${user.nickname}">
+            <span class="status online"></span><a>${user.nickname}</a>
+        </li>
     `).join('');
 
     const offlineListItems = offlineUsers.map(user => `
-        <li><span class="status offline"></span><a>${user.nickname}</a></li>
+        <li class="user" data-username="${user.nickname}">
+            <span class="status offline"></span><a>${user.nickname}</a>
+        </li>
     `).join('');
 
     return {

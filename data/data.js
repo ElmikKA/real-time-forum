@@ -54,6 +54,7 @@ export function addPost(post) {
 
 const users = [
     {
+        id: 1,
         nickname: 'Elmek',
         age: '24',
         gender: 'male',
@@ -64,6 +65,7 @@ const users = [
         online: true,
     },
     {
+        id: 2,
         nickname: 'MuriMees277',
         age: '29',
         gender: 'male',
@@ -74,6 +76,7 @@ const users = [
         online: false,
     },
     {
+        id: 3,
         nickname: 'Murutraktor',
         age: '22',
         gender: 'male',

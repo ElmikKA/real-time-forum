@@ -19,70 +19,58 @@
             </div>
             <div id="profile-and-add-new-button-div" class="visible">
                 <button id="add-new-button">NEW POST</button>
-                <button id="open-profile-button">K</button>
+                <!-- Dropdown Menu -->
+                <div class="dropdown">
+                    <button id="dropdown-toggle" class="dropdown-toggle">K</button>
+                    <div class="dropdown-menu" id="dropdown-menu">
+                        <button id="user-profile-button">Profile</button>
+                        <button id="logout-button">Logout</button>
+                    </div>
+                </div>
             </div>
         </header>
 
         <div class="login-container hidden" id="login-container">
             <div id="login-and-registration-section">
                 <form id="login-form">
-                    <label for="username">Username/Email</label>
-                    <input type="text" id="login-username" name="username">
+                    <label for="login-username">Username/Email</label>
+                    <input type="text" id="login-username" name="login-username">
 
-                    <label for="password">Password</label>
-                    <input type="password" id="login-password" name="password">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="login-password">
     
                     <div class="login-and-registration-buttons">
                         <button type="submit" class="login-button" id="login-button">LogIn</button>
                         <button class="registration-button" type="button">Register</button>
                     </div>
                 </form>
-    
             </div>
         </div>
 
         <!-- Main Section -->
         <main id="main-section" class="visible">
-
             <!-- Aside Section -->
-            <aside id="sidebar">
-                <div class="section">
-                    <h2>ONLINE</h2>
-                    <ul>
-                        <li><span class="status online"></span><a>Meme_reemsZ23</a></li>
-                        <li><span class="status online"></span><a>Meme_reemsZ23</a></li>
-                        <li><span class="status online"></span><a>Meme_reemsZ23</a></li>
-                    </ul>
-                </div>
-                <div class="section">
-                    <h2>OFFLINE</h2>
-                    <ul>
-                        <li><span class="status offline"></span><a>Meme_reemsZ23</a></li>
-                        <li><span class="status offline"></span><a>Meme_reemsZ23</a></li>
-                        <li><span class="status offline"></span><a>Meme_reemsZ23</a></li>
-                    </ul>
-                </div>
-            </aside>
-
+            <aside id="sidebar"></aside>
             <!-- Main Section for Posts -->
             <main id="main-content">
                 <!-- Main content heading -->
-                <div id="heading-class-for-main-content">
-                    <h2>Find the REAL truth about everything!</h2>
-                    <div id="filter-posts-button-div">
-                        <button id="filter-posts-button">FILTER</button>
-                    </div>
-                </div>
+                 <div id="main-content-for-posts" class="visible">
+                    <div id="heading-class-for-main-content">
+                         <h2>Find the REAL truth about everything!</h2>
+                         <div id="filter-posts-button-div">
+                             <button id="filter-posts-button">FILTER</button>
+                         </div>
+                     </div>
+                     <!-- Posts Section -->
+                     <div id="post-grid-layout"></div>
+                 </div>
+                 <div id="user-profile" class="hidden"></div>
 
-                <!-- Posts Section -->
-                <div id="post-grid-layout"></div>
+                 <div id="messenger-container" class="hidden"></div>
             </main>
-
         </main>
     </div>
 
-    
-    
     <script src="script.js" type="module"></script>
 </body>
 </html>

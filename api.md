@@ -1,5 +1,6 @@
 # /api/register  POST
-```fetch('/api/register', {
+```
+fetch('/api/register', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
@@ -31,11 +32,11 @@ returnData {
         password: string,
         username: string,
     }
-}
+}```
 
 
 # /api/login  POST
-
+```
 fetch('/api/login', {
     method: 'POST',
     headers: {
@@ -93,11 +94,11 @@ returnData {
         }
     ],
     
-}
+}```
 
 
 # /api/posts  POST
-
+```
 fetch('/api/posts', {
     method: 'POST',
     headers: {
@@ -159,11 +160,11 @@ returnData {
             User_id: int, (id of the user who liked/disliked)
         }
     ]
-}
+}```
 
 
 # /api/newPost  POST
-
+```
 fetch('/api/newPost', {
     method: 'POST',
     headers: {
@@ -200,11 +201,11 @@ returnData {
         title: string,
         user_id: int, (post creator's id)
     }
-}
+}```
 
 
 # /api/newComment  POST
-
+```
 fetch('/api/newComment', {
     method: 'POST',
     headers: {
@@ -239,11 +240,11 @@ returnData: {
             post_id: int, (id of the post being commented on)
             user_id: int, (id of the commenter)
     }
-}
+}```
 
 
 # /api/changeLikes  POST
-
+```
 fetch('/api/changeLikes', {
     method: 'POST',
     headers: {

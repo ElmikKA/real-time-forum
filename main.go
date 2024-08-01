@@ -1,30 +1,29 @@
 package main
 
 import (
-	"RTForum/database"
-	"database/sql"
+	functions "RTForum/database"
 	"log"
 	"net/http"
 )
 
-type application struct {
-	db *sql.DB
-}
+// type application struct {
+// 	db *sql.DB
+// }
 
 func main() {
 	var err error
-	app := application{}
+	// app := application{}
 	// initiates database
-	app.db, err = database.InitDb()
+	err = functions.InitDb()
 	if err != nil {
 		log.Fatalf("error connectiong to database: %v", err)
 	}
 	// closes db when everything ends
-	defer app.db.Close()
+	defer functions.Db.Close()
 
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: app.Routes(),
+		Handler: Routes(),
 	}
 	println("starting at http://localhost:8080")
 	if err := srv.ListenAndServe(); err != nil {

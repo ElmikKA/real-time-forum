@@ -11,7 +11,7 @@ import (
 )
 
 // executes the single html file
-func (app *application) Mainpage(w http.ResponseWriter, r *http.Request) {
+func Mainpage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
@@ -21,7 +21,7 @@ func (app *application) Mainpage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) Register(w http.ResponseWriter, r *http.Request) {
+func Register(w http.ResponseWriter, r *http.Request) {
 
 	responseData := make(map[string]interface{})
 	if r.Method == "POST" {
@@ -40,7 +40,7 @@ func (app *application) Register(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// checks if the username or email is already in use
-		exists, err := functions.CheckUserExists(app.db, user.Name, user.Email)
+		exists, err := functions.CheckUserExists(user.Name, user.Email)
 
 		// if db error
 		if err != nil {
@@ -60,7 +60,7 @@ func (app *application) Register(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			// if it's a new user it adds it to db
-			functions.AddUser(app.db, user)
+			functions.AddUser(user)
 		}
 
 		// responds success
@@ -75,7 +75,7 @@ func (app *application) Register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) Login(w http.ResponseWriter, r *http.Request) {
+func Login(w http.ResponseWriter, r *http.Request) {
 	responseData := make(map[string]interface{})
 
 	if r.Method == "POST" {
@@ -94,7 +94,7 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// checks if the username|email + pass is correct
-		valid, id, err := functions.CheckLogin(app.db, creds.User, creds.Pass)
+		valid, id, err := functions.CheckCredentials(creds.User, creds.Pass)
 
 		// error either on invalid credentials or db error
 		if err != nil {
@@ -116,13 +116,13 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 
 		// adds user session to db
 		// removes any previous sessions on this user id
-		err = functions.DeleteUserSession(app.db, id)
+		err = functions.DeleteUserSession(id)
 		if err != nil {
 			fmt.Println("error deleting session from user")
 		}
 
 		// adds new session for this user id
-		err = app.AddSession(w, r, id)
+		err = functions.AddSession(w, r, id)
 		if err != nil {
 			fmt.Println("error adding session")
 			responseData["login"] = "failure"
@@ -141,15 +141,11 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type PostRequest struct {
-	PostNumber int `json:"postNumber"`
-}
-
-func (app *application) Posts(w http.ResponseWriter, r *http.Request) {
+func Posts(w http.ResponseWriter, r *http.Request) {
 	responseData := make(map[string]interface{})
 
 	// checks if logged in
-	id, username, loggedIn := app.CheckLogin(w, r)
+	id, username, loggedIn := functions.CheckLogin(w, r)
 
 	responseData["loggedIn"] = loggedIn
 	responseData["id"] = id
@@ -167,7 +163,7 @@ func (app *application) Posts(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 
 		// gets all posts
-		posts, err := functions.GetPosts(app.db, id)
+		posts, err := functions.GetPosts(id)
 		if err != nil {
 			fmt.Println("Posts error", err)
 			responseData["posts"] = "failure"
@@ -180,7 +176,7 @@ func (app *application) Posts(w http.ResponseWriter, r *http.Request) {
 
 		// gets all post likes separately with more info
 		// (maybe not needed)
-		post_likes, err := functions.GetAllPostLikes(app.db)
+		post_likes, err := functions.GetAllPostLikes()
 		if err != nil {
 			fmt.Println("error postlikes", err)
 			responseData["posts"] = "failure"
@@ -212,7 +208,7 @@ func (app *application) Posts(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// gets the post with post_id
-		post, err = functions.GetOnePost(app.db, post.Id, id)
+		post, err = functions.GetOnePost(post.Id, id)
 		if err != nil {
 			fmt.Println("error getting onepost")
 			responseData["post"] = "failure"
@@ -224,7 +220,7 @@ func (app *application) Posts(w http.ResponseWriter, r *http.Request) {
 
 		// gets the additional information on likes of the post
 		// (maybe not needed)
-		post_likes, err := functions.GetOnePostLike(app.db, post.Id)
+		post_likes, err := functions.GetOnePostLike(post.Id)
 		if err != nil {
 			fmt.Println("err getting one post like", err)
 			responseData["post"] = "failure"
@@ -235,7 +231,7 @@ func (app *application) Posts(w http.ResponseWriter, r *http.Request) {
 		responseData["post_likes"] = post_likes
 
 		// gets all comments for the post
-		comments, err := functions.GetComments(app.db, post.Id, id)
+		comments, err := functions.GetComments(post.Id, id)
 		if err != nil {
 			fmt.Println("error getting comments")
 			responseData["post"] = "failure"
@@ -247,7 +243,7 @@ func (app *application) Posts(w http.ResponseWriter, r *http.Request) {
 
 		// gets all additional information on comment likes for the post
 		// (maybe not needed)
-		comment_likes, err := functions.GetCommentLikes(app.db, post.Id)
+		comment_likes, err := functions.GetCommentLikes(post.Id)
 		if err != nil {
 			fmt.Println("error getting commentlikes", err)
 			responseData["post"] = "failure"
@@ -263,12 +259,12 @@ func (app *application) Posts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) NewPost(w http.ResponseWriter, r *http.Request) {
+func NewPost(w http.ResponseWriter, r *http.Request) {
 
 	responseData := make(map[string]interface{})
 
 	// checks if logged in
-	id, username, loggedIn := app.CheckLogin(w, r)
+	id, username, loggedIn := functions.CheckLogin(w, r)
 
 	responseData["loggedIn"] = loggedIn
 	responseData["id"] = id
@@ -303,7 +299,7 @@ func (app *application) NewPost(w http.ResponseWriter, r *http.Request) {
 		post.Creator = username
 
 		// create post in db
-		err = functions.CreatePost(app.db, post)
+		err = functions.CreatePost(post)
 		if err != nil {
 			responseData["newPost"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
@@ -320,10 +316,10 @@ func (app *application) NewPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) newComment(w http.ResponseWriter, r *http.Request) {
+func newComment(w http.ResponseWriter, r *http.Request) {
 	responseData := make(map[string]interface{})
 	// checks if logged in
-	id, username, loggedIn := app.CheckLogin(w, r)
+	id, username, loggedIn := functions.CheckLogin(w, r)
 
 	responseData["loggedIn"] = loggedIn
 	responseData["id"] = id
@@ -354,7 +350,7 @@ func (app *application) newComment(w http.ResponseWriter, r *http.Request) {
 		comment.User_id = id
 
 		// gets username from db
-		user, err := functions.GetUser(app.db, id)
+		user, err := functions.GetUser(id)
 		if err != nil {
 			responseData["newComment"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
@@ -369,7 +365,7 @@ func (app *application) newComment(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(string(out))
 
 		// adds comment to db
-		err = functions.CreateComment(app.db, comment)
+		err = functions.CreateComment(comment)
 		if err != nil {
 			responseData["newComment"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
@@ -385,10 +381,10 @@ func (app *application) newComment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) ChangeLikes(w http.ResponseWriter, r *http.Request) {
+func ChangeLikes(w http.ResponseWriter, r *http.Request) {
 	responseData := make(map[string]interface{})
 	// checks if logged in
-	id, username, loggedIn := app.CheckLogin(w, r)
+	id, username, loggedIn := functions.CheckLogin(w, r)
 
 	responseData["loggedIn"] = loggedIn
 	responseData["id"] = id
@@ -417,7 +413,7 @@ func (app *application) ChangeLikes(w http.ResponseWriter, r *http.Request) {
 
 		// if a post is being liked
 		if like.Post {
-			err := functions.AddPostLike(app.db, like.Post_id, id, like.Like)
+			err := functions.AddPostLike(like.Post_id, id, like.Like)
 			if err != nil {
 				responseData["like"] = "failure"
 				w.Header().Set("Content-Type", "application/json")
@@ -428,7 +424,7 @@ func (app *application) ChangeLikes(w http.ResponseWriter, r *http.Request) {
 
 		// if a comment is getting liked
 		if like.Comment {
-			err := functions.AddCommentLike(app.db, like.Post_id, like.Comment_id, id, like.Like)
+			err := functions.AddCommentLike(like.Post_id, like.Comment_id, id, like.Like)
 			if err != nil {
 				responseData["like"] = "failure"
 				w.Header().Set("Content-Type", "application/json")

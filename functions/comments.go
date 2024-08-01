@@ -1,7 +1,6 @@
 package functions
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 )
@@ -19,7 +18,7 @@ type Comment struct {
 	Disliked  bool      `json:"disliked"`
 }
 
-func GetComments(db *sql.DB, id int, user_id int) ([]Comment, error) {
+func GetComments(id int, user_id int) ([]Comment, error) {
 	// query := `SELECT * FROM comments WHERE post_id = ?`
 	query := `
 	SELECT 
@@ -40,7 +39,7 @@ func GetComments(db *sql.DB, id int, user_id int) ([]Comment, error) {
 	WHERE post_id = ?
 	`
 	var comments []Comment
-	rows, err := db.Query(query, user_id, user_id, id)
+	rows, err := Db.Query(query, user_id, user_id, id)
 	if err != nil {
 		fmt.Println("error getting rows from comments", err)
 		return nil, err
@@ -59,9 +58,9 @@ func GetComments(db *sql.DB, id int, user_id int) ([]Comment, error) {
 	return comments, nil
 }
 
-func CreateComment(db *sql.DB, comment Comment) error {
+func CreateComment(comment Comment) error {
 	query := `INSERT INTO comments (user_id, creator, post_id, content) VALUES (?,?,?,?)`
-	_, err := db.Exec(query, comment.User_id, comment.Creator, comment.Post_id, comment.Content)
+	_, err := Db.Exec(query, comment.User_id, comment.Creator, comment.Post_id, comment.Content)
 	if err != nil {
 		fmt.Println("error creating comment", err)
 		return err

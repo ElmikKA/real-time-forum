@@ -2,17 +2,17 @@ package main
 
 import "net/http"
 
-func (app *application) Routes() http.Handler {
+func Routes() http.Handler {
 	mux := http.NewServeMux()
 
 	// different pages
-	mux.HandleFunc("/", app.Mainpage)
-	mux.HandleFunc("/api/register", app.Register)
-	mux.HandleFunc("/api/login", app.Login)
-	mux.HandleFunc("/api/posts", app.Posts)
-	mux.HandleFunc("/api/newPost", app.NewPost)
-	mux.HandleFunc("/api/newComment", app.newComment)
-	mux.HandleFunc("/api/changeLikes", app.ChangeLikes)
+	mux.HandleFunc("/", Mainpage)
+	mux.HandleFunc("/api/register", Register)
+	mux.HandleFunc("/api/login", Login)
+	mux.HandleFunc("/api/posts", Posts)
+	mux.HandleFunc("/api/newPost", NewPost)
+	mux.HandleFunc("/api/newComment", newComment)
+	mux.HandleFunc("/api/changeLikes", ChangeLikes)
 
 	// so js scripts works
 	fileServer := http.FileServer(http.Dir("./static"))

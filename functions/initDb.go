@@ -1,4 +1,4 @@
-package database
+package functions
 
 import (
 	"database/sql"
@@ -9,21 +9,21 @@ import (
 
 var Db *sql.DB
 
-func InitDb() (*sql.DB, error) {
+func InitDb() error {
 	db, err := sql.Open("sqlite3", "./database/forum.db")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	tables, err := os.ReadFile("./database/tables.sql")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err = db.Exec(string(tables))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return db, nil
+	return nil
 }

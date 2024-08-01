@@ -1,7 +1,6 @@
 package functions
 
 import (
-	"database/sql"
 	"fmt"
 )
 
@@ -26,10 +25,10 @@ type Change_like struct {
 	Like       int  `json:"like"`
 }
 
-func GetAllPostLikes(db *sql.DB) ([]Post_likes, error) {
+func GetAllPostLikes() ([]Post_likes, error) {
 	query := `SELECT * FROM post_likes`
 	var likes []Post_likes
-	rows, err := db.Query(query)
+	rows, err := Db.Query(query)
 	if err != nil {
 		fmt.Println("error getting all postlikes", err)
 		return nil, err
@@ -47,10 +46,10 @@ func GetAllPostLikes(db *sql.DB) ([]Post_likes, error) {
 	return likes, nil
 }
 
-func GetOnePostLike(db *sql.DB, id int) ([]Post_likes, error) {
+func GetOnePostLike(id int) ([]Post_likes, error) {
 	query := `SELECT * FROM post_likes WHERE post_id = ?`
 	var post_likes []Post_likes
-	rows, err := db.Query(query, id)
+	rows, err := Db.Query(query, id)
 	if err != nil {
 		fmt.Println("error getting one postlikes", err)
 		return post_likes, err
@@ -69,10 +68,10 @@ func GetOnePostLike(db *sql.DB, id int) ([]Post_likes, error) {
 	return post_likes, nil
 }
 
-func GetCommentLikes(db *sql.DB, id int) ([]Comment_likes, error) {
+func GetCommentLikes(id int) ([]Comment_likes, error) {
 	query := `SELECT * FROM comment_likes WHERE post_id = ?`
 	var comment_likes []Comment_likes
-	rows, err := db.Query(query, id)
+	rows, err := Db.Query(query, id)
 	if err != nil {
 		fmt.Println("error getting rows for commentlikes", err)
 		return nil, err
@@ -89,12 +88,12 @@ func GetCommentLikes(db *sql.DB, id int) ([]Comment_likes, error) {
 	return comment_likes, nil
 }
 
-func AddPostLike(db *sql.DB, post_id int, user_id int, like int) error {
+func AddPostLike(post_id int, user_id int, like int) error {
 
 	query := `INSERT OR REPLACE INTO post_likes (user_id, post_id, like) 
 	VALUES (?,?,?)`
 
-	_, err := db.Exec(query, user_id, post_id, like)
+	_, err := Db.Exec(query, user_id, post_id, like)
 	if err != nil {
 		fmt.Println("error adding post likes", err)
 		return err
@@ -102,12 +101,12 @@ func AddPostLike(db *sql.DB, post_id int, user_id int, like int) error {
 	return nil
 }
 
-func AddCommentLike(db *sql.DB, post_id int, comment_id int, user_id int, like int) error {
+func AddCommentLike(post_id int, comment_id int, user_id int, like int) error {
 
 	query := `INSERT OR REPLACE INTO comment_likes (user_id, post_id,comment_id, like) 
 	VALUES (?,?,?,?)`
 
-	_, err := db.Exec(query, user_id, post_id, comment_id, like)
+	_, err := Db.Exec(query, user_id, post_id, comment_id, like)
 	if err != nil {
 		fmt.Println("error adding comment likes", err)
 		return err

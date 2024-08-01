@@ -1,7 +1,6 @@
 package functions
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 )
@@ -20,7 +19,7 @@ type Post struct {
 	Disliked  bool      `json:"disliked"`
 }
 
-func GetPosts(db *sql.DB, user_id int) ([]Post, error) {
+func GetPosts(user_id int) ([]Post, error) {
 	query := `
 	SELECT 
 		p.id,
@@ -39,7 +38,7 @@ func GetPosts(db *sql.DB, user_id int) ([]Post, error) {
 	LEFT JOIN 
 		users u ON p.user_id = u.id
 	`
-	rows, err := db.Query(query, user_id, user_id)
+	rows, err := Db.Query(query, user_id, user_id)
 	if err != nil {
 		fmt.Println("error getting posts", err)
 		return nil, err
@@ -60,7 +59,7 @@ func GetPosts(db *sql.DB, user_id int) ([]Post, error) {
 	return posts, nil
 }
 
-func GetOnePost(db *sql.DB, id int, user_id int) (Post, error) {
+func GetOnePost(id int, user_id int) (Post, error) {
 	query := `
 	SELECT 
 		p.id,
@@ -82,7 +81,7 @@ func GetOnePost(db *sql.DB, id int, user_id int) (Post, error) {
 	`
 	// query := `SELECT * FROM posts WHERE id = ?`
 	var post Post
-	err := db.QueryRow(query, user_id, user_id, id).Scan(&post.Id, &post.User_id, &post.Creator, &post.Title, &post.Content, &post.Category, &post.CreatedAt, &post.Likes, &post.Dislikes, &post.Liked, &post.Disliked)
+	err := Db.QueryRow(query, user_id, user_id, id).Scan(&post.Id, &post.User_id, &post.Creator, &post.Title, &post.Content, &post.Category, &post.CreatedAt, &post.Likes, &post.Dislikes, &post.Liked, &post.Disliked)
 	if err != nil {
 		fmt.Println("error gettig one post", err)
 		return post, err
@@ -90,9 +89,9 @@ func GetOnePost(db *sql.DB, id int, user_id int) (Post, error) {
 	return post, nil
 }
 
-func CreatePost(db *sql.DB, post Post) error {
+func CreatePost(post Post) error {
 	query := `INSERT INTO posts (user_id, creator, title, content, category) VALUES (?,?,?,?,?)`
-	_, err := db.Exec(query, post.User_id, post.Creator, post.Title, post.Content, post.Category)
+	_, err := Db.Exec(query, post.User_id, post.Creator, post.Title, post.Content, post.Category)
 	if err != nil {
 		fmt.Println("error creating post", err)
 		return err

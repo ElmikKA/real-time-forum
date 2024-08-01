@@ -1,7 +1,7 @@
-package main
+package functions
 
 import (
-	"RTForum/functions"
+	// "RTForum/functions"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (app *application) AddSession(w http.ResponseWriter, r *http.Request, id int) error {
+func AddSession(w http.ResponseWriter, r *http.Request, id int) error {
 
 	cookie, err := r.Cookie("session")
 
@@ -28,13 +28,13 @@ func (app *application) AddSession(w http.ResponseWriter, r *http.Request, id in
 		http.SetCookie(w, cookie)
 
 		// creates session variable with data from cookie to push to database
-		session := functions.Session{
+		session := Session{
 			Id:      id,
 			Cookie:  cookie.Value,
 			Expires: cookie.Expires,
 		}
 		// adds session to db
-		_, err = functions.CreateSession(app.db, session)
+		_, err = CreateSession(session)
 		if err != nil {
 			fmt.Println("error creating session")
 			log.Fatal(err)
@@ -43,7 +43,7 @@ func (app *application) AddSession(w http.ResponseWriter, r *http.Request, id in
 		// cookie exists
 
 		// checks which session is active with this cookie
-		session, err := functions.GetSessionByCookie(app.db, cookie.Value)
+		session, err := GetSessionByCookie(cookie.Value)
 
 		if err != nil {
 			// no session with that cookie on db
@@ -58,14 +58,14 @@ func (app *application) AddSession(w http.ResponseWriter, r *http.Request, id in
 				Secure:   true,
 			}
 			http.SetCookie(w, cookie)
-			session = functions.Session{
+			session = Session{
 				Id:      id,
 				Cookie:  cookie.Value,
 				Expires: cookie.Expires,
 			}
 
 			// adding session to db
-			_, err := functions.CreateSession(app.db, session)
+			_, err := CreateSession(session)
 			if err != nil {
 				fmt.Println("error creating session")
 				log.Fatal(err)
@@ -74,7 +74,7 @@ func (app *application) AddSession(w http.ResponseWriter, r *http.Request, id in
 			// session belongs to a different user
 
 			// deletes the session so a new one can be made with the new user
-			functions.DeleteSession(app.db, session.Cookie)
+			DeleteSession(session.Cookie)
 
 			// create new cookie and session
 			cookie = &http.Cookie{
@@ -86,12 +86,12 @@ func (app *application) AddSession(w http.ResponseWriter, r *http.Request, id in
 				Secure:   true,
 			}
 			http.SetCookie(w, cookie)
-			session = functions.Session{
+			session = Session{
 				Id:      id,
 				Cookie:  cookie.Value,
 				Expires: cookie.Expires,
 			}
-			_, err = functions.CreateSession(app.db, session)
+			_, err = CreateSession(session)
 			if err != nil {
 				log.Fatal(err)
 			}

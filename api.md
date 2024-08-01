@@ -18,7 +18,7 @@ registerForm {
     password: string,
 }
 ```
-fetch returns:
+## fetch returns:
 ```
 returnData {
     register: string, ("success" or "failure")
@@ -50,7 +50,7 @@ loginCredentials {
     password: string,
 }
 ```
-fetch returns:
+## fetch returns:
 ```
 returnData {
     login: string, ("success" or "failure")
@@ -64,7 +64,7 @@ fetch('/api/posts', {
     method: 'GET'
 })
 ```
-fetch returns:
+## fetch returns
 ```
 returnData {
     posts: string, ("success" or "failure")
@@ -111,7 +111,7 @@ requestPost {
     id: int, (id of the post you want to open up)
 }
 ```
-fetch returns:
+## fetch returns
 ```
 returnData {
     username: string, (logged in user username)
@@ -179,7 +179,7 @@ postData {
     content: string,
 }
 ```
-fetch returns:
+## fetch returns
 ```
 <!-- might not be worth using this. On newpage fetch from /api/posts -->
 
@@ -219,7 +219,7 @@ commentData {
     post_id: id, (id of the post being commented on)
 }
 ```
-fetch returns:
+## fetch returns
 ```
 <!-- might not be worth using this. On newpage fetch from /api/posts -->
 
@@ -259,9 +259,9 @@ likeData {
     comment: bool, (true if a comment is being liked)
     comment_id: int, (id of the liked comment)
 }
-
-fetch returns:
-
+```
+## fetch returns
+```
 returnData {
     id: int, (logged in user id)
     username: string, (logged in user username)

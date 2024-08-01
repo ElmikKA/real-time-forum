@@ -55,11 +55,8 @@ func GetComments(db *sql.DB, id int, user_id int) ([]Comment, error) {
 			return nil, err
 		}
 		comments = append(comments, comment)
-		fmt.Println(comment.Liked, id)
 	}
-	fmt.Println(comments)
 	return comments, nil
-
 }
 
 func CreateComment(db *sql.DB, comment Comment) error {

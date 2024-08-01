@@ -26,7 +26,7 @@
     <button onclick="togglePost()">posting</button>
     <button onclick="toggleComment()">commenting</button>
     <button onclick="posts()">posts</button>
-    <button onclick="post1()">post1</button>
+    <button onclick="onePost(1)">post1</button>
     <button onclick="changeLike('post',1,0, 1)">like</button>
     <button onclick="changeLike('post',1,0,-1)">dislike</button>
     <button onclick="changeLike('comment',1,1, 1)">likeComment</button>
@@ -36,52 +36,43 @@
     <br>
 
     <!-- register -->
-    <div id="register" class="hidden">
-        <form id="registrationForm">
-            <label for="username">Username</label>
-            <input placeholder="Enter Username" name="username" required type="text">
-            <br>
-
-            <label for="age">Age</label>
-            <input type="number" name="age" required placeholder="Age">
-            <br>
-
-            <label for="gender">gender</label>
-            <input placeholder="Enter gender" name="gender" required type="text">
-            <br>
-
-            <label for="firstName">first name</label>
-            <input placeholder="Enter first name" name="firstName" required type="text">
-            <br>
-            <label for="lastName">last name</label>
-            <input placeholder="Enter last name" name="lastName" required type="text">
-            <br>
-            <label for="email">e-mail</label>
-            <input placeholder="Enter E-mail" name="email" required type="text">
-            <br>
-            <label for="password">password</label>
-            <input type="text" name="password" placeholder="Password" required>
-
-            <br>
-            <button type="button" onclick="registerUser()">register</button>
-            <p id="registerMessage"></p>
-        </form>
+    <div id="registerDiv" class="hidden">
+        <label for="username">Username</label>
+        <input placeholder="Enter Username" id="username" required type="text">
+        <br>
+        <label for="age">Age</label>
+        <input type="number" id="age" required placeholder="Age">
+        <br>
+        <label for="gender">gender</label>
+        <input placeholder="Enter gender" id="gender" required type="text">
+        <br>
+        <label for="firstName">first name</label>
+        <input placeholder="Enter first name" id="firstName" required type="text">
+        <br>
+        <label for="lastName">last name</label>
+        <input placeholder="Enter last name" id="lastName" required type="text">
+        <br>
+        <label for="email">e-mail</label>
+        <input placeholder="Enter E-mail" id="email" required type="text">
+        <br>
+        <label for="password">password</label>
+        <input type="text" id="password" placeholder="Password" required>
+        <br>
+        <button type="button" onclick="registerUser()">register</button>
+        <p id="registerMessage"></p>
     </div>
 
 
     <!-- Login -->
-    <div id="login" class="hidden">
-        <form id="loginForm">
-            <label for="user">username/email</label>
-            <input type="text" name="user" required placeholder="username/email">
-            <br>
-            <label for="password">password</label>
-            <input type="text" name="password" required placeholder="password">
-            <br>
-            <button type="button" onclick="login()">login</button>
-            <p id="loginMessage"></p>
-        </form>
-
+    <div id="loginDiv" class="hidden">
+        <label for="user">username/email</label>
+        <input type="text" id="user" required placeholder="username/email">
+        <br>
+        <label for="password">password</label>
+        <input type="text" id="password" required placeholder="password">
+        <br>
+        <button type="button" onclick="login()">login</button>
+        <p id="loginMessage"></p>
     </div>
 
     <!-- Posts -->
@@ -97,16 +88,16 @@
 
     <div id="commentDiv" class="hidden">
         <input type="text" placeholder="content" id="content"> <br>
-        <button id="post" onclick="createNewComment()">comment</button>
+        <button id="post" onclick="createNewComment(1)">comment</button>
     </div>
 
     <script>
         function toggleRegister() {
-            const registerDiv = document.getElementById('register')
+            const registerDiv = document.getElementById('registerDiv')
             registerDiv.classList.toggle('hidden')
         }
         function toggleLogin() {
-            const loginDiv = document.getElementById('login')
+            const loginDiv = document.getElementById('loginDiv')
             loginDiv.classList.toggle('hidden')
         }
         function togglePost() {
@@ -119,65 +110,61 @@
         }
 
         function registerUser() {
-            const form = document.getElementById('registrationForm')
-            const message = document.getElementById('registerMessage')
-            if (form.checkValidity()) {
-                message.innerHTML = "";
-                const formData = new FormData(form);
-                fetch('/api/register', {
-                    method: 'POST',
-                    body: formData,
-                })
-                    .then(response => {
-                        console.log(response)
-                        return response.json()
-                    }
-                    )
-                    .then(data => {
-                        console.log(data)
-                        if (data["register"] === "success") {
-                            console.log('registered');
-                            toggleRegister()
-                        } else {
-                            message.innerHTML = 'Error: ' + data["message"]
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error registering user:', error);
-                    });
-            } else {
-                message.innerHTML = "please check your answers"
+
+            const registerDiv = document.getElementById('registerDiv')
+            const messageDiv = document.getElementById('reisterMessage')
+            const registerForm = {
+                username: registerDiv.querySelector('#username').value,
+                age: parseInt(registerDiv.querySelector('#age').value),
+                gender: registerDiv.querySelector('#gender').value,
+                fname: registerDiv.querySelector('#firstName').value,
+                lname: registerDiv.querySelector('#lastName').value,
+                email: registerDiv.querySelector('#email').value,
+                password: registerDiv.querySelector('#password').value,
             }
+
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(registerForm)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data["register"] !== "success") {
+                        messageDiv.innerHTML = data["message"]
+                    }
+                    console.log(data)
+                })
+                .catch(error => console.log(error))
         }
 
+
         function login() {
-            document.addEventListener('scroll', event => {
-                console.log(event)
-            })
-            const form = document.getElementById('loginForm')
+            const loginDiv = document.getElementById('loginDiv')
             const message = document.getElementById('loginMessage')
-            if (form.checkValidity()) {
-                message.innerHTML = ""
-                const formData = new FormData(form)
-                fetch('/api/login', {
-                    method: 'POST',
-                    body: formData,
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data["login"] === "success") {
-                            console.log('logged in')
-                            toggleLogin()
-                        } else {
-                            message.innerHTML = 'Error: ' + data["message"]
-                        }
-                    })
-                    .catch(error => {
-                        console.log('error registering user: ', error)
-                    })
-            } else {
-                message.innerHTML = 'check the answers'
+
+            const loginCredentials = {
+                user: loginDiv.querySelector('#user').value,
+                password: loginDiv.querySelector('#password').value,
             }
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(loginCredentials)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data["login"] !== "success") {
+                        message.innerHTML = data["message"]
+                    }
+                    console.log(data)
+                })
+                .catch(error => console.log(error))
         }
 
         function posts() {
@@ -185,41 +172,26 @@
                 method: 'GET'
             })
                 .then(response => response.json())
-                .then(data => {
-                    if (data['loggedIn'] === false) {
-                        console.log('not logged in')
-                        return
-                    }
-                    if (data["posts"] === "success") {
-                        console.log(data["data"])
-                        console.log(data["loggedIn"])
-                        console.log(data)
-                    } else {
-                        console.log("error getting posts")
+                .then(data => console.log(data))
+                .catch(error => console.log(error))
 
-                    }
-                })
-                .catch(error => {
-                    console.log("error getting posts", error)
-                })
         }
 
-        function post1() {
+        function onePost(postNum) {
+            const requestPost = {
+                id: postNum,
+            }
+
             fetch('/api/posts', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ postNumber: 1 })
+                body: JSON.stringify(requestPost)
             })
                 .then(response => response.json())
-                .then(data => {
-                    console.log(data)
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-
+                .then(data => console.log(data))
+                .catch(error => console.log(error))
         }
 
         function createPost() {
@@ -242,19 +214,15 @@
                 body: JSON.stringify(postData)
             })
                 .then(response => response.json())
-                .then(data => {
-                    console.log(data)
-                })
-                .catch(error => {
-                    console.log(error)
-                })
+                .then(data => console.log(data))
+                .catch(error => console.log(error))
         }
 
-        function createNewComment() {
+        function createNewComment(postNum) {
             const commentDiv = document.getElementById('commentDiv')
             const commentData = {
                 content: commentDiv.querySelector('#content').value,
-                post_id: 1, // hardcoded for post id of 1
+                post_id: postNum,
             }
 
             fetch('/api/newComment', {
@@ -282,7 +250,6 @@
                 like: like,
             }
 
-            console.log(likeData)
             fetch('/api/changeLikes', {
                 method: 'POST',
                 headers: {

@@ -18,6 +18,14 @@ type Comment_likes struct {
 	Like       int
 }
 
+type Change_like struct {
+	Post       bool `json:"post"`
+	Post_id    int  `json:"post_id"`
+	Comment    bool `json:"comment"`
+	Comment_id int  `json:"comment_id"`
+	Like       int  `json:"like"`
+}
+
 func GetAllPostLikes(db *sql.DB) ([]Post_likes, error) {
 	query := `SELECT * FROM post_likes`
 	var likes []Post_likes
@@ -91,7 +99,6 @@ func AddPostLike(db *sql.DB, post_id int, user_id int, like int) error {
 		fmt.Println("error adding post likes", err)
 		return err
 	}
-	fmt.Println(user_id, post_id, like)
 	return nil
 }
 

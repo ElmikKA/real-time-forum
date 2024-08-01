@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strconv"
 
 	"RTForum/functions"
 )
@@ -22,114 +21,123 @@ func (app *application) Mainpage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type Response struct {
-	Error    bool   `json:"error"`
-	Message  string `json:"message"`
-	LoggedIn bool   `json:"loggedIn"`
-}
-
 func (app *application) Register(w http.ResponseWriter, r *http.Request) {
 
+	responseData := make(map[string]interface{})
 	if r.Method == "POST" {
-		// parses the data from the form
-		err := r.ParseMultipartForm(10 << 20)
+		user := functions.Users{}
+
+		// decode data sent from frontend
+		err := json.NewDecoder(r.Body).Decode(&user)
+
 		if err != nil {
 			fmt.Println("error", err)
+			responseData["register"] = "failure"
+			responseData["message"] = "form error"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
 		}
-		age, _ := strconv.Atoi(r.FormValue("age"))
 
-		user := functions.Users{
-			Name:      r.Form.Get("username"),
-			Age:       age,
-			Gender:    r.Form.Get("gender"),
-			FirstName: r.Form.Get("firstName"),
-			LastName:  r.Form.Get("lastName"),
-			Email:     r.Form.Get("email"),
-			Password:  r.Form.Get("password"),
-		}
 		// checks if the username or email is already in use
 		exists, err := functions.CheckUserExists(app.db, user.Name, user.Email)
 
-		// variable to return to js with all data
-		data := make(map[string]interface{})
-
 		// if db error
 		if err != nil {
-			data["register"] = "failure"
-			data["message"] = "unable to check database"
+			responseData["register"] = "failure"
+			responseData["message"] = "unable to check database"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 
 		// if username/email is already in use
 		if exists {
-			data["register"] = "failure"
-			data["message"] = "username or email already in use"
+			responseData["register"] = "failure"
+			responseData["message"] = "username or email already in use"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		} else {
 			// if it's a new user it adds it to db
 			functions.AddUser(app.db, user)
 		}
-		// responds success
-		data["register"] = "success"
 
+		// responds success
+		responseData["register"] = "success"
+
+		// currently sending all user data including PASSWORD to frontend
+		responseData["user"] = user
+
+		// encodes the data and sends it to frontend
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 	}
 }
 
 func (app *application) Login(w http.ResponseWriter, r *http.Request) {
+	responseData := make(map[string]interface{})
+
 	if r.Method == "POST" {
-		// parses the data from login form
-		err := r.ParseMultipartForm(10 << 20)
+		creds := functions.LoginCredentials{}
+
+		// decodes credentials sent from frontend
+		err := json.NewDecoder(r.Body).Decode(&creds)
+
 		if err != nil {
-			http.Error(w, fmt.Sprintf("error parsing form: %v", err), http.StatusBadRequest)
+			fmt.Println("error", err)
+			responseData["login"] = "failure"
+			responseData["message"] = "form error"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
-		name := r.Form.Get("user")
-		pass := r.Form.Get("password")
-		// checks if the username/email + pass is correct
-		valid, id, err := functions.CheckLogin(app.db, name, pass)
-		data := make(map[string]interface{})
+
+		// checks if the username|email + pass is correct
+		valid, id, err := functions.CheckLogin(app.db, creds.User, creds.Pass)
 
 		// error either on invalid credentials or db error
 		if err != nil {
-			data["login"] = "failure"
-			data["message"] = "Invalid credentials"
+			responseData["login"] = "failure"
+			responseData["message"] = "Invalid credentials"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+
+		// if invalid crenedtials
+		if !valid {
+			responseData["login"] = "failure"
+			responseData["message"] = "Invalid credentials"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+
+		// adds user session to db
+		// removes any previous sessions on this user id
+		err = functions.DeleteUserSession(app.db, id)
+		if err != nil {
+			fmt.Println("error deleting session from user")
+		}
+
+		// adds new session for this user id
+		err = app.AddSession(w, r, id)
+		if err != nil {
+			fmt.Println("error adding session")
+			responseData["login"] = "failure"
+			responseData["message"] = "session error"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 
 		// user logged in
-		if valid {
-			data["login"] = "success"
-			data["message"] = "Logged in"
+		responseData["login"] = "success"
+		responseData["message"] = "Logged in"
 
-			// adds user session to db
-
-			// removes any previous sessions on this user id
-			err = functions.DeleteUserSession(app.db, id)
-			if err != nil {
-				fmt.Println("error deleting session from user")
-			}
-
-			// adds new session for this user id
-			err = app.AddSession(w, r, id)
-			if err != nil {
-				fmt.Println("error adding session")
-				return
-			}
-
-		} else {
-			data["login"] = "failure"
-			data["message"] = "Invalid credentials"
-		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 	}
 }
 
@@ -138,209 +146,208 @@ type PostRequest struct {
 }
 
 func (app *application) Posts(w http.ResponseWriter, r *http.Request) {
-	data := make(map[string]interface{})
-	// checks if logged in
-	id, loggedIn := app.CheckLogin(w, r)
+	responseData := make(map[string]interface{})
 
-	data["loggedIn"] = loggedIn
-	data["id"] = id
+	// checks if logged in
+	id, username, loggedIn := app.CheckLogin(w, r)
+
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
 
 	// if not logged in sends data["loggedIn"] as false
 	if !loggedIn {
-		data["posts"] = "failure"
+		responseData["posts"] = "failure"
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 		return
 	}
+
+	// on post load with GET
 	if r.Method == "GET" {
-		// on post load with GET
 
 		// gets all posts
 		posts, err := functions.GetPosts(app.db, id)
 		if err != nil {
 			fmt.Println("Posts error", err)
-			data["posts"] = "failure"
+			responseData["posts"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 		// sends all posts
-		data["data"] = posts
-		fmt.Println(posts)
+		responseData["allPosts"] = posts
 
-		// gets all post likes
+		// gets all post likes separately with more info
+		// (maybe not needed)
 		post_likes, err := functions.GetAllPostLikes(app.db)
 		if err != nil {
 			fmt.Println("error postlikes", err)
-			data["posts"] = "failure"
+			responseData["posts"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 		// sends all post likes
-		data["post_likes"] = post_likes
+		responseData["post_likes"] = post_likes
 
-		data["posts"] = "success"
+		responseData["posts"] = "success"
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 	} else if r.Method == "POST" {
-		fmt.Println("here")
-		var reqData PostRequest
+		// POST method for when user opens up one post
 
-		// right now its hard coded for id = 1
-
-		// err := r.ParseMultipartForm(10 << 20)
+		var post functions.Post
 
 		// decodes the post id sent from js
-		err := json.NewDecoder(r.Body).Decode(&reqData)
+		err := json.NewDecoder(r.Body).Decode(&post)
 
 		if err != nil {
-			http.Error(w, fmt.Sprintf("error parsing form: %v", err), http.StatusBadRequest)
-			data["post"] = "failure"
+			fmt.Println("error", err)
+			responseData["post"] = "failure"
+			responseData["message"] = "form error"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
-		fmt.Println(reqData.PostNumber)
 
 		// gets the post with post_id
-		post, err := functions.GetOnePost(app.db, reqData.PostNumber, id)
+		post, err = functions.GetOnePost(app.db, post.Id, id)
 		if err != nil {
 			fmt.Println("error getting onepost")
-			data["post"] = "failure"
+			responseData["post"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
-		data["data"] = post
+		responseData["onePost"] = post
 
-		// gets the likes of the post
+		// gets the additional information on likes of the post
+		// (maybe not needed)
 		post_likes, err := functions.GetOnePostLike(app.db, post.Id)
 		if err != nil {
 			fmt.Println("err getting one post like", err)
-			data["post"] = "failure"
+			responseData["post"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
-		data["post_likes"] = post_likes
+		responseData["post_likes"] = post_likes
 
 		// gets all comments for the post
-		fmt.Println(id)
 		comments, err := functions.GetComments(app.db, post.Id, id)
 		if err != nil {
 			fmt.Println("error getting comments")
-			data["post"] = "failure"
+			responseData["post"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
-		data["comments"] = comments
+		responseData["comments"] = comments
 
-		// gets all comments for the post
+		// gets all additional information on comment likes for the post
+		// (maybe not needed)
 		comment_likes, err := functions.GetCommentLikes(app.db, post.Id)
 		if err != nil {
 			fmt.Println("error getting commentlikes", err)
-			data["post"] = "failure"
+			responseData["post"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
-		data["comment_likes"] = comment_likes
+		responseData["comment_likes"] = comment_likes
 
-		data["post"] = "success"
+		responseData["post"] = "success"
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 	}
 }
 
 func (app *application) NewPost(w http.ResponseWriter, r *http.Request) {
 
-	data := make(map[string]interface{})
+	responseData := make(map[string]interface{})
+
 	// checks if logged in
-	id, loggedIn := app.CheckLogin(w, r)
+	id, username, loggedIn := app.CheckLogin(w, r)
 
-	data["loggedIn"] = loggedIn
-	data["id"] = id
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
 
-	// if not logged in sends data["loggedIn"] as false
+	// if not logged in sends responseData["loggedIn"] as false
 	if !loggedIn {
-		data["posts"] = "failure"
+		responseData["newPost"] = "failure"
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 		return
 	}
+
 	if r.Method == "POST" {
 		// creates a new post
 
 		post := functions.Post{}
 
-		// the decode is for data sent as JSON, the upper parseform is if data is sent from a <form>. It's better to use json
+		// decodes data sent from frontend
 		err := json.NewDecoder(r.Body).Decode(&post)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("error parsing form: %v", err), http.StatusBadRequest)
-			return
-		}
-
-		fmt.Println(id)
-		// gets username of the poster
-		user, err := functions.GetUser(app.db, id)
-		if err != nil {
-			data["newPost"] = "failure"
+			fmt.Println("error", err)
+			responseData["newPost"] = "failure"
+			responseData["message"] = "form error"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 
+		// adds user id and username to the post struct
 		post.User_id = id
-		post.Creator = user.Name
-
-		// the marshal printing is for testing purposes so the entire post is printed out (will be removed)
-		out, _ := json.Marshal(post)
-		fmt.Println(string(out))
+		post.Creator = username
 
 		// create post in db
 		err = functions.CreatePost(app.db, post)
 		if err != nil {
-			data["newPost"] = "failure"
+			responseData["newPost"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 
-		data["newPost"] = "success"
+		responseData["newPost"] = "success"
+		responseData["postData"] = post
 
-		data["data"] = post
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 		return
 	}
 }
 
 func (app *application) newComment(w http.ResponseWriter, r *http.Request) {
-	data := make(map[string]interface{})
+	responseData := make(map[string]interface{})
 	// checks if logged in
-	id, loggedIn := app.CheckLogin(w, r)
+	id, username, loggedIn := app.CheckLogin(w, r)
 
-	data["loggedIn"] = loggedIn
-	data["id"] = id
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
 
-	// if not logged in sends data["loggedIn"] as false
+	// if not logged in sends responeData["loggedIn"] as false
 	if !loggedIn {
-		data["posts"] = "failure"
+		responseData["newComment"] = "failure"
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 		return
 	}
-	if r.Method == "POST" {
-		fmt.Println("new comment")
 
+	if r.Method == "POST" {
 		comment := functions.Comment{}
 
 		// decodes json sent by js
 		err := json.NewDecoder(r.Body).Decode(&comment)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("error parsing form: %v", err), http.StatusBadRequest)
+			fmt.Println("error", err)
+			responseData["newComment"] = "failure"
+			responseData["message"] = "form error"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 
@@ -349,9 +356,9 @@ func (app *application) newComment(w http.ResponseWriter, r *http.Request) {
 		// gets username from db
 		user, err := functions.GetUser(app.db, id)
 		if err != nil {
-			data["newComment"] = "failure"
+			responseData["newComment"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 
@@ -364,73 +371,75 @@ func (app *application) newComment(w http.ResponseWriter, r *http.Request) {
 		// adds comment to db
 		err = functions.CreateComment(app.db, comment)
 		if err != nil {
-			data["newComment"] = "failure"
+			responseData["newComment"] = "failure"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 
-		data["newComment"] = "success"
-		data["comment"] = comment
+		responseData["newComment"] = "success"
+		responseData["comment"] = comment
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 
 	}
 }
 
-type Like struct {
-	Post       bool `json:"post"`
-	Post_id    int  `json:"post_id"`
-	Comment    bool `json:"comment"`
-	Comment_id int  `json:"comment_id"`
-	Like       int  `json:"like"`
-}
-
 func (app *application) ChangeLikes(w http.ResponseWriter, r *http.Request) {
-	data := make(map[string]interface{})
+	responseData := make(map[string]interface{})
 	// checks if logged in
-	id, loggedIn := app.CheckLogin(w, r)
+	id, username, loggedIn := app.CheckLogin(w, r)
 
-	data["loggedIn"] = loggedIn
-	data["id"] = id
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
 
-	// if not logged in sends data["loggedIn"] as false
+	// if not logged in sends responeData["loggedIn"] as false
 	if !loggedIn {
 		fmt.Println("not logged in")
-		data["posts"] = "failure"
+		responseData["changeLikes"] = "failure"
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 		return
 	}
 
 	if r.Method == "POST" {
-		fmt.Println("post")
-		var like Like
+		var like functions.Change_like
 		err := json.NewDecoder(r.Body).Decode(&like)
 		if err != nil {
-			fmt.Println("error here")
-			data["changeLikes"] = "failure"
+			fmt.Println("error", err)
+			responseData["changeLikes"] = "failure"
+			responseData["message"] = "form error"
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(responseData)
 			return
 		}
 
 		// if a post is being liked
 		if like.Post {
-			fmt.Println("liking post")
-			functions.AddPostLike(app.db, like.Post_id, id, like.Like)
+			err := functions.AddPostLike(app.db, like.Post_id, id, like.Like)
+			if err != nil {
+				responseData["like"] = "failure"
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(responseData)
+				return
+			}
 		}
+
 		// if a comment is getting liked
 		if like.Comment {
-			fmt.Println("comment")
-			functions.AddCommentLike(app.db, like.Post_id, like.Comment_id, id, like.Like)
+			err := functions.AddCommentLike(app.db, like.Post_id, like.Comment_id, id, like.Like)
+			if err != nil {
+				responseData["like"] = "failure"
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(responseData)
+				return
+			}
 		}
 
-		// prints out for testing
-		out, _ := json.Marshal(like)
-		fmt.Println(string(out))
+		responseData["like"] = "success"
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		json.NewEncoder(w).Encode(responseData)
 	}
 }

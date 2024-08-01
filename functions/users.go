@@ -6,13 +6,18 @@ import (
 )
 
 type Users struct {
-	Name      string
-	Age       int
-	Gender    string
-	FirstName string
-	LastName  string
-	Email     string
-	Password  string
+	Name      string `json:"username"`
+	Age       int    `json:"age"`
+	Gender    string `json:"gender"`
+	FirstName string `json:"fname"`
+	LastName  string `json:"lname"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
+
+type LoginCredentials struct {
+	User string `json:"user"`
+	Pass string `json:"password"`
 }
 
 func CheckUserExists(db *sql.DB, username, email string) (bool, error) {

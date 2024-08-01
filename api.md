@@ -32,8 +32,8 @@ returnData {
         password: string,
         username: string,
     }
-}```
-
+}
+```
 
 # /api/login  POST
 ```
@@ -94,8 +94,8 @@ returnData {
         }
     ],
     
-}```
-
+}
+```
 
 # /api/posts  POST
 ```
@@ -160,8 +160,8 @@ returnData {
             User_id: int, (id of the user who liked/disliked)
         }
     ]
-}```
-
+}
+```
 
 # /api/newPost  POST
 ```
@@ -201,8 +201,8 @@ returnData {
         title: string,
         user_id: int, (post creator's id)
     }
-}```
-
+}
+```
 
 # /api/newComment  POST
 ```
@@ -240,8 +240,8 @@ returnData: {
             post_id: int, (id of the post being commented on)
             user_id: int, (id of the commenter)
     }
-}```
-
+}
+```
 
 # /api/changeLikes  POST
 ```
@@ -267,4 +267,5 @@ returnData {
     username: string, (logged in user username)
     like: string, ("success", or "failure")
     loggedIn: bool,
-}```
+}
+```

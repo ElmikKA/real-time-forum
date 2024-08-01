@@ -1,11 +1,11 @@
 # /api/register  POST
-fetch('/api/register', {
+`fetch('/api/register', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
     },
     body: JSON.stringify(registerForm)
-})
+})`
 
 registerForm {
     username: string,

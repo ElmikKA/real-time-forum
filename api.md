@@ -6,7 +6,7 @@ fetch('/api/register', {
         'Content-Type': 'application/json'
     },
     body: JSON.stringify(registerForm)
-})`
+})
 
 registerForm {
     username: string,

@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     lname TEXT NOT NULL,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
-    online INTEGER
+    online INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS sessions (

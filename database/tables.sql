@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     lname TEXT NOT NULL,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
-    online INTEGER DEFAULT 0
+    online INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
@@ -52,9 +52,8 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 );
 
 CREATE TABLE IF NOT EXISTS messages (
-    user1 TEXT NOT NULL,
-    written_by TEXT NOT NULL,
-    user2 TEXT NOT NULL,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
     message TEXT NOT NULL,
-    written_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    written_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

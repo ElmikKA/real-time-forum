@@ -8,6 +8,8 @@ import (
 	"net/http"
 
 	"RTForum/functions"
+
+	"github.com/gorilla/websocket"
 )
 
 // executes the single html file
@@ -448,6 +450,122 @@ func ChangeLikes(w http.ResponseWriter, r *http.Request) {
 
 		responseData["like"] = "success"
 
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+	}
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func newWebsocket(w http.ResponseWriter, r *http.Request) {
+
+	responseData := make(map[string]interface{})
+	// checks if logged in
+	id, username, loggedIn := functions.CheckLogin(w, r)
+
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("error upgrading", err)
+		return
+	}
+
+	defer conn.Close()
+
+	if !loggedIn {
+		responseData["error"] = "not logged in"
+		jsonResponse, err := json.Marshal(responseData)
+		if err != nil {
+			fmt.Println("error marshaling !login responsedata", err)
+			return
+		}
+		conn.WriteMessage(websocket.TextMessage, jsonResponse)
+		conn.Close()
+		return
+	}
+
+	for {
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Println("err reading message", err)
+			return
+		}
+
+		responseData["data"] = "hello"
+		responseData["websocket"] = "success"
+		responseData["message"] = string(p)
+
+		jsonResponse, err := json.Marshal(responseData)
+		if err != nil {
+			fmt.Println("error marshaling responsedata", err)
+
+		}
+
+		if err := conn.WriteMessage(messageType, jsonResponse); err != nil {
+			fmt.Println("error writing message", err)
+			return
+		}
+
+	}
+}
+
+func getUsers(w http.ResponseWriter, r *http.Request) {
+
+	responseData := make(map[string]interface{})
+	// checks if logged in
+	id, username, loggedIn := functions.CheckLogin(w, r)
+
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
+
+	// if not logged in sends responeData["loggedIn"] as false
+	if !loggedIn {
+		fmt.Println("not logged in")
+		responseData["getUsers"] = "failure"
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+		return
+	}
+
+	if r.Method == "GET" {
+		users, err := functions.GetAllUsers()
+		if err != nil {
+			fmt.Println("error getting all users", err)
+			responseData["getUsers"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+
+		latestMessagedUsers, err := functions.GetLatestMessages(id)
+		if err != nil {
+			fmt.Println("error getting latest messages", err)
+			responseData["getUsers"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+
+		sortedUsers, err := functions.SortUsers(users, latestMessagedUsers, id)
+		if err != nil {
+			fmt.Println("error sorting users", err)
+			responseData["getUsers"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+		fmt.Println(latestMessagedUsers)
+		fmt.Println(sortedUsers)
+
+		responseData["allUsers"] = sortedUsers
+		responseData["getUsers"] = "success"
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(responseData)
 	}

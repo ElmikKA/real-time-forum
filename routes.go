@@ -13,6 +13,8 @@ func Routes() http.Handler {
 	mux.HandleFunc("/api/newPost", NewPost)
 	mux.HandleFunc("/api/newComment", newComment)
 	mux.HandleFunc("/api/changeLikes", ChangeLikes)
+	mux.HandleFunc("/api/websocket", newWebsocket)
+	mux.HandleFunc("/api/getUsers", getUsers)
 
 	// so js scripts works
 	fileServer := http.FileServer(http.Dir("./static"))

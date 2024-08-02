@@ -1,4 +1,6 @@
 
+let mysocket = null
+
 function toggleRegister() {
     const registerDiv = document.getElementById('registerDiv')
     registerDiv.classList.toggle('hidden')
@@ -15,6 +17,95 @@ function toggleComment() {
     const commentDiv = document.getElementById('commentDiv')
     commentDiv.classList.toggle('hidden')
 }
+function toggleWebsocket() {
+    const websocketDiv = document.getElementById('websocketDiv')
+    websocketDiv.classList.toggle('hidden')
+
+    if (!mysocket) {
+        mysocket = new MySocket()
+        mysocket.connectSocket()
+    }
+}
+
+function addWebsocketUsers(usersData) {
+    console.log(usersData)
+    let users = usersData.allUsers
+
+    const websocketDiv = document.getElementById('websocketDiv')
+    const container = websocketDiv.querySelector('#websocketContainer')
+    const userDiv = container.querySelector('#userDiv')
+
+    for (let i = 0; i < users.length; i++) {
+        if (users[i].username !== usersData.username) {
+
+            const div = document.createElement('div')
+            div.innerHTML = users[i].username
+            div.style.border = "solid black"
+            div.style.margin = "2px"
+            userDiv.appendChild(div)
+        }
+    }
+}
+
+
+class MySocket {
+    constructor() {
+        this.mysocket = null
+    }
+
+    connectSocket() {
+        console.log("connecting socket")
+        this.mysocket = new WebSocket('ws://localhost:8080/api/websocket')
+
+        this.mysocket.onopen = () => {
+            this.fetchUsers()
+        }
+
+        this.mysocket.onmessage = (event) => {
+            console.log("here")
+            try {
+                const responseData = JSON.parse(event.data)
+                console.log(responseData)
+            } catch (e) {
+                console.error("error parsing JSON:", e)
+            }
+        }
+
+        this.mysocket.onclose = (event) => {
+            if (event.wasClean) {
+                console.log("socket closed")
+            } else {
+                console.log('connection died')
+                mysocket = null
+            }
+        }
+
+        this.mysocket.onerror = (event) => {
+            console.error(`Websocket error: ${event}`)
+        }
+    }
+
+    fetchUsers() {
+        fetch('/api/getUsers', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then(data => {
+                addWebsocketUsers(data)
+            })
+            .catch(error => console.log(error))
+    }
+
+    sendMessage() {
+        const websocketDiv = document.getElementById('websocketDiv')
+        const message = websocketDiv.querySelector('#message').value
+        this.mysocket.send(message)
+    }
+}
+
+
+
+
 
 function registerUser() {
 

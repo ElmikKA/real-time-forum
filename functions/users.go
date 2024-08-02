@@ -2,9 +2,12 @@ package functions
 
 import (
 	"fmt"
+	"sort"
+	"time"
 )
 
 type Users struct {
+	Id        int    `json:"id"`
 	Name      string `json:"username"`
 	Age       int    `json:"age"`
 	Gender    string `json:"gender"`
@@ -61,11 +64,68 @@ func CheckCredentials(user, pass string) (bool, int, error) {
 
 func GetUser(id int) (Users, error) {
 	var user Users
-	query := `SELECT username, age, gender, fname, lname, email, online FROM users WHERE id = ?`
-	err := Db.QueryRow(query, id).Scan(&user.Name, &user.Age, &user.Gender, &user.FirstName, &user.LastName, &user.Email, &user.Online)
+	query := `SELECT id,username, age, gender, fname, lname, email, online FROM users WHERE id = ?`
+	err := Db.QueryRow(query, id).Scan(&user.Id, &user.Name, &user.Age, &user.Gender, &user.FirstName, &user.LastName, &user.Email, &user.Online)
 	if err != nil {
 		fmt.Println("error getting user", err)
 		return user, err
 	}
 	return user, nil
+}
+
+func GetAllUsers() ([]Users, error) {
+	var users []Users
+	query := `SELECT id, username, age, gender, fname, lname, email, online FROM users`
+	rows, err := Db.Query(query)
+	if err != nil {
+		fmt.Println("error getting all users", err)
+		return users, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var user Users
+		err := rows.Scan(&user.Id, &user.Name, &user.Age, &user.Gender, &user.FirstName, &user.LastName, &user.Email, &user.Online)
+		if err != nil {
+			fmt.Println("error rows.scan", err)
+			return users, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
+
+func SortUsers(users []Users, latestMessages []Messages, id int) ([]Users, error) {
+	latestMessageTimes := make(map[int]time.Time)
+
+	for _, msg := range latestMessages {
+		var otherUserID int
+		if msg.Sender_id == id {
+			otherUserID = msg.Receiver_id
+		} else {
+			otherUserID = msg.Sender_id
+		}
+		if msg.Written_at.After(latestMessageTimes[otherUserID]) {
+			latestMessageTimes[otherUserID] = msg.Written_at
+		}
+	}
+
+	sort.SliceStable(users, func(i, j int) bool {
+		timeI, hasTimeI := latestMessageTimes[users[i].Id]
+		timeJ, hasTimeJ := latestMessageTimes[users[j].Id]
+
+		if hasTimeI && hasTimeJ {
+			return timeI.After(timeJ)
+		}
+		if hasTimeI {
+			return true
+		}
+		if hasTimeJ {
+			return false
+		}
+		return users[i].Name < users[j].Name
+	})
+
+	return users, nil
 }

@@ -31,6 +31,7 @@
     <button onclick="changeLike('post',1,0,-1)">dislike</button>
     <button onclick="changeLike('comment',1,1, 1)">likeComment</button>
     <button onclick="changeLike('comment',1,1,-1)">dislikeComment</button>
+    <button onclick="toggleWebsocket()">websocket</button>
     <br>
     <br>
     <br>
@@ -89,6 +90,19 @@
     <div id="commentDiv" class="hidden">
         <input type="text" placeholder="content" id="content"> <br>
         <button id="post" onclick="createNewComment(1)">comment</button>
+    </div>
+
+    <!-- websocket -->
+
+    <div id="websocketDiv" class="hidden">
+        <div id="websocketContainer" style="display: flex;">
+            <div id="userDiv" style="width: 100px; height: 300px; background-color:bisque;"></div>
+            <div id="messageContainer">
+                <div id="messageDiv" style="width: 300px; height: 280px; background-color:beige;"></div>
+                <input type="text" id="message">
+                <button onclick="mysocket.sendMessage()">send</button>
+            </div>
+        </div>
     </div>
 
     <script src="../static/js/index.js"></script>

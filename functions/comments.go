@@ -6,16 +6,16 @@ import (
 )
 
 type Comment struct {
-	Id        int       `json:"id"`
-	User_id   int       `json:"user_id"`
-	Creator   string    `json:"creator"`
-	Post_id   int       `json:"post_id"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"createdAt"`
-	Likes     int       `json:"likes"`
-	Dislikes  int       `json:"dislikes"`
-	Liked     bool      `json:"liked"`
-	Disliked  bool      `json:"disliked"`
+	Id         int       `json:"id"`
+	User_id    int       `json:"user_id"`
+	Creator    string    `json:"creator"`
+	Post_id    int       `json:"post_id"`
+	Content    string    `json:"content"`
+	Created_at time.Time `json:"created_at"`
+	Likes      int       `json:"likes"`
+	Dislikes   int       `json:"dislikes"`
+	Liked      bool      `json:"liked"`
+	Disliked   bool      `json:"disliked"`
 }
 
 func GetComments(id int, user_id int) ([]Comment, error) {
@@ -28,7 +28,7 @@ func GetComments(id int, user_id int) ([]Comment, error) {
 		c.creator,
 		c.post_id,
 		c.content,
-		c.createdAt,
+		c.created_at,
 		(SELECT COUNT(*) FROM comment_likes WHERE post_id = c.id AND like = 1) AS likes,
 		(SELECT COUNT(*) FROM comment_likes WHERE post_id = c.id AND like = -1) AS dislikes,
 		EXISTS (SELECT 1 FROM comment_likes WHERE user_id = ? AND like = 1) AS liked,
@@ -49,7 +49,7 @@ func GetComments(id int, user_id int) ([]Comment, error) {
 
 	for rows.Next() {
 		var comment Comment
-		err := rows.Scan(&comment.Id, &comment.User_id, &comment.Creator, &comment.Post_id, &comment.Content, &comment.CreatedAt, &comment.Likes, &comment.Dislikes, &comment.Liked, &comment.Disliked)
+		err := rows.Scan(&comment.Id, &comment.User_id, &comment.Creator, &comment.Post_id, &comment.Content, &comment.Created_at, &comment.Likes, &comment.Dislikes, &comment.Liked, &comment.Disliked)
 		if err != nil {
 			fmt.Println("error rows.next", err)
 			return nil, err

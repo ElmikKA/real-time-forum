@@ -6,14 +6,15 @@ CREATE TABLE IF NOT EXISTS users (
     fname TEXT NOT NULL,
     lname TEXT NOT NULL,
     email TEXT NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    online INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
     id INTEGER PRIMARY KEY NOT NULL,
     cookie TEXT NOT NULL,
-    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expiresAt DATETIME NOT NULL 
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NOT NULL 
 );
 
 CREATE TABLE IF NOT EXISTS posts (
@@ -23,7 +24,7 @@ CREATE TABLE IF NOT EXISTS posts (
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     category TEXT NOT NULL,
-    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS comments (
@@ -32,7 +33,7 @@ CREATE TABLE IF NOT EXISTS comments (
     creator TEXT NOT NULL,
     post_id INTEGER NOT NULL,
     content TEXT NOT NULL,
-    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS post_likes (
@@ -48,4 +49,12 @@ CREATE TABLE IF NOT EXISTS comment_likes (
     comment_id INTEGER NOT NULL,
     like integer,
     PRIMARY KEY (post_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+    user1 TEXT NOT NULL,
+    written_by TEXT NOT NULL,
+    user2 TEXT NOT NULL,
+    message TEXT NOT NULL,
+    written_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

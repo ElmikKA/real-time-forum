@@ -75,7 +75,7 @@ returnData {
         {
             category: string,
             content: string,
-            createdAt: string,
+            Created_at: string,
             creator: string,
             disliked: bool,
             dislikes: int,
@@ -121,7 +121,7 @@ returnData {
     onePost: {
         category: string,
         content: string,
-        createdAt: string,
+        Created_at: string,
         creator: string,
         disliked: bool,
         dislikes: int,
@@ -141,7 +141,7 @@ returnData {
     comments: [
         {
             content: string,
-            createdAt: string,
+            Created_at: string,
             creator: string,
             disliked: bool,
             dislikes: int,
@@ -191,7 +191,7 @@ returnData {
     postData: {
         category: string,
         content: string,
-        <!-- createdAt: string,  does not send -->
+        <!-- Created_at: string,  does not send -->
         creator: string,
         disliked: bool,
         dislikes: int,
@@ -230,7 +230,7 @@ returnData: {
     newComment: string, ("success" or "failure")
     comment: {
             content: string,
-            <!-- createdAt: string,  does not send  -->
+            <!-- Created_at: string,  does not send  -->
             creator: string,
             disliked: bool,
             dislikes: int,

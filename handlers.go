@@ -60,7 +60,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			// if it's a new user it adds it to db
-			functions.AddUser(user)
+			err := functions.AddUser(user)
+			if err != nil {
+				responseData["register"] = "failure"
+				responseData["message"] = "error adding user to database"
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(responseData)
+				return
+			}
 		}
 
 		// responds success

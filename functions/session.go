@@ -13,7 +13,7 @@ type Session struct {
 }
 
 func CreateSession(session Session) (int, error) {
-	query := `INSERT INTO sessions (id, cookie, createdAt, expiresAt) VALUES (?,?,?,?)`
+	query := `INSERT INTO sessions (id, cookie, created_at, expires_at) VALUES (?,?,?,?)`
 
 	_, err := Db.Exec(query, session.Id, session.Cookie, time.Now(), session.Expires)
 	if err != nil {
@@ -47,7 +47,7 @@ func DeleteUserSession(id int) error {
 
 func GetSessionByCookie(cookie string) (Session, error) {
 	var session Session
-	query := `SELECT id, cookie, createdAt FROM sessions WHERE cookie = ?`
+	query := `SELECT id, cookie, created_at FROM sessions WHERE cookie = ?`
 
 	err := Db.QueryRow(query, cookie).Scan(&session.Id, &session.Cookie, &session.Created)
 	if err != nil {

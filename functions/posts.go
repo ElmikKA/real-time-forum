@@ -6,17 +6,17 @@ import (
 )
 
 type Post struct {
-	Id        int       `json:"id"`
-	User_id   int       `json:"user_id"`
-	Creator   string    `json:"creator"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	Category  string    `json:"category"`
-	CreatedAt time.Time `json:"createdAt"`
-	Likes     int       `json:"likes"`
-	Dislikes  int       `json:"dislikes"`
-	Liked     bool      `json:"liked"`
-	Disliked  bool      `json:"disliked"`
+	Id         int       `json:"id"`
+	User_id    int       `json:"user_id"`
+	Creator    string    `json:"creator"`
+	Title      string    `json:"title"`
+	Content    string    `json:"content"`
+	Category   string    `json:"category"`
+	Created_at time.Time `json:"created_at"`
+	Likes      int       `json:"likes"`
+	Dislikes   int       `json:"dislikes"`
+	Liked      bool      `json:"liked"`
+	Disliked   bool      `json:"disliked"`
 }
 
 func GetPosts(user_id int) ([]Post, error) {
@@ -30,7 +30,7 @@ func GetPosts(user_id int) ([]Post, error) {
 		p.title,
 		p.content,
 		p.category,
-		p.createdAt,
+		p.created_at,
 		(SELECT COUNT(*) FROM post_likes WHERE post_id = p.id AND like = 1) AS likes,
 		(SELECT COUNT(*) FROM post_likes WHERE post_id = p.id AND like = -1) AS dislikes,
 		EXISTS (SELECT 1 FROM post_likes WHERE user_id = ? AND like = 1) AS liked,
@@ -51,7 +51,7 @@ func GetPosts(user_id int) ([]Post, error) {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		err := rows.Scan(&post.Id, &post.User_id, &post.Creator, &post.Title, &post.Content, &post.Category, &post.CreatedAt, &post.Likes, &post.Dislikes, &post.Liked, &post.Disliked)
+		err := rows.Scan(&post.Id, &post.User_id, &post.Creator, &post.Title, &post.Content, &post.Category, &post.Created_at, &post.Likes, &post.Dislikes, &post.Liked, &post.Disliked)
 		if err != nil {
 			fmt.Println("error getting next post", err)
 			return nil, err
@@ -72,7 +72,7 @@ func GetOnePost(id int, user_id int) (Post, error) {
 		p.title,
 		p.content,
 		p.category,
-		p.createdAt,
+		p.created_at,
 		(SELECT COUNT(*) FROM post_likes WHERE post_id = p.id AND like = 1) AS likes,
 		(SELECT COUNT(*) FROM post_likes WHERE post_id = p.id AND like = -1) AS dislikes,
 		EXISTS (SELECT 1 FROM post_likes WHERE user_id = ? AND like = 1) AS liked,
@@ -84,7 +84,7 @@ func GetOnePost(id int, user_id int) (Post, error) {
 	WHERE p.id = ?
 	`
 	var post Post
-	err := Db.QueryRow(query, user_id, user_id, id).Scan(&post.Id, &post.User_id, &post.Creator, &post.Title, &post.Content, &post.Category, &post.CreatedAt, &post.Likes, &post.Dislikes, &post.Liked, &post.Disliked)
+	err := Db.QueryRow(query, user_id, user_id, id).Scan(&post.Id, &post.User_id, &post.Creator, &post.Title, &post.Content, &post.Category, &post.Created_at, &post.Likes, &post.Dislikes, &post.Liked, &post.Disliked)
 	if err != nil {
 		fmt.Println("error gettig one post", err)
 		return post, err

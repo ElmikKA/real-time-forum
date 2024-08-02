@@ -12,6 +12,7 @@ type Users struct {
 	LastName  string `json:"lname"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
+	Online    string `json:"online"`
 }
 
 type LoginCredentials struct {
@@ -30,13 +31,15 @@ func CheckUserExists(username, email string) (bool, error) {
 	return count > 0, nil
 }
 
-func AddUser(user Users) {
+func AddUser(user Users) error {
 	query := "INSERT INTO users (username, age, gender, fName, lName, email, password) VALUES (?,?,?,?,?,?,?)"
 	_, err := Db.Exec(query, user.Name, user.Age, user.Gender, user.FirstName, user.LastName, user.Email, user.Password)
 
 	if err != nil {
 		fmt.Println("error adding user to users", err)
+		return err
 	}
+	return nil
 }
 
 func CheckCredentials(user, pass string) (bool, int, error) {
@@ -58,8 +61,8 @@ func CheckCredentials(user, pass string) (bool, int, error) {
 
 func GetUser(id int) (Users, error) {
 	var user Users
-	query := `SELECT username, age, gender, fname, lname, email FROM users WHERE id = ?`
-	err := Db.QueryRow(query, id).Scan(&user.Name, &user.Age, &user.Gender, &user.FirstName, &user.LastName, &user.Email)
+	query := `SELECT username, age, gender, fname, lname, email, online FROM users WHERE id = ?`
+	err := Db.QueryRow(query, id).Scan(&user.Name, &user.Age, &user.Gender, &user.FirstName, &user.LastName, &user.Email, &user.Online)
 	if err != nil {
 		fmt.Println("error getting user", err)
 		return user, err

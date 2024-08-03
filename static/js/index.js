@@ -40,6 +40,9 @@ function addWebsocketUsers(usersData) {
 
             const div = document.createElement('div')
             div.innerHTML = users[i].username
+            div.onclick = function () {
+                openPrivateMessages(users[i].id)
+            }
             div.style.border = "solid black"
             div.style.margin = "2px"
             userDiv.appendChild(div)
@@ -47,6 +50,54 @@ function addWebsocketUsers(usersData) {
     }
 }
 
+function openPrivateMessages(userId) {
+
+    const messageContainer = document.getElementById('messageContainer')
+    const msgDiv = messageContainer.querySelector('#messageDiv')
+
+    msgDiv.classList = userId
+
+    const requestMessage = {
+        id: userId,
+    }
+
+    fetch('/api/getMessages', {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestMessage)
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            displayPrivateMessages(data)
+        })
+        .catch(error => console.log(error))
+}
+
+function displayPrivateMessages(data) {
+    console.log(data)
+    const messageContainer = document.getElementById('messageContainer')
+    const msgDiv = messageContainer.querySelector('#messageDiv')
+    msgDiv.innerHTML = ""
+
+    let messages = data.messages
+    if (messages === null) {
+        console.log("no messages")
+        msgDiv.innerHTML = ""
+        return
+    } else {
+
+        for (let i = 0; i < messages.length; i++) {
+            let div = document.createElement('div')
+            div.innerHTML = messages[i].message
+
+            msgDiv.appendChild(div)
+        }
+        console.log(messages)
+    }
+}
 
 class MySocket {
     constructor() {
@@ -99,7 +150,15 @@ class MySocket {
     sendMessage() {
         const websocketDiv = document.getElementById('websocketDiv')
         const message = websocketDiv.querySelector('#message').value
-        this.mysocket.send(message)
+        const receiverId = websocketDiv.querySelector('#messageDiv').classList[0]
+        console.log(receiverId)
+        var msgData = {
+            message: message,
+            receiver: parseInt(receiverId),
+        }
+        console.log(msgData)
+
+        this.mysocket.send(JSON.stringify(msgData))
     }
 }
 

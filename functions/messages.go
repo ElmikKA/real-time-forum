@@ -12,6 +12,15 @@ type Messages struct {
 	Written_at  time.Time `json:"written_at"`
 }
 
+type RequestMessage struct {
+	Id int `json:"id"`
+}
+
+type MessageData struct {
+	Message     string `json:"message"`
+	Receiver_id int    `json:"receiver"`
+}
+
 func GetLatestMessages(user int) ([]Messages, error) {
 
 	query := `
@@ -55,5 +64,34 @@ func GetLatestMessages(user int) ([]Messages, error) {
 		return nil, err
 	}
 
+	return messages, nil
+}
+
+func GetAllMessages(user1 int, user2 int) ([]Messages, error) {
+	var messages []Messages
+	query := `
+	SELECT * FROM messages WHERE 
+		(sender_id = ? AND receiver_id = ?) 
+	OR 
+		(sender_id = ? AND receiver_id = ?) 
+	ORDER BY 
+		written_at DESC`
+
+	rows, err := Db.Query(query, user1, user2, user2, user1)
+	if err != nil {
+		fmt.Println("error getting all messages", err)
+		return messages, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var message Messages
+		err := rows.Scan(&message.Sender_id, &message.Receiver_id, &message.Message, &message.Written_at)
+		if err != nil {
+			fmt.Println("error all messages rows.next", err)
+			return messages, err
+		}
+		messages = append(messages, message)
+	}
 	return messages, nil
 }

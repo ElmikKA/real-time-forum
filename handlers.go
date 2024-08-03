@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sync"
 
 	"RTForum/functions"
 
@@ -460,6 +461,11 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+var (
+	connections = make(map[*websocket.Conn]map[string]interface{})
+	mu          sync.Mutex
+)
+
 func newWebsocket(w http.ResponseWriter, r *http.Request) {
 
 	responseData := make(map[string]interface{})
@@ -475,8 +481,20 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error upgrading", err)
 		return
 	}
+	defer func() {
+		mu.Lock()
+		delete(connections, conn)
+		mu.Unlock()
+		conn.Close()
+	}()
 
-	defer conn.Close()
+	mu.Lock()
+	connections[conn] = map[string]interface{}{
+		"connection": true,
+		"id":         id,
+		"username":   username,
+	}
+	mu.Unlock()
 
 	if !loggedIn {
 		responseData["error"] = "not logged in"
@@ -486,9 +504,12 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		conn.WriteMessage(websocket.TextMessage, jsonResponse)
-		conn.Close()
 		return
 	}
+	fmt.Println("connections:")
+	mu.Lock()
+	fmt.Println(connections)
+	mu.Unlock()
 
 	for {
 		messageType, p, err := conn.ReadMessage()
@@ -496,6 +517,18 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("err reading message", err)
 			return
 		}
+
+		var msgData functions.MessageData
+
+		err = json.Unmarshal(p, &msgData)
+
+		if err != nil {
+			fmt.Println("error unmarshaling msgdata", err)
+		}
+
+		fmt.Println("message received:", msgData)
+
+		// err := functions.AddMessage(string(p))
 
 		responseData["data"] = "hello"
 		responseData["websocket"] = "success"
@@ -513,6 +546,7 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
+
 }
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
@@ -568,5 +602,57 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 		responseData["getUsers"] = "success"
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(responseData)
+	}
+}
+
+func getMessages(w http.ResponseWriter, r *http.Request) {
+
+	responseData := make(map[string]interface{})
+	// checks if logged in
+	id, username, loggedIn := functions.CheckLogin(w, r)
+
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
+
+	// if not logged in sends responeData["loggedIn"] as false
+	if !loggedIn {
+		fmt.Println("not logged in")
+		responseData["getMessages"] = "failure"
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+		return
+	}
+
+	if r.Method == "POST" {
+		fmt.Println()
+
+		var requestMessage functions.RequestMessage
+
+		err := json.NewDecoder(r.Body).Decode(&requestMessage)
+
+		if err != nil {
+			fmt.Println("error getMessages", err)
+			responseData["getMessages"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+		messages, err := functions.GetAllMessages(id, requestMessage.Id)
+
+		if err != nil {
+			fmt.Println("error getMessages", err)
+			responseData["getMessages"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+		fmt.Println(messages)
+
+		responseData["getMessages"] = "success"
+		responseData["messages"] = messages
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+
 	}
 }

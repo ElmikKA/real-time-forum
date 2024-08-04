@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -19,7 +18,7 @@ func Mainpage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("error parsing template")
 		}
 		tmpl.Execute(w, nil)
 	}
@@ -484,6 +483,7 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer func() {
 		mu.Lock()
+		fmt.Println("leaving connection", connections[conn])
 		delete(connections, conn)
 		mu.Unlock()
 		conn.Close()
@@ -491,9 +491,8 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 
 	mu.Lock()
 	connections[conn] = map[string]interface{}{
-		"connection": true, // maybe not needed
-		"id":         id,
-		"username":   username,
+		"id":       id,
+		"username": username,
 	}
 	mu.Unlock()
 
@@ -551,6 +550,11 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 				}
 				msgResponseData["written_at"] = time.Now()
 				msgResponseData["msgResponse"] = true
+				msgResponseData["written_by"] = username
+				msgResponseData["writer_id"] = id
+				receiverName, _ := functions.GetUser(msgData.Receiver_id)
+				// msgResponseData["written_to"] =
+				msgResponseData["username"] = receiverName.Name
 
 				jsonMsg, err := json.Marshal(msgResponseData)
 
@@ -568,11 +572,11 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 
 		responseData["message"] = msgData.Message
 		responseData["receiver_id"] = msgData.Receiver_id
-		responseData["sendeer_id"] = id
+		responseData["sender_id"] = id
 		responseData["written_at"] = time.Now()
-		responseData["data"] = "hello"
 		responseData["websocket"] = "success"
 		responseData["msgResponse"] = false
+		responseData["written_by"] = username
 		if msgData.Receiver_id == id {
 			responseData["receiver"] = true
 		} else {
@@ -694,6 +698,9 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(messages)
 
+		msgPartner, _ := functions.GetUser(requestMessage.Id)
+
+		responseData["messagePartner"] = msgPartner.Name
 		responseData["getMessages"] = "success"
 		responseData["messages"] = messages
 		w.Header().Set("Content-Type", "application/json")

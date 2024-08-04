@@ -84,6 +84,7 @@ function displayPrivateMessages(data) {
     console.log(data)
     const messageContainer = document.getElementById('messageContainer')
     const msgDiv = messageContainer.querySelector('#messageDiv')
+    msgDiv.classList.add(data.messagePartner)
     msgDiv.innerHTML = ""
 
     let messages = data.messages
@@ -146,17 +147,30 @@ class MySocket {
 
     displayNewMessage(responseData) {
 
+        // only display if the pm is opened to the right person
+        // else send notification (pending)
+
+
+
+
         console.log("displaying", responseData)
         const messageContainer = document.getElementById('messageContainer')
         const msgDiv = messageContainer.querySelector('#messageDiv')
 
+        if (responseData.username === responseData.written_by || msgDiv.classList.contains(responseData.written_by)) {
+            console.log("can print it out")
+            let div = document.createElement('div')
+            div.innerHTML = responseData.message
+            div.style.float = responseData.receiver ? 'left' : 'right'
 
-        let div = document.createElement('div')
-        div.innerHTML = responseData.message
-        div.style.float = responseData.receiver ? 'left' : 'right'
+            msgDiv.appendChild(div)
+            msgDiv.innerHTML += "<br>"
+        } else {
+            console.log("pm not opened, send a notification\nSent by:", responseData.written_by)
+            // add code to send notification
+        }
 
-        msgDiv.appendChild(div)
-        msgDiv.innerHTML += "<br>"
+
     }
 
 

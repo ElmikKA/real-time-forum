@@ -75,7 +75,7 @@ func GetAllMessages(user1 int, user2 int) ([]Messages, error) {
 	OR 
 		(sender_id = ? AND receiver_id = ?) 
 	ORDER BY 
-		written_at DESC`
+		written_at ASC`
 
 	rows, err := Db.Query(query, user1, user2, user2, user1)
 	if err != nil {
@@ -94,4 +94,16 @@ func GetAllMessages(user1 int, user2 int) ([]Messages, error) {
 		messages = append(messages, message)
 	}
 	return messages, nil
+}
+
+func AddMessage(message string, receiver int, sender int) error {
+	query := `INSERT INTO messages (sender_id, receiver_id, message) VALUES (?,?,?)`
+
+	_, err := Db.Exec(query, sender, receiver, message)
+
+	if err != nil {
+		fmt.Println("error adding message", err)
+		return err
+	}
+	return nil
 }

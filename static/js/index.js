@@ -28,7 +28,7 @@ function toggleWebsocket() {
 }
 
 function addWebsocketUsers(usersData) {
-    console.log(usersData)
+    console.log("adding users", usersData)
     let users = usersData.allUsers
 
     const websocketDiv = document.getElementById('websocketDiv')
@@ -45,6 +45,9 @@ function addWebsocketUsers(usersData) {
             }
             div.style.border = "solid black"
             div.style.margin = "2px"
+
+            // div.style.float =
+
             userDiv.appendChild(div)
         }
     }
@@ -76,6 +79,7 @@ function openPrivateMessages(userId) {
         .catch(error => console.log(error))
 }
 
+
 function displayPrivateMessages(data) {
     console.log(data)
     const messageContainer = document.getElementById('messageContainer')
@@ -88,12 +92,12 @@ function displayPrivateMessages(data) {
         msgDiv.innerHTML = ""
         return
     } else {
-
         for (let i = 0; i < messages.length; i++) {
             let div = document.createElement('div')
             div.innerHTML = messages[i].message
-
+            div.style.float = data.id == messages[i].sender_id ? 'right' : 'left'
             msgDiv.appendChild(div)
+            msgDiv.innerHTML += "<br>"
         }
         console.log(messages)
     }
@@ -116,7 +120,11 @@ class MySocket {
             console.log("here")
             try {
                 const responseData = JSON.parse(event.data)
-                console.log(responseData)
+                console.log("got response", responseData)
+
+
+
+                this.displayNewMessage(responseData)
             } catch (e) {
                 console.error("error parsing JSON:", e)
             }
@@ -136,6 +144,22 @@ class MySocket {
         }
     }
 
+    displayNewMessage(responseData) {
+
+        console.log("displaying", responseData)
+        const messageContainer = document.getElementById('messageContainer')
+        const msgDiv = messageContainer.querySelector('#messageDiv')
+
+
+        let div = document.createElement('div')
+        div.innerHTML = responseData.message
+        div.style.float = responseData.receiver ? 'left' : 'right'
+
+        msgDiv.appendChild(div)
+        msgDiv.innerHTML += "<br>"
+    }
+
+
     fetchUsers() {
         fetch('/api/getUsers', {
             method: 'GET'
@@ -151,16 +175,17 @@ class MySocket {
         const websocketDiv = document.getElementById('websocketDiv')
         const message = websocketDiv.querySelector('#message').value
         const receiverId = websocketDiv.querySelector('#messageDiv').classList[0]
-        console.log(receiverId)
+        // console.log(receiverId)
         var msgData = {
             message: message,
             receiver: parseInt(receiverId),
         }
-        console.log(msgData)
+        // console.log(msgData)
 
         this.mysocket.send(JSON.stringify(msgData))
     }
 }
+
 
 
 

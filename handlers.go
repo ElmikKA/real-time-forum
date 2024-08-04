@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"RTForum/functions"
 
@@ -490,7 +491,7 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 
 	mu.Lock()
 	connections[conn] = map[string]interface{}{
-		"connection": true,
+		"connection": true, // maybe not needed
 		"id":         id,
 		"username":   username,
 	}
@@ -528,16 +529,60 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println("message received:", msgData)
 
-		// err := functions.AddMessage(string(p))
+		// add message to db
 
+		err = functions.AddMessage(msgData.Message, msgData.Receiver_id, id)
+		if err != nil {
+			fmt.Println("error adding message to db", err)
+		}
+
+		// send message to receiver
+
+		mu.Lock()
+
+		for msgConn, value := range connections {
+			if value["id"] == msgData.Receiver_id {
+				msgResponseData := make(map[string]interface{})
+				msgResponseData["message"] = msgData.Message
+				if msgData.Receiver_id == id {
+					msgResponseData["receiver"] = false
+				} else {
+					msgResponseData["receiver"] = true
+				}
+				msgResponseData["written_at"] = time.Now()
+				msgResponseData["msgResponse"] = true
+
+				jsonMsg, err := json.Marshal(msgResponseData)
+
+				if err != nil {
+					fmt.Println("error marshaling", msgConn, err)
+				}
+
+				if err := msgConn.WriteMessage(messageType, jsonMsg); err != nil {
+					fmt.Println("error writing message")
+				}
+			}
+		}
+
+		mu.Unlock()
+
+		responseData["message"] = msgData.Message
+		responseData["receiver_id"] = msgData.Receiver_id
+		responseData["sendeer_id"] = id
+		responseData["written_at"] = time.Now()
 		responseData["data"] = "hello"
 		responseData["websocket"] = "success"
-		responseData["message"] = string(p)
+		responseData["msgResponse"] = false
+		if msgData.Receiver_id == id {
+			responseData["receiver"] = true
+		} else {
+			responseData["receiver"] = false
+		}
+		// responseData["message"] = string(p)
 
 		jsonResponse, err := json.Marshal(responseData)
 		if err != nil {
 			fmt.Println("error marshaling responsedata", err)
-
 		}
 
 		if err := conn.WriteMessage(messageType, jsonResponse); err != nil {
@@ -653,6 +698,5 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 		responseData["messages"] = messages
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(responseData)
-
 	}
 }

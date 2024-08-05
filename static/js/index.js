@@ -381,3 +381,11 @@ function changeLike(type, post_id, comment_id, like) {
             console.log(error)
         })
 }
+
+function logout() {
+    fetch("/api/logout", {
+        method: "POST",
+    })
+        .then(response => console.log(response))
+        .catch(error => console.log(error))
+}

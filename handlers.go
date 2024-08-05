@@ -482,38 +482,39 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer func() {
-		mu.Lock()
-		fmt.Println("leaving connection", connections[conn])
-		delete(connections, conn)
-		conn.Close()
-		err = functions.ChangeOnline(id, -1)
-		if err != nil {
-			fmt.Println("error changing online status -1", err)
-		}
-		// send status change to every online user
+		CloseSocket(conn, id, username)
+		// mu.Lock()
+		// fmt.Println("leaving connection", connections[conn])
+		// delete(connections, conn)
+		// conn.Close()
+		// err = functions.ChangeOnline(id, -1)
+		// if err != nil {
+		// 	fmt.Println("error changing online status -1", err)
+		// }
+		// // send status change to every online user
 
-		for msgConn, value := range connections {
-			statusChangeResponse := make(map[string]interface{})
-			statusChangeResponse["statusChange"] = true
-			statusChangeResponse["username"] = value["username"]
-			statusChangeResponse["id"] = value["id"]
-			statusChangeResponse["statusChangeUsername"] = username
-			statusChangeResponse["statusChangeId"] = id
-			statusChangeResponse["online"] = -1
+		// for msgConn, value := range connections {
+		// 	statusChangeResponse := make(map[string]interface{})
+		// 	statusChangeResponse["statusChange"] = true
+		// 	statusChangeResponse["username"] = value["username"]
+		// 	statusChangeResponse["id"] = value["id"]
+		// 	statusChangeResponse["statusChangeUsername"] = username
+		// 	statusChangeResponse["statusChangeId"] = id
+		// 	statusChangeResponse["online"] = -1
 
-			// msgType := value["messageType"]
+		// 	// msgType := value["messageType"]
 
-			jsonMsg, err := json.Marshal(statusChangeResponse)
+		// 	jsonMsg, err := json.Marshal(statusChangeResponse)
 
-			if err != nil {
-				fmt.Println("error marshaling", msgConn, err)
-			}
+		// 	if err != nil {
+		// 		fmt.Println("error marshaling", msgConn, err)
+		// 	}
 
-			if err := msgConn.WriteMessage(1, jsonMsg); err != nil {
-				fmt.Println("error writing message")
-			}
-		}
-		mu.Unlock()
+		// 	if err := msgConn.WriteMessage(1, jsonMsg); err != nil {
+		// 		fmt.Println("error writing message")
+		// 	}
+		// }
+		// mu.Unlock()
 	}()
 
 	if !loggedIn {
@@ -767,5 +768,20 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 		responseData["messages"] = messages
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(responseData)
+	}
+}
+
+func LogOut(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("logout")
+	if r.Method == "POST" {
+		id, username, _ := functions.CheckLogin(w, r)
+		for msgConn, value := range connections {
+			if value["id"] == id {
+				CloseSocket(msgConn, id, username)
+				fmt.Println("conn closed")
+			}
+		}
+		functions.RemoveSession(id)
+		w.WriteHeader(http.StatusOK)
 	}
 }

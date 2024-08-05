@@ -1,5 +1,5 @@
 import { getUsers } from "../data/data.js";
-import { showPostSection } from "../components/userProfileUI.js";
+import { showPostSection } from "./../components/userProfileUI.js";
 
 export function login() {
     const users = getUsers();

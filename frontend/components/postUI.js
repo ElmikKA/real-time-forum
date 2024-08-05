@@ -47,10 +47,10 @@ function createInnerHTMLForDashboardCard(postLayout, postObj) {
             </h3>
         </div>
         <div class="like-dislike-comment-section">
-            <img src="/src/img/Like.png" class="like-img">
+            <img src="./src/img/Like.png" class="like-img">
             <span>0</span>
-            <img src="/src/img/Dislike.png" class="dislike-img">
-            <img src="/src/img/Comment.png" class="comment-img">
+            <img src="./src/img/Dislike.png" class="dislike-img">
+            <img src="./src/img/Comment.png" class="comment-img">
         </div>
     `;
 }

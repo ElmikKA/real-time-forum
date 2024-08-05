@@ -97,3 +97,12 @@ func AddSession(w http.ResponseWriter, r *http.Request, id int) error {
 	}
 	return nil
 }
+
+func RemoveSession(id int) {
+	fmt.Println("removing session with id:", id)
+	query := `DELETE FROM sessions WHERE id = ?`
+	_, err := Db.Exec(query, id)
+	if err != nil {
+		fmt.Println("error removing session", err)
+	}
+}

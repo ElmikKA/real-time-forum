@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
+	"sync"
+	"time"
 
 	"RTForum/functions"
+
+	"github.com/gorilla/websocket"
 )
 
 // executes the single html file
@@ -15,7 +18,7 @@ func Mainpage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("error parsing template")
 		}
 		tmpl.Execute(w, nil)
 	}
@@ -450,5 +453,335 @@ func ChangeLikes(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(responseData)
+	}
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+var (
+	connections = make(map[*websocket.Conn]map[string]interface{})
+	mu          sync.Mutex
+)
+
+func newWebsocket(w http.ResponseWriter, r *http.Request) {
+
+	responseData := make(map[string]interface{})
+	// checks if logged in
+	id, username, loggedIn := functions.CheckLogin(w, r)
+
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("error upgrading", err)
+		return
+	}
+	defer func() {
+		CloseSocket(conn, id, username)
+		// mu.Lock()
+		// fmt.Println("leaving connection", connections[conn])
+		// delete(connections, conn)
+		// conn.Close()
+		// err = functions.ChangeOnline(id, -1)
+		// if err != nil {
+		// 	fmt.Println("error changing online status -1", err)
+		// }
+		// // send status change to every online user
+
+		// for msgConn, value := range connections {
+		// 	statusChangeResponse := make(map[string]interface{})
+		// 	statusChangeResponse["statusChange"] = true
+		// 	statusChangeResponse["username"] = value["username"]
+		// 	statusChangeResponse["id"] = value["id"]
+		// 	statusChangeResponse["statusChangeUsername"] = username
+		// 	statusChangeResponse["statusChangeId"] = id
+		// 	statusChangeResponse["online"] = -1
+
+		// 	// msgType := value["messageType"]
+
+		// 	jsonMsg, err := json.Marshal(statusChangeResponse)
+
+		// 	if err != nil {
+		// 		fmt.Println("error marshaling", msgConn, err)
+		// 	}
+
+		// 	if err := msgConn.WriteMessage(1, jsonMsg); err != nil {
+		// 		fmt.Println("error writing message")
+		// 	}
+		// }
+		// mu.Unlock()
+	}()
+
+	if !loggedIn {
+		responseData["error"] = "not logged in"
+		jsonResponse, err := json.Marshal(responseData)
+		if err != nil {
+			fmt.Println("error marshaling !login responsedata", err)
+			return
+		}
+		conn.WriteMessage(websocket.TextMessage, jsonResponse)
+		return
+	}
+	fmt.Println("connections:")
+	mu.Lock()
+	fmt.Println(connections)
+	mu.Unlock()
+
+	// make online
+	err = functions.ChangeOnline(id, 1)
+	if err != nil {
+		fmt.Println("error changing online status", err)
+	}
+
+	// send online status change
+
+	mu.Lock()
+	for msgConn, value := range connections {
+		// if msgConn == conn {
+		// 	return
+		// }
+		statusChangeResponse := make(map[string]interface{})
+		statusChangeResponse["statusChange"] = true
+		statusChangeResponse["username"] = value["username"]
+		statusChangeResponse["id"] = value["id"]
+		statusChangeResponse["statusChangeUsername"] = username
+		statusChangeResponse["statusChangeId"] = id
+		statusChangeResponse["online"] = 1
+
+		jsonMsg, err := json.Marshal(statusChangeResponse)
+
+		if err != nil {
+			fmt.Println("error marshaling", msgConn, err)
+		}
+
+		if err := msgConn.WriteMessage(1, jsonMsg); err != nil {
+			fmt.Println("error writing message")
+		}
+	}
+	mu.Unlock()
+	mu.Lock()
+	connections[conn] = map[string]interface{}{
+		"id":       id,
+		"username": username,
+	}
+	mu.Unlock()
+	for {
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Println("err reading message", err)
+			return
+		}
+		// mu.Lock()
+		// connections[conn]["messageType"] = messageType
+		// mu.Unlock()
+
+		var msgData functions.MessageData
+
+		err = json.Unmarshal(p, &msgData)
+
+		if err != nil {
+			fmt.Println("error unmarshaling msgdata", err)
+		}
+
+		fmt.Println("message received:", msgData)
+
+		// add message to db
+
+		err = functions.AddMessage(msgData.Message, msgData.Receiver_id, id)
+		if err != nil {
+			fmt.Println("error adding message to db", err)
+		}
+
+		// send message to receiver
+
+		mu.Lock()
+
+		for msgConn, value := range connections {
+			if value["id"] == msgData.Receiver_id {
+				msgResponseData := make(map[string]interface{})
+				msgResponseData["message"] = msgData.Message
+				if msgData.Receiver_id == id {
+					msgResponseData["receiver"] = false
+				} else {
+					msgResponseData["receiver"] = true
+				}
+				msgResponseData["written_at"] = time.Now()
+				msgResponseData["msgResponse"] = true
+				msgResponseData["written_by"] = username
+				msgResponseData["writer_id"] = id
+				receiverName, _ := functions.GetUser(msgData.Receiver_id)
+				msgResponseData["username"] = receiverName.Name
+				msgResponseData["statusChange"] = false
+
+				jsonMsg, err := json.Marshal(msgResponseData)
+
+				if err != nil {
+					fmt.Println("error marshaling", msgConn, err)
+				}
+
+				if err := msgConn.WriteMessage(messageType, jsonMsg); err != nil {
+					fmt.Println("error writing message")
+				}
+			}
+		}
+
+		mu.Unlock()
+
+		responseData["message"] = msgData.Message
+		responseData["receiver_id"] = msgData.Receiver_id
+		responseData["sender_id"] = id
+		responseData["written_at"] = time.Now()
+		responseData["websocket"] = "success"
+		responseData["msgResponse"] = false
+		responseData["written_by"] = username
+		if msgData.Receiver_id == id {
+			responseData["receiver"] = true
+		} else {
+			responseData["receiver"] = false
+		}
+		responseData["statusChange"] = false
+		// responseData["message"] = string(p)
+
+		jsonResponse, err := json.Marshal(responseData)
+		if err != nil {
+			fmt.Println("error marshaling responsedata", err)
+		}
+
+		if err := conn.WriteMessage(messageType, jsonResponse); err != nil {
+			fmt.Println("error writing message", err)
+			return
+		}
+
+	}
+
+}
+
+func getUsers(w http.ResponseWriter, r *http.Request) {
+
+	responseData := make(map[string]interface{})
+	// checks if logged in
+	id, username, loggedIn := functions.CheckLogin(w, r)
+
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
+
+	// if not logged in sends responeData["loggedIn"] as false
+	if !loggedIn {
+		fmt.Println("not logged in")
+		responseData["getUsers"] = "failure"
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+		return
+	}
+
+	if r.Method == "GET" {
+		users, err := functions.GetAllUsers()
+		if err != nil {
+			fmt.Println("error getting all users", err)
+			responseData["getUsers"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+
+		latestMessagedUsers, err := functions.GetLatestMessages(id)
+		if err != nil {
+			fmt.Println("error getting latest messages", err)
+			responseData["getUsers"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+
+		sortedUsers, err := functions.SortUsers(users, latestMessagedUsers, id)
+		if err != nil {
+			fmt.Println("error sorting users", err)
+			responseData["getUsers"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+		fmt.Println(latestMessagedUsers)
+		fmt.Println(sortedUsers)
+
+		responseData["allUsers"] = sortedUsers
+		responseData["getUsers"] = "success"
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+	}
+}
+
+func getMessages(w http.ResponseWriter, r *http.Request) {
+
+	responseData := make(map[string]interface{})
+	// checks if logged in
+	id, username, loggedIn := functions.CheckLogin(w, r)
+
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
+
+	// if not logged in sends responeData["loggedIn"] as false
+	if !loggedIn {
+		fmt.Println("not logged in")
+		responseData["getMessages"] = "failure"
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+		return
+	}
+
+	if r.Method == "POST" {
+		fmt.Println()
+
+		var requestMessage functions.RequestMessage
+
+		err := json.NewDecoder(r.Body).Decode(&requestMessage)
+
+		if err != nil {
+			fmt.Println("error getMessages", err)
+			responseData["getMessages"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+		messages, err := functions.GetAllMessages(id, requestMessage.Id)
+
+		if err != nil {
+			fmt.Println("error getMessages", err)
+			responseData["getMessages"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+		fmt.Println(messages)
+
+		msgPartner, _ := functions.GetUser(requestMessage.Id)
+
+		responseData["messagePartner"] = msgPartner.Name
+		responseData["getMessages"] = "success"
+		responseData["messages"] = messages
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+	}
+}
+
+func LogOut(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("logout")
+	if r.Method == "POST" {
+		id, username, _ := functions.CheckLogin(w, r)
+		for msgConn, value := range connections {
+			if value["id"] == id {
+				CloseSocket(msgConn, id, username)
+				fmt.Println("conn closed")
+			}
+		}
+		functions.RemoveSession(id)
+		w.WriteHeader(http.StatusOK)
 	}
 }

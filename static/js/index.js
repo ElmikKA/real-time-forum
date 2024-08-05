@@ -39,14 +39,14 @@ function addWebsocketUsers(usersData) {
         if (users[i].username !== usersData.username) {
 
             const div = document.createElement('div')
-            div.innerHTML = users[i].username
+            div.id = users[i].username
+            div.innerHTML = users[i].online === "1" ? "🟢" : "⚪"
+            div.innerHTML += users[i].username
             div.onclick = function () {
                 openPrivateMessages(users[i].id)
             }
             div.style.border = "solid black"
             div.style.margin = "2px"
-
-            // div.style.float =
 
             userDiv.appendChild(div)
         }
@@ -122,10 +122,14 @@ class MySocket {
             try {
                 const responseData = JSON.parse(event.data)
                 console.log("got response", responseData)
+                console.log(responseData.statusChange)
 
-
-
-                this.displayNewMessage(responseData)
+                if (responseData.statusChange) {
+                    console.log("change status", responseData)
+                    this.changeOnlineStatus(responseData)
+                } else {
+                    this.displayNewMessage(responseData)
+                }
             } catch (e) {
                 console.error("error parsing JSON:", e)
             }
@@ -144,6 +148,18 @@ class MySocket {
             console.error(`Websocket error: ${event}`)
         }
     }
+
+    changeOnlineStatus(responseData) {
+        const websocketDiv = document.getElementById('websocketDiv')
+        const container = websocketDiv.querySelector('#websocketContainer')
+        const userDiv = container.querySelector('#userDiv')
+        const changingUsername = responseData.statusChangeUsername
+        let user = userDiv.querySelector('#' + changingUsername)
+        user.innerHTML = responseData.online === 1 ? "🟢" : "⚪"
+        user.innerHTML += responseData.statusChangeUsername
+    }
+
+
 
     displayNewMessage(responseData) {
 

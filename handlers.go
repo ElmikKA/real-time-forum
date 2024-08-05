@@ -485,16 +485,36 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		fmt.Println("leaving connection", connections[conn])
 		delete(connections, conn)
-		mu.Unlock()
 		conn.Close()
-	}()
+		err = functions.ChangeOnline(id, -1)
+		if err != nil {
+			fmt.Println("error changing online status -1", err)
+		}
+		// send status change to every online user
 
-	mu.Lock()
-	connections[conn] = map[string]interface{}{
-		"id":       id,
-		"username": username,
-	}
-	mu.Unlock()
+		for msgConn, value := range connections {
+			statusChangeResponse := make(map[string]interface{})
+			statusChangeResponse["statusChange"] = true
+			statusChangeResponse["username"] = value["username"]
+			statusChangeResponse["id"] = value["id"]
+			statusChangeResponse["statusChangeUsername"] = username
+			statusChangeResponse["statusChangeId"] = id
+			statusChangeResponse["online"] = -1
+
+			// msgType := value["messageType"]
+
+			jsonMsg, err := json.Marshal(statusChangeResponse)
+
+			if err != nil {
+				fmt.Println("error marshaling", msgConn, err)
+			}
+
+			if err := msgConn.WriteMessage(1, jsonMsg); err != nil {
+				fmt.Println("error writing message")
+			}
+		}
+		mu.Unlock()
+	}()
 
 	if !loggedIn {
 		responseData["error"] = "not logged in"
@@ -511,12 +531,53 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(connections)
 	mu.Unlock()
 
+	// make online
+	err = functions.ChangeOnline(id, 1)
+	if err != nil {
+		fmt.Println("error changing online status", err)
+	}
+
+	// send online status change
+
+	mu.Lock()
+	for msgConn, value := range connections {
+		// if msgConn == conn {
+		// 	return
+		// }
+		statusChangeResponse := make(map[string]interface{})
+		statusChangeResponse["statusChange"] = true
+		statusChangeResponse["username"] = value["username"]
+		statusChangeResponse["id"] = value["id"]
+		statusChangeResponse["statusChangeUsername"] = username
+		statusChangeResponse["statusChangeId"] = id
+		statusChangeResponse["online"] = 1
+
+		jsonMsg, err := json.Marshal(statusChangeResponse)
+
+		if err != nil {
+			fmt.Println("error marshaling", msgConn, err)
+		}
+
+		if err := msgConn.WriteMessage(1, jsonMsg); err != nil {
+			fmt.Println("error writing message")
+		}
+	}
+	mu.Unlock()
+	mu.Lock()
+	connections[conn] = map[string]interface{}{
+		"id":       id,
+		"username": username,
+	}
+	mu.Unlock()
 	for {
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("err reading message", err)
 			return
 		}
+		// mu.Lock()
+		// connections[conn]["messageType"] = messageType
+		// mu.Unlock()
 
 		var msgData functions.MessageData
 
@@ -553,8 +614,8 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 				msgResponseData["written_by"] = username
 				msgResponseData["writer_id"] = id
 				receiverName, _ := functions.GetUser(msgData.Receiver_id)
-				// msgResponseData["written_to"] =
 				msgResponseData["username"] = receiverName.Name
+				msgResponseData["statusChange"] = false
 
 				jsonMsg, err := json.Marshal(msgResponseData)
 
@@ -582,6 +643,7 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 		} else {
 			responseData["receiver"] = false
 		}
+		responseData["statusChange"] = false
 		// responseData["message"] = string(p)
 
 		jsonResponse, err := json.Marshal(responseData)

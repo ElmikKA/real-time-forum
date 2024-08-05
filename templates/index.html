@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <style>
+        #register,
+        #login {
+            background-color: rgb(206, 206, 206);
+            /* display: inline-block; */
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    mainpage
+
+    <button onclick="toggleRegister()">register</button>
+    <button onclick="toggleLogin()">login</button>
+    <button onclick="togglePost()">posting</button>
+    <button onclick="toggleComment()">commenting</button>
+    <button onclick="posts()">posts</button>
+    <button onclick="onePost(1)">post1</button>
+    <button onclick="changeLike('post',1,0, 1)">like</button>
+    <button onclick="changeLike('post',1,0,-1)">dislike</button>
+    <button onclick="changeLike('comment',1,1, 1)">likeComment</button>
+    <button onclick="changeLike('comment',1,1,-1)">dislikeComment</button>
+    <br>
+    <br>
+    <br>
+
+    <!-- register -->
+    <div id="registerDiv" class="hidden">
+        <label for="username">Username</label>
+        <input placeholder="Enter Username" id="username" required type="text">
+        <br>
+        <label for="age">Age</label>
+        <input type="number" id="age" required placeholder="Age">
+        <br>
+        <label for="gender">gender</label>
+        <input placeholder="Enter gender" id="gender" required type="text">
+        <br>
+        <label for="firstName">first name</label>
+        <input placeholder="Enter first name" id="firstName" required type="text">
+        <br>
+        <label for="lastName">last name</label>
+        <input placeholder="Enter last name" id="lastName" required type="text">
+        <br>
+        <label for="email">e-mail</label>
+        <input placeholder="Enter E-mail" id="email" required type="text">
+        <br>
+        <label for="password">password</label>
+        <input type="text" id="password" placeholder="Password" required>
+        <br>
+        <button type="button" onclick="registerUser()">register</button>
+        <p id="registerMessage"></p>
+    </div>
+
+
+    <!-- Login -->
+    <div id="loginDiv" class="hidden">
+        <label for="user">username/email</label>
+        <input type="text" id="user" required placeholder="username/email">
+        <br>
+        <label for="password">password</label>
+        <input type="text" id="password" required placeholder="password">
+        <br>
+        <button type="button" onclick="login()">login</button>
+        <p id="loginMessage"></p>
+    </div>
+
+    <!-- Posts -->
+
+    <div id="postDiv" class="hidden">
+        <input type="text" placeholder="title" id="title"> <br>
+        <input type="text" placeholder="category" id="category"> <br>
+        <input type="text" placeholder="content" id="content"> <br>
+        <button id="createPost" onclick="createPost()">post</button>
+    </div>
+
+    <!-- Comment -->
+
+    <div id="commentDiv" class="hidden">
+        <input type="text" placeholder="content" id="content"> <br>
+        <button id="post" onclick="createNewComment(1)">comment</button>
+    </div>
+
+    <script src="../static/js/index.js"></script>
+</body>
+
+
+</html>

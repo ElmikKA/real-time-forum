@@ -17,7 +17,7 @@
             <div id="logo-div">
                 <img src="src/img/logo.png" alt="logo-for-real-forum">
             </div>
-            <div id="profile-and-add-new-button-div" class="visible">
+            <div id="profile-and-add-new-button-div" class="hidden">
                 <button id="add-new-button">NEW POST</button>
                 <!-- Dropdown Menu -->
                 <div class="dropdown">
@@ -30,8 +30,8 @@
             </div>
         </header>
 
-        <div class="login-container hidden" id="login-container">
-            <div id="login-and-registration-section">
+        <div class="login-container visible" id="login-container">
+            <div id="login-and-registration-section" class="visible">
                 <form id="login-form">
                     <label for="login-username">Username/Email</label>
                     <input type="text" id="login-username" name="login-username">
@@ -41,14 +41,63 @@
     
                     <div class="login-and-registration-buttons">
                         <button type="submit" class="login-button" id="login-button">LogIn</button>
-                        <button class="registration-button" type="button">Register</button>
+                        <button class="registration-button" id="registration-button" type="button">Register</button>
                     </div>
+                </form>
+            </div>
+
+            <div class="hidden" id="registration-section">
+                <h1>Register User</h1>
+                <form action="">
+
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label for="username">Username</label>
+                            <input placeholder="Enter Username" id="username" required type="text">
+                        </div>
+                        <div class="form-field">
+                            <label for="age">Age</label>
+                            <input type="number" id="age" required placeholder="Age">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label for="gender">Gender</label>
+                            <input placeholder="Enter gender" id="gender" required type="text">
+                        </div>
+                        <div class="form-field">
+                            <label for="firstName">First Name</label>
+                            <input placeholder="Enter first name" id="firstName" required type="text">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label for="lastName">Last Name</label>
+                            <input placeholder="Enter last name" id="lastName" required type="text">
+                        </div>
+                        <div class="form-field">
+                            <label for="email">E-mail</label>
+                            <input placeholder="Enter E-mail" id="email" required type="text">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" placeholder="Password" required>
+                        </div>
+                    </div>
+                
+                    <input type="submit" name="register-user-button" id="register-user-button">
+                    <p id="registerMessage"></p>
                 </form>
             </div>
         </div>
 
         <!-- Main Section -->
-        <main id="main-section" class="visible">
+        <main id="main-section" class="hidden">
             <!-- Aside Section -->
             <aside id="sidebar"></aside>
             <!-- Main Section for Posts -->

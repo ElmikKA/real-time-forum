@@ -1,6 +1,8 @@
 import { getUsers } from "../data/data.js";
 import { showPostSection } from "./../components/userProfileUI.js";
 
+
+//Login Logic
 export function login() {
     const users = getUsers();
     const nickname = document.getElementById('login-username').value;
@@ -43,3 +45,5 @@ function toggleVisibility(elementId, isVisible) {
     element.classList.toggle('visible', isVisible);
     element.classList.toggle('hidden', !isVisible);
 }
+
+//Register User Logic

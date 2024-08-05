@@ -4,6 +4,7 @@ import { addNewPostButtonListener, initializePosts } from "./components/postUI.j
 import { openProfileSection } from "./components/userProfileUI.js";
 import { dropDownMenu } from "./components/dropdownMenu.js"
 import { messengerWindow } from "./components/messengerWindow.js";
+import { registrationSection } from "./components/registrationUI.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -20,6 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('user-profile-button').addEventListener('click', (event) => {
         event.preventDefault();
         openProfileSection();
+    })
+
+    document.getElementById('registration-button').addEventListener('click', (event) => {
+        event.preventDefault();
+        registrationSection();
     })
 
     initializePosts();

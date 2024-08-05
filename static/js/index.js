@@ -35,16 +35,18 @@ function registerUser() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registerForm)
+        body: JSON.stringify(registerForm),
     })
         .then(response => response.json())
         .then(data => {
             if (data["register"] !== "success") {
                 messageDiv.innerHTML = data["message"]
+                console.log(data)
             } else {
                 toggleRegister()
             }
             console.log(data)
+            console.log(registerDiv)
         })
         .catch(error => console.log(error))
 }

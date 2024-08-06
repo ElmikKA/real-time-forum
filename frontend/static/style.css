@@ -42,6 +42,12 @@ dialog[open] {
 
 #logo-div {
     margin: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 50px;
 }
 
 #profile-and-add-new-button-div {
@@ -52,11 +58,11 @@ dialog[open] {
 
 #add-new-button, #dropdown-toggle{
     background: var(--button-color);
-    padding: 15px;
+    padding: 10px;
+    margin-right: 10px;
     border-radius: 10px;
     border: none;
-    font-size: 25px;
-    margin: 10px;
+    font-size: 20px;
     cursor: pointer;
     font-family: 'Jockey One', sans-serif;
 }
@@ -70,50 +76,58 @@ dialog[open] {
 }
 
 /* Login and Registration Section */
-.login-container {
+.login-container, #registration-container {
     justify-content: center;
     align-items: center;
     flex-grow: 1;
     height: 88vh;
 }
 
-#login-and-registration-section {
+#login-section {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     height: 500px;
     width: 700px;
     border-radius: 20px;
     background: var(--main-color);
-    justify-content: flex-start;
-    align-items: center;
-    padding-left: 50px;
+    color: white;
+}
+
+#login-section h1 {
+    font-size: 2.5rem;
 }
 
 form {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 label {
     margin-bottom: 10px;
     font-weight: bold;
     color: white;
-    font-size: 25px;
+    font-size: 20px;
 }
 
 input {
     margin-bottom: 20px;
-    padding: 10px;
+    padding: 5px;
     border: none;
     border-radius: 10px;
     width: 620px;
     background-color: var(--button-color);
-    font-size: 25px;
+    font-size: 20px;
 }
 
 .login-button, .registration-button {
     margin-right: 20px;   
     width: 180px;
-    height: 50px;
-    font-size: 30px;
+    height: 40px;
+    font-size: 25px;
     border-radius: 10px;
     border: none;
     background-color: var(--background-color);
@@ -163,7 +177,7 @@ input {
 }
 
 #sidebar h2 {
-    font-size: 2em;
+    font-size: 1.5em;
     margin-bottom: 10px;
     color: #8fe3cf;
 }
@@ -180,13 +194,13 @@ input {
 #sidebar li a{
     margin-bottom: 10px;
     margin-left: 10px;
-    font-size: 1.5em;
+    font-size: 1em;
     color: white;
     cursor: pointer;
 }
 
 #sidebar li a:hover {
-    font-size: 1.7em;
+    font-size: 1.2em;
 }
 
 .status {
@@ -209,7 +223,7 @@ input {
 #main-content {
     width: 85%;
     padding-left: 40px;
-    padding-top: 40px;
+    padding-top: 20px;
     padding-right: 20px;
     box-sizing: border-box;
 }
@@ -224,7 +238,7 @@ input {
 }
 
 #heading-class-for-main-content h2{
-    font-size: 35px;
+    font-size: 2em;
     color: white;
 }
 
@@ -238,7 +252,7 @@ input {
     background-color: transparent;
     color: white;
     border: none; 
-    font-size: 20px;
+    font-size: 1em;
     height: 60px;
     width: 100px;
     cursor: pointer;
@@ -247,14 +261,14 @@ input {
 
 /* Add a better animation */
 #filter-posts-button:hover {
-    font-size: 25px;
+    font-size: 1.2em;
 }
 
 /* Post Grid Layout Section */
 #post-grid-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 10px;
 }
 
 .card-layout {
@@ -293,6 +307,7 @@ input {
 }
 
 .show-profile h2 {
+    font-size: 1em;
     color: var(--secondary-color);
 }
 
@@ -312,14 +327,15 @@ input {
     display: flex;
     align-items: center;
     color: white;
-    font-size: 25px;
-    height: 40px;
+    font-size: 1.5em;
+    height: 35px;
     margin: 10px;
 } 
 
 .short-descriptsion-for-card {
     display: flex;
     margin: 10px;
+    font-size: 0.9em;
 }
 
 .like-dislike-comment-section {
@@ -339,7 +355,6 @@ input {
     border-radius: 20px;
     background: var(--background-color);
     color: white;
-
 }
 
 /* Post-Dialog */
@@ -377,18 +392,10 @@ input {
 }
 
 /* Create new Post */
-
-/* .create-new-post-container {
-    background: var(--background-color);
-    color: white;
-    border: none;
-} */
-
 .add-new-post-dialog {
     background: var(--background-color);
     color: white;
     border-radius: 20px;
-
 }
 
 #create-post-form > label{
@@ -464,29 +471,29 @@ input {
 
 #user-profile-picture-and-name h2 {
     margin-left: 20px;
-    font-size: 70px;
+    font-size: 50px;
     color: white;
 }
 
 #user-profile-picture {
-    height: 150px;
-    width: 150px;
+    height: 130px;
+    width: 130px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 90px;
+    font-size: 70px;
     color: white;
     background: var(--secondary-color);
 }
 
 #save-user-profile-changes-button {
-    width: 250px;
-    height: 60px;
+    width: 150px;
+    height: 40px;
     background: var(--button-color);
     margin: 10px;
     border-radius: 10px;
-    font-size: 30px;
+    font-size: 20px;
     font-family: 'Jockey One', sans-serif;
     border: none;
 }
@@ -494,6 +501,7 @@ input {
 #save-user-profile-changes-button:hover {
     background: var(--button-hover-color);
     border: none; 
+    color: white;
 }
 
 #save-user-profile-changes-button:active {
@@ -506,6 +514,10 @@ input {
     flex-direction: column;
 }
 
+#change-profile-information-form input {
+    width: 600px;
+}
+
 .form-group {
     display: flex;
     justify-content: space-between;
@@ -515,10 +527,6 @@ input {
     display: flex;
     flex-direction: column;
     width: 48%
-}
-
-.form-field > input {
-    width: 800px;
 }
 
 .password-field-for-user-profile {

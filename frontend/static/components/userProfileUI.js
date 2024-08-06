@@ -31,11 +31,13 @@ function hideUserProfileSection(userProfileSection) {
 
 function createInnerHTMLForUserProfile(userProfileSection) {
     const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    console.log(user)
+
     userProfileSection.innerHTML = `
         <div id="user-profile-header">
             <div id="user-profile-picture-and-name">
-                <div id="user-profile-picture">${user.nickname[0]}</div>
-                <h2>${user.nickname}</h2>
+                <div id="user-profile-picture">${user.username[0]}</div>
+                <h2>${user.username}</h2>
             </div>
             <button id="save-user-profile-changes-button">SAVE CHANGES</button>
         </div>
@@ -46,18 +48,18 @@ function createInnerHTMLForUserProfile(userProfileSection) {
                     <input type="email" id="user-email" name="user-email" placeholder="${user.email}">
                 </div>
                 <div class="form-field">
-                    <label for="user-nickname">Nickname</label>
-                    <input type="text" id="user-nickname" name="user-nickname" placeholder="${user.nickname}">
+                    <label for="user-username">Username</label>
+                    <input type="text" id="user-username" name="user-username" placeholder="${user.username}">
                 </div>
             </div>
             <div class="form-group">
                 <div class="form-field">
                     <label for="user-first-name">First Name</label>
-                    <input type="text" id="user-first-name" name="user-first-name" placeholder="${user.firstName}">
+                    <input type="text" id="user-first-name" name="user-first-name" placeholder="${user.fname}">
                 </div>
                 <div class="form-field">
                     <label for="user-last-name">Last Name</label>
-                    <input type="text" id="user-last-name" name="user-last-name" placeholder="${user.lastName}">
+                    <input type="text" id="user-last-name" name="user-last-name" placeholder="${user.lname}">
                 </div>
             </div>
             <div class="form-group">

@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jockey+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
     <div>
@@ -15,7 +15,7 @@
         <!-- Header Section -->
         <header id="header-section">
             <div id="logo-div">
-                <img src="src/img/logo.png" alt="logo-for-real-forum">
+                <img src="./static/assets/logo.png" alt="logo-for-real-forum" class="logo">
             </div>
             <div id="profile-and-add-new-button-div" class="hidden">
                 <button id="add-new-button">NEW POST</button>
@@ -31,7 +31,8 @@
         </header>
 
         <div class="login-container visible" id="login-container">
-            <div id="login-and-registration-section" class="visible">
+            <div id="login-section">
+                <h1>WELCOME TO THE GULAG!</h1>
                 <form id="login-form">
                     <label for="login-username">Username/Email</label>
                     <input type="text" id="login-username" name="login-username">
@@ -44,12 +45,15 @@
                         <button class="registration-button" id="registration-button" type="button">Register</button>
                     </div>
                 </form>
+                <p id="login-messages"></p>
             </div>
+        </div>
 
-            <div class="hidden" id="registration-section">
+        <div id="registration-container" class="hidden">
+            <div id="registration-section">
                 <h1>Register User</h1>
-                <form action="">
-
+                <form action="" id="registration-form">
+    
                     <div class="form-group">
                         <div class="form-field">
                             <label for="username">Username</label>
@@ -67,22 +71,22 @@
                             <input placeholder="Enter gender" id="gender" required type="text">
                         </div>
                         <div class="form-field">
-                            <label for="firstName">First Name</label>
-                            <input placeholder="Enter first name" id="firstName" required type="text">
+                            <label for="first-name">First Name</label>
+                            <input placeholder="Enter first name" id="first-name" required type="text">
                         </div>
                     </div>
-
+    
                     <div class="form-group">
                         <div class="form-field">
-                            <label for="lastName">Last Name</label>
-                            <input placeholder="Enter last name" id="lastName" required type="text">
+                            <label for="last-name">Last Name</label>
+                            <input placeholder="Enter last name" id="last-name" required type="text">
                         </div>
                         <div class="form-field">
                             <label for="email">E-mail</label>
                             <input placeholder="Enter E-mail" id="email" required type="text">
                         </div>
                     </div>
-
+    
                     <div class="form-group">
                         <div class="form-field">
                             <label for="password">Password</label>
@@ -120,7 +124,7 @@
         </main>
     </div>
 
-    <script src="script.js" type="module"></script>
+    <script src="./static/script.js" type="module"></script>
 </body>
 </html>
 

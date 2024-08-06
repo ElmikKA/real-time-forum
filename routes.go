@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 func Routes() http.Handler {
 	mux := http.NewServeMux()
@@ -19,7 +22,12 @@ func Routes() http.Handler {
 	mux.HandleFunc("/api/getMessages", getMessages)
 
 	// so js scripts works
-	fileServer := http.FileServer(http.Dir("./static"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("/static/", http.StripPrefix("/static", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set MIME type for .js files
+		if strings.HasSuffix(r.URL.Path, ".js") {
+			w.Header().Set("Content-Type", "application/javascript")
+		}
+		http.FileServer(http.Dir("./frontend/static")).ServeHTTP(w, r)
+	})))
 	return mux
 }

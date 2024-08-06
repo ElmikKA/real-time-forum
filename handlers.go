@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 // executes the single html file
 func Mainpage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
-		tmpl, err := template.ParseFiles("templates/index.html")
+		tmpl, err := template.ParseFiles(filepath.Join("frontend", "index.html"))
 		if err != nil {
 			fmt.Println("error parsing template")
 		}

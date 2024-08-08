@@ -785,3 +785,50 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 }
+
+func deletePost(w http.ResponseWriter, r *http.Request) {
+
+	responseData := make(map[string]interface{})
+
+	// checks if logged in
+	id, username, loggedIn := functions.CheckLogin(w, r)
+
+	responseData["loggedIn"] = loggedIn
+	responseData["id"] = id
+	responseData["username"] = username
+
+	// if not logged in sends responseData["loggedIn"] as false
+	if !loggedIn {
+		responseData["deletePost"] = "failure"
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+		return
+	}
+
+	if r.Method == "POST" {
+
+		postId := functions.Post{}
+		err := json.NewDecoder(r.Body).Decode(&postId)
+		if err != nil {
+			fmt.Println("error decoding delpost", err)
+			responseData["deletePost"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+
+		err = functions.DeletePost(postId.Id)
+		if err != nil {
+			fmt.Println("error delpost", err)
+			responseData["deletePost"] = "failure"
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(responseData)
+			return
+		}
+
+		responseData["deletePost"] = "success"
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+	}
+
+}

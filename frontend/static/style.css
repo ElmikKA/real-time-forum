@@ -56,7 +56,7 @@ dialog[open] {
     margin:20px;
 }
 
-#add-new-button, #dropdown-toggle{
+#add-new-button, #dropdown-toggle {
     background: var(--button-color);
     padding: 10px;
     margin-right: 10px;
@@ -65,6 +65,7 @@ dialog[open] {
     font-size: 20px;
     cursor: pointer;
     font-family: 'Jockey One', sans-serif;
+    transition: background-color 0.2s;
 }
 
 #add-new-button:hover, #dropdown-toggle:hover {
@@ -197,6 +198,7 @@ input {
     font-size: 1em;
     color: white;
     cursor: pointer;
+    transition: font-size 0.2s;
 }
 
 #sidebar li a:hover {
@@ -242,6 +244,7 @@ input {
     color: white;
 }
 
+/* Filter Post Button */
 #filter-posts-button-div {
     display: flex;
     align-items: center;
@@ -257,8 +260,9 @@ input {
     width: 100px;
     cursor: pointer;
     border-radius: 10px;
+    transition: font-size 0.3s;
 }
-
+/* TODO */
 /* Add a better animation */
 #filter-posts-button:hover {
     font-size: 1.2em;
@@ -284,6 +288,7 @@ input {
     background-color: var(--main-color);
     border-radius: 10px;
     z-index: 1;
+    transition: transform 0.2s;
 }  
 
 .card-layout .description-div {
@@ -338,16 +343,121 @@ input {
     font-size: 0.9em;
 }
 
+
+/* Like Dislike And Comment Section */
 .like-dislike-comment-section {
     display: flex;
 }
 
-.like-img, .dislike-img, .comment-img {
+.like-dislike-comment{
+    margin: 10px 20px;
     height: 30px;
-    width: 30px;
-    margin: 10px 30px 10px 10px;
-    z-index: 2;
+    width: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    transition: color 0.2s;
 }
+
+.like-dislike-comment:hover {
+    color: var(--button-color);
+}
+
+/* Like Button */
+.like-button {
+    background-image: url("./assets/Like.png");
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-size: contain;
+}
+
+.like-button-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35px;
+    width: 35px;
+    transition: background-color 0.3s, border-radius 0.5s;
+}
+
+.like-dislike-comment:hover .like-button-div {
+    border-radius: 10px;
+    background-color: var(--secondary-color);
+}
+
+#like-number {
+    transition: color 0.3s; /* Smooth transition for color change */
+}
+
+.like-dislike-comment:hover #like-number {
+    color: var(--button-color); /* Color change on hover */
+}
+
+/* Dislike Button */
+.dislike-button {
+    background-image: url("./assets/Dislike.png");
+    width: 24px; /* Set the appropriate width */
+    height: 24px; /* Set the appropriate height */
+    display: inline-block;
+    background-size: contain;
+}
+
+.dislike-button-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35px;
+    width: 35px;
+    transition: background-color 0.3s, border-radius 0.5s;
+}
+
+.like-dislike-comment:hover .dislike-button-div {
+    border-radius: 10px;
+    background-color: var(--secondary-color);
+}
+
+#dislike-number {
+    transition: color 0.3s;
+}
+
+.like-dislike-comment:hover #dislike-number {
+    color: var(--button-color);
+}
+
+/* Comment Button */
+.comment-button {
+    background-image: url("./assets/Comment.png");
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-size: contain;
+}
+
+.comment-button-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35px;
+    width: 35px;
+    transition: background-color 0.3s, border-radius 0.5s;
+}
+
+.like-dislike-comment:hover .comment-button-div {
+    border-radius: 10px;
+    background-color: var(--secondary-color);
+}
+
+#comment-number {
+    transition: color 0.3s;
+}
+
+.like-dislike-comment:hover #comment-number {
+    color: var(--button-color); 
+}
+
+
 
 .post-dialog {
     border: 4px solid var(--button-color);

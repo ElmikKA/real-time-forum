@@ -1,6 +1,7 @@
 import { getPosts } from "../data/data.js";
 import { openNewPostDialog, openFullPost } from "./postDialog.js";
 
+
 const postGridLayout = document.getElementById('post-grid-layout');
 const addNewPostButton = document.getElementById('add-new-button');
 
@@ -30,6 +31,8 @@ function displayPostOnDashboard(postObj) {
     return postLayout
 }
 
+//TODO
+//Add the like, dislike, comment numbers, or do you want to add it anyways? 
 function createInnerHTMLForDashboardCard(postLayout, postObj) {
     postLayout.innerHTML = `
         <div class="show-profile">
@@ -47,10 +50,27 @@ function createInnerHTMLForDashboardCard(postLayout, postObj) {
             </h3>
         </div>
         <div class="like-dislike-comment-section">
-            <img src="./src/img/Like.png" class="like-img">
-            <span>0</span>
-            <img src="./src/img/Dislike.png" class="dislike-img">
-            <img src="./src/img/Comment.png" class="comment-img">
+
+            <div class="like-dislike-comment">
+                <div class="like-button-div">
+                    <span class="like-button"></span>
+                </div>
+                <span id="like-number" class="">12</span>
+            </div>
+
+            <div class="like-dislike-comment">
+                <div class="dislike-button-div">
+                    <span class="dislike-button"></span>
+                </div>
+                <span id="dislike-number" class="">2</span>
+            </div>
+
+            <div class="like-dislike-comment">
+                <div class="comment-button-div">
+                    <span class="comment-button"></span>
+                </div>
+                <span id="comment-number" class="">7</span>
+            </div>
         </div>
     `;
 }

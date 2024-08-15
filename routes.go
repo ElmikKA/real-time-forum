@@ -20,6 +20,7 @@ func Routes() http.Handler {
 	mux.HandleFunc("/api/websocket", newWebsocket)
 	mux.HandleFunc("/api/getUsers", getUsers)
 	mux.HandleFunc("/api/getMessages", getMessages)
+	mux.HandleFunc("/api/deletePost", deletePost)
 
 	// so js scripts works
 	mux.Handle("/static/", http.StripPrefix("/static", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

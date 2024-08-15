@@ -101,3 +101,14 @@ func CreatePost(post Post) error {
 	}
 	return nil
 }
+
+func DeletePost(id int) error {
+	query := `DELETE FROM posts WHERE id = ?`
+
+	_, err := Db.Exec(query, id)
+	if err != nil {
+		fmt.Println("error deleting post", err)
+		return err
+	}
+	return nil
+}

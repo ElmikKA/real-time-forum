@@ -1,18 +1,24 @@
 import { login, logout, registerUser } from "./services/auth.js";
 import { showAllUsersAtSidebar } from "./components/sidebarUI.js";
-import { addNewPostButtonListener, initializePosts } from "./components/postUI.js";
+import { addNewPostButtonListener, initializePosts } from "./components/posts/posts.js";
 import { openProfileSection } from "./components/userProfileUI.js";
 import { dropDownMenu } from "./components/dropdownMenu.js";
 import { messengerWindow } from "./components/messengerWindow.js";
 import { showRegistrationSection} from "./services/auth.js";
-import { fetchAndStoreActiveUser } from "./services/user.js";
+import { showHeaderSection } from "./components/headerUI.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    document.getElementById('login-form').addEventListener('submit', (event) => {
+    showHeaderSection();
+    initializePosts();
+    addNewPostButtonListener();
+    showAllUsersAtSidebar();
+    dropDownMenu();
+    messengerWindow();
+
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevents form submission
-        login();
-        fetchAndStoreActiveUser();
+        await login();
     });
 
     document.getElementById('registration-form').addEventListener('submit', (event) => {
@@ -20,9 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
         registerUser();
     });
 
-    document.getElementById('logout-button').addEventListener('click', (event) => {
+    document.getElementById('logout-button').addEventListener('click', async (event) => {
         event.preventDefault();
-        logout();
+        await logout();
     });
 
     document.getElementById('user-profile-button').addEventListener('click', (event) => {
@@ -34,10 +40,4 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         showRegistrationSection();
     });
-
-    initializePosts();
-    addNewPostButtonListener();
-    showAllUsersAtSidebar();
-    dropDownMenu();
-    messengerWindow();
 });

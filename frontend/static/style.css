@@ -273,17 +273,17 @@ input {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 10px;
+    align-items: stretch;
 }
 
 .card-layout {
     padding: 10px;
     margin-bottom: 10px;
     display: flex;
-    word-break: break-all;
-    overflow-wrap: break-word;
     min-width: 350px;
     max-width: 550px;
-    max-height: 255px;
+    height: 250px;
+    box-sizing: border-box;
     flex-direction: column;
     background-color: var(--main-color);
     border-radius: 10px;
@@ -332,17 +332,16 @@ input {
     display: flex;
     align-items: center;
     color: white;
-    font-size: 1.5em;
-    height: 35px;
+    font-size: 1em;
     margin: 10px;
+    height: 100px;
 } 
 
-.short-descriptsion-for-card {
-    display: flex;
-    margin: 10px;
-    font-size: 0.9em;
+.title-div h1 {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    width: 100%; 
 }
-
 
 /* Like Dislike And Comment Section */
 .like-dislike-comment-section {
@@ -358,6 +357,14 @@ input {
     align-items: center;
     color: white;
     transition: color 0.2s;
+}
+
+.liked {
+    background-image: url("../static/assets/Like_hover.png");
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-size: contain;
 }
 
 .like-dislike-comment:hover {
@@ -388,18 +395,18 @@ input {
 }
 
 #like-number {
-    transition: color 0.3s; /* Smooth transition for color change */
+    transition: color 0.3s; 
 }
 
 .like-dislike-comment:hover #like-number {
-    color: var(--button-color); /* Color change on hover */
+    color: var(--button-color); 
 }
 
 /* Dislike Button */
 .dislike-button {
     background-image: url("./assets/Dislike.png");
-    width: 24px; /* Set the appropriate width */
-    height: 24px; /* Set the appropriate height */
+    width: 24px; 
+    height: 24px; 
     display: inline-block;
     background-size: contain;
 }
@@ -457,19 +464,18 @@ input {
     color: var(--button-color); 
 }
 
-
-
+/* Post-Dialog */
 .post-dialog {
     border: 4px solid var(--button-color);
-    width: 60%;
+    width: 1000px;
     border-radius: 20px;
     background: var(--background-color);
     color: white;
 }
 
-/* Post-Dialog */
 .post-dialog-content {
     padding: 20px;
+    width: 100%;
 }
 
 .author-and-close-button {
@@ -477,7 +483,16 @@ input {
     justify-content: space-between;
 }
 
-.profile-picture-on-post-dialog {
+.profile-picture-and-name {
+    display: flex;
+    align-items: center;
+}
+
+.profile-picture-and-name {
+    font-size: 20px;
+}
+
+.profile-picture-on-card {
     display: flex;
     align-items: center;
 }
@@ -496,9 +511,56 @@ input {
     cursor: pointer;
 }
 
-.profile-picture-and-name {
-    display: flex;
-    align-items: center;
+.post-title {
+    font-size: 50px;
+    height: 50px;
+    margin-top: 0px;
+}
+
+/* .comment-section {
+    border: 1px solid white;
+} */
+
+.comment-line {
+    width: 100%;
+    height: 1px;
+    background-color: white;
+    margin-bottom: 10px;
+}
+
+#comments-list {
+    margin-bottom: 10px;
+}
+
+.comment {
+    border-radius: 20px;
+    padding: 10px;
+    background-color: var(--main-color);
+}
+
+.comment-author {
+    color: var(--secondary-color);
+    font-size: 15px; 
+    margin-bottom: 10px;
+}
+
+.comment-content{
+
+}
+
+#add-comment-button {
+    background: var(--button-color);
+    padding: 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#add-comment-button:hover {
+    background: var(--button-hover-color);
 }
 
 /* Create new Post */
@@ -524,17 +586,9 @@ input {
     min-width: 200px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     border-radius: 5px;
-    z-index: 1;
-    left: -165px;
+    z-index: 999;
+    left: -190px;
     padding: 20px 10px;
-}
-
-.dropdown-menu a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    font-size: 30px;
 }
 
 .dropdown-menu > button {
@@ -542,14 +596,17 @@ input {
     padding: 12px 16px;
     text-decoration: none;
     display: block;
-    font-size: 30px;
+    font-size: 1em;
     border: none;
     background-color: transparent;
     cursor: pointer;
+    width: 100%;
+    text-align: left;
 }
 
-.dropdown-menu a:hover {
+.dropdown-menu button:hover {
     background-color: #f1f1f1;
+    border-radius: 20px;
 }
 
 .dropdown.show .dropdown-menu {
@@ -641,13 +698,6 @@ input {
 
 .password-field-for-user-profile {
     display: flex;
-}
-
-#show-password-button {
-    background: transparent;
-    border: none;
-    margin-top: 30px;
-    cursor: pointer;
 }
 
 /* Messenger Section */

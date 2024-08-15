@@ -3,9 +3,8 @@ import { showPostSection } from "./../components/userProfileUI.js";
 //TODO
 //Make the message after registerig or some failure bit more seeable
 
-
 //Login Logic
-export function login() {
+export async function login() {
     const message = document.getElementById('login-messages');
     const loginCredentials = {
         user: document.getElementById('login-username').value,
@@ -17,20 +16,22 @@ export function login() {
         return;
     }
 
-    fetch('/api/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginCredentials)
-    })
-    .then(response => {
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginCredentials)
+        });
+
         if(!response.ok) {
             throw new Error('Network response was not ok ' + response.statusText);
         }
-        return response.json();
-    })
-    .then(data => {
+
+        const data = await response.json();
+        console.log(data)
+        
         if(data.login !== 'success') {
             message.innerHTML = data.message;
         } else {
@@ -38,13 +39,11 @@ export function login() {
             hideLoginSection();
             clearLoginForm();
         }
-    })
-    .catch(error =>  {
+
+    } catch (error) {
         console.log('There was a problem with the login in:', error);
         message.innerHTML = "An error occured durning log in. Please try again."
-    })
-
-    console.log(JSON.parse(localStorage.getItem('loggedInUser')))
+    }
 }
 
 function clearLoginForm() {
@@ -70,31 +69,32 @@ function showLoginSection() {
 
 
 //Logout Logic
-export function logout() {
+export async function logout() {
     //If user logsout in user profile section, it reverses to post section
     const userProfileSection = document.getElementById('user-profile');
     if(userProfileSection.classList.contains('visible')) showPostSection(userProfileSection);
 
-    fetch('/api/logout', {
-        method: 'POST',
-    })
-    .then(response => {
+    try {
+        const response = await fetch('/api/logout', {
+            method: 'POST',
+        }); 
+
         if (!response.ok) {
             throw new Error('Network response was not ok ' + response.statusText);
         }
         console.log('Logout successful:', response);
-    })
-    .catch(error => {
-        console.error('There was a problem with the logout:', error);
-    });
 
-    //Cleares user session data
-    localStorage.removeItem('loggedInUser');
-    showLoginSection()
+        //Cleares user session data
+        localStorage.removeItem('loggedInUser');
+        showLoginSection()
+            
+    } catch(error) {
+        console.error('There was a problem with the logout:', error);
+    }
 }
 
 //Register User Logic
-export function registerUser() {
+export async function registerUser() {
     const registrationFormSection = document.getElementById('registration-form');
     const messageDiv = document.getElementById('registerMessage');
     const registerForm = {
@@ -112,20 +112,20 @@ export function registerUser() {
         return;
     }
 
-    fetch('/api/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type' : 'application/json'
-        },
-        body: JSON.stringify(registerForm),
-    })
-    .then(response => {
+    try {
+        const response = fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(registerForm),
+        });
+
         if(!response.ok) {
             throw new Error('Network response was not ok ' + response.statusText);
         }
-        return response.json();
-    })
-    .then(data => {
+        const data = await response.json();
+        
         if(data.register !== 'success') {
             messageDiv.innerHTML = data.message;
             console.log(data)
@@ -134,12 +134,10 @@ export function registerUser() {
             hideRegistrationSection();
         }
         console.log(data)
-    })
-    .catch(error =>  {
+    } catch(error) {
         console.log('There was a problem with the registration:', error);
         messageDiv.innerHTML = "An error occured durning registration. Please try again."
-    })
-            
+    }
 }
 
 export function showRegistrationSection() {
@@ -153,11 +151,9 @@ function hideRegistrationSection() {
 }   
 
 function validateForm(form) {
-    // Check if any of the required fields are empty
     if (!form.username || !form.age || !form.gender || !form.fname || !form.lname || !form.email || !form.password) {
         return false;
     }
-    // Additional validation rules can be added here
     return true;
 }
 

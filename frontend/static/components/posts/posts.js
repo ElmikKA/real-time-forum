@@ -1,5 +1,6 @@
-import { createPostFetch, changeLike, fetchPosts } from "../../services/api.js";
+import { createPostFetch, changeLike, fetchPosts, deletePostFetch } from "../../services/api.js";
 import { createInnerHTMLForDashboardCard, createInnerHTMLForFullPost, createInnerHTMLForNewPostDialog } from "./postsUI.js";
+import { showCustomConfirm } from "../customAlerts.js"
 
 const postGridLayout = document.getElementById('post-grid-layout');
 
@@ -16,9 +17,6 @@ export async function initializePosts() {
         postElement.addEventListener('click', () => openFullPost(post))
         postGridLayout.appendChild(postElement)
     })
-    // fetch();
-    // likePost();
-    
 }
 
 export function addNewPostButtonListener() {
@@ -34,21 +32,33 @@ function addPostToUI(post) {
 
 function displayPostOnDashboard(postObj) {
     const postLayout = document.createElement('div');
-    postLayout.innerHTML = "";
     postLayout.classList.add('card-layout');
     //For likes, dislikes
     postLayout.setAttribute('data-post-id', postObj.id)
     createInnerHTMLForDashboardCard(postLayout, postObj)
+
+    // Add a delete button to the post card
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.classList.add('delete-button');
+    deleteButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevents the click event from triggering other handlers
+        deletePost(postObj.id);
+    });
+
+    postLayout.appendChild(deleteButton);
+
     return postLayout
 }
 
 function openFullPost(post) {
-    const postDialog = document.createElement('dialog');
-    postDialog.classList.add('post-dialog');
-    createInnerHTMLForFullPost(postDialog, post)
+    const postDialogDiv = document.createElement('div');
+    postDialogDiv.classList.add('post-dialog-div');
+    createInnerHTMLForFullPost(postDialogDiv, post)
     //TODO:
     //Add the dialog to the main-content section
-    document.body.appendChild(postDialog);
+    const postDialog = document.querySelector(".post-dialog"); 
+    document.body.appendChild(postDialogDiv);
     postDialog.showModal();
 }
 
@@ -68,10 +78,21 @@ export function openNewPostDialog() {
     })
 }
 
-function deletePost() {
-    
-}
+async function deletePost(postId) {
+   showCustomConfirm("Are you sure you want to delete this post?", async (isConfirmed) => {
+        if(isConfirmed) {
+            await deletePostFetch(postId);
 
+            // Remove the post from the UI
+            const postElement = document.querySelector(`[data-post-id='${postId}']`);
+            if (postElement) {
+                postGridLayout.removeChild(postElement);
+            }
+
+            console.log(`Post with ID ${postId} has been deleted.`);
+            }
+   })
+}
 
 //TODO
 //Cant make two new posts starig straight
@@ -86,25 +107,21 @@ async function createNewPost() {
         content: content
     };
 
-    // Post the new post to the server
     await createPostFetch(newPost);
 
-    // Fetch the latest posts
     const data = await fetchPosts();
     if (!data) {
         return;
     }
     const posts = data.allPosts;
 
-    // Assuming the latest post is at the end of the array
     const latestPost = posts[posts.length - 1];
 
-    // Add the latest post to the UI
     addPostToUI(latestPost);
 }
 
-function likePost() {
-    document.querySelectorAll('.like-dislike-comment').forEach(section => section.addEventListener('click', (event) => {
+async function likePost() {
+    document.querySelectorAll('.like-dislike-comment').forEach(section => section.addEventListener('click', async (event) => {
         const actionElement = event.target.closest('.like-dislike-comment');
         if (actionElement) {
             event.stopPropagation();
@@ -112,7 +129,7 @@ function likePost() {
             const postId = postElement.getAttribute('data-post-id');
 
             if (actionType === 'like') {
-                changeLike(true, parseInt(postId), 0, 1);
+               await changeLike(true, parseInt(postId), 0, 1);
             } 
         }
     }));

@@ -22,11 +22,6 @@ function createDropDownMenu() {
         dropdown.innerHTML = `
             <button id="dropdown-toggle" class="dropdown-toggle">${user.username[0]}</button>
             <div class="dropdown-menu" id="dropdown-menu">
-                <div id="profile-picture-div">
-                    <div id>
-                    
-                    </div>
-                </div>
                 <button id="home-button">Home</button>
                 <button id="user-profile-button">Profile</button>
                 <button id="logout-button">Logout</button>

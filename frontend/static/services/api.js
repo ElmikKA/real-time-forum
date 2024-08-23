@@ -1,4 +1,4 @@
-import { hideLoginSection, clearLoginForm, showLoginSection, hideRegistrationSection } from "./auth";
+import { hideLoginSection, clearLoginForm, showLoginSection, hideRegistrationSection } from "./auth.js";
 
 export async function loginFetch(loginCredentials) {
     try {

@@ -1,6 +1,6 @@
 import { login, logout, registerUser } from "./services/auth.js";
 import { showAllUsersAtSidebar } from "./components/sidebarUI.js";
-import { addNewPostButtonListener, initializePosts } from "./components/posts/posts.js";
+import { addNewPostButtonListener, initializePosts } from "./components/posts.js";
 import { openProfileSection } from "./components/userProfileUI.js";
 import { dropDownMenu } from "./components/dropdownMenu.js";
 import { messengerWindow } from "./components/messengerWindow.js";

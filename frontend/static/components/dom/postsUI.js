@@ -87,7 +87,7 @@ export function createDashboardPosts(post) {
 
     const commentNumber = document.createElement('span');
     commentNumber.id = 'comment-number';
-    commentNumber.textContent = '7'; // TODO: replace '7' with the actual comment count if dynamic
+    commentNumber.textContent = '7'; // TODO: replace '7' with the actual comment count
 
     commentDiv.appendChild(commentButtonDiv);
     commentDiv.appendChild(commentNumber);

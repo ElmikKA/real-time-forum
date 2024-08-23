@@ -1,6 +1,6 @@
-import { createPostFetch, changeLike, fetchPosts, deletePostFetch } from "../../services/api.js";
-import { createInnerHTMLForDashboardCard, createInnerHTMLForFullPost, createInnerHTMLForNewPostDialog } from "./postsUI.js";
-import { showCustomConfirm } from "../customAlerts.js"
+import { createPostFetch, changeLike, fetchPosts, deletePostFetch } from "../services/api.js";
+import { showCustomConfirm } from "./customAlerts.js"
+import { createDashboardPosts, createFullPostDialog, createNewPostDialog } from "./dom/postsUI.js";
 
 const postGridLayout = document.getElementById('post-grid-layout');
 
@@ -13,7 +13,7 @@ export async function initializePosts() {
 
     posts.forEach(post => {
         console.log(post)
-        const postElement = displayPostOnDashboard(post)
+        const postElement = createDashboardPosts(post)
         postElement.addEventListener('click', () => openFullPost(post))
         postGridLayout.appendChild(postElement)
     })
@@ -25,65 +25,59 @@ export function addNewPostButtonListener() {
 }
 
 function addPostToUI(post) {
-    const postElement = displayPostOnDashboard(post);
+    const postElement = createDashboardPosts(post)
     postElement.addEventListener('click', () => openFullPost(post));
     postGridLayout.appendChild(postElement);
-}
-
-function displayPostOnDashboard(postObj) {
-    const postLayout = document.createElement('div');
-    postLayout.classList.add('card-layout');
-    //For likes, dislikes
-    postLayout.setAttribute('data-post-id', postObj.id)
-    createInnerHTMLForDashboardCard(postLayout, postObj)
-
-    // Add a delete button to the post card
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete';
-    deleteButton.classList.add('delete-button');
-    deleteButton.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevents the click event from triggering other handlers
-        deletePost(postObj.id);
-    });
-
-    postLayout.appendChild(deleteButton);
-
-    return postLayout
 }
 
 function openFullPost(post) {
     const postDialogDiv = document.createElement('div');
     postDialogDiv.classList.add('post-dialog-div');
-    createInnerHTMLForFullPost(postDialogDiv, post)
-    //TODO:
-    //Add the dialog to the main-content section
-    const postDialog = document.querySelector(".post-dialog"); 
+
+    const postDialog = document.createElement('dialog');
+    postDialog.classList.add('post-dialog');
+
+    const postContent = createFullPostDialog(post, postDialog);
+    postDialog.appendChild(postContent);
+
+    postDialogDiv.appendChild(postDialog);
+
     document.body.appendChild(postDialogDiv);
+
     postDialog.showModal();
 }
 
 export function openNewPostDialog() {
+
+    const createNewPostDialogDiv = document.createElement('div');
+    createNewPostDialogDiv.classList.add('create-new-post-dialog-div');
+
     const addNewPostDialog = document.createElement('dialog');
     addNewPostDialog.classList.add('add-new-post-dialog');
-    createInnerHTMLForNewPostDialog(addNewPostDialog);
+    
+    const postContent = createNewPostDialog(addNewPostDialog);
+    addNewPostDialog.appendChild(postContent);
+
+    createNewPostDialogDiv.appendChild(addNewPostDialog);
     //TODO:
     //Add the dialog to the main-content section
-    document.body.appendChild(addNewPostDialog);
+    document.body.appendChild(createNewPostDialogDiv);
     addNewPostDialog.showModal();
 
-    document.getElementById('create-post-form').addEventListener('submit', (event) => {
+    const form = postContent.querySelector('#create-post-form');
+    form.addEventListener('submit', (event) => {
         event.preventDefault();
-        createNewPost();
+        createNewPost(form);
         addNewPostDialog.close();
-    })
+        createNewPostDialogDiv.remove();
+    });
 }
 
-async function deletePost(postId) {
+export async function deletePost(postId) {
    showCustomConfirm("Are you sure you want to delete this post?", async (isConfirmed) => {
         if(isConfirmed) {
             await deletePostFetch(postId);
 
-            // Remove the post from the UI
             const postElement = document.querySelector(`[data-post-id='${postId}']`);
             if (postElement) {
                 postGridLayout.removeChild(postElement);
@@ -94,12 +88,10 @@ async function deletePost(postId) {
    })
 }
 
-//TODO
-//Cant make two new posts starig straight
-async function createNewPost() {
-    const title = document.getElementById('title').value;
-    const category = document.getElementById('description').value;
-    const content = document.getElementById('post-text').value;
+async function createNewPost(form) {
+    const title = form.title.value;
+    const category = form.category.value;
+    const content = form.content.value;
 
     const newPost = {
         title: title,
@@ -118,6 +110,8 @@ async function createNewPost() {
     const latestPost = posts[posts.length - 1];
 
     addPostToUI(latestPost);
+
+    form.reset();
 }
 
 async function likePost() {

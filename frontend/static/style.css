@@ -465,6 +465,16 @@ input {
 }
 
 /* Post-Dialog */
+.post-dialog-div {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
 .post-dialog {
     border: 4px solid var(--button-color);
     width: 1000px;
@@ -596,6 +606,8 @@ input {
     border-radius: 20px;
 }
 
+
+
 #create-post-form > label{
     color: white;
 }
@@ -605,6 +617,7 @@ input {
     display: inline-block;
 }
 
+/* DropDown Menu */
 .dropdown-menu {
     display: none;
     position: absolute;

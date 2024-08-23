@@ -1,7 +1,5 @@
 import { showPostSection } from "./../components/userProfileUI.js";
-
-//TODO
-//Make the message after registerig or some failure bit more seeable
+import { loginFetch, logoutFetch, registerFetch } from "./api.js";
 
 //Login Logic
 export async function login() {
@@ -16,37 +14,10 @@ export async function login() {
         return;
     }
 
-    try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(loginCredentials)
-        });
-
-        if(!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-        }
-
-        const data = await response.json();
-        console.log(data)
-        
-        if(data.login !== 'success') {
-            message.innerHTML = data.message;
-        } else {
-            localStorage.setItem('loggedInUser', JSON.stringify(data.user));
-            hideLoginSection();
-            clearLoginForm();
-        }
-
-    } catch (error) {
-        console.log('There was a problem with the login in:', error);
-        message.innerHTML = "An error occured durning log in. Please try again."
-    }
+    await loginFetch(loginCredentials);
 }
 
-function clearLoginForm() {
+export function clearLoginForm() {
     document.getElementById('login-username').value = '';
     document.getElementById('login-password').value = '';
 }
@@ -55,42 +26,24 @@ function validateLoginForm(credentials) {
     return credentials.user && credentials.password;
 }
 
-function hideLoginSection() {
+export function hideLoginSection() {
     toggleVisibility('profile-and-add-new-button-div', true);
     toggleVisibility('login-container', false);
     toggleVisibility('main-section', true);
 }
 
-function showLoginSection() {
+export function showLoginSection() {
     toggleVisibility('profile-and-add-new-button-div', false);
     toggleVisibility('login-container', true);
     toggleVisibility('main-section', false);
 }
-
 
 //Logout Logic
 export async function logout() {
     //If user logsout in user profile section, it reverses to post section
     const userProfileSection = document.getElementById('user-profile');
     if(userProfileSection.classList.contains('visible')) showPostSection(userProfileSection);
-
-    try {
-        const response = await fetch('/api/logout', {
-            method: 'POST',
-        }); 
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-        }
-        console.log('Logout successful:', response);
-
-        //Cleares user session data
-        localStorage.removeItem('loggedInUser');
-        showLoginSection()
-            
-    } catch(error) {
-        console.error('There was a problem with the logout:', error);
-    }
+    await logoutFetch();
 }
 
 //Register User Logic
@@ -112,32 +65,7 @@ export async function registerUser() {
         return;
     }
 
-    try {
-        const response = fetch('/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify(registerForm),
-        });
-
-        if(!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-        }
-        const data = await response.json();
-        
-        if(data.register !== 'success') {
-            messageDiv.innerHTML = data.message;
-            console.log(data)
-        } else {
-            messageDiv.innerHTML = "Registration successful!";
-            hideRegistrationSection();
-        }
-        console.log(data)
-    } catch(error) {
-        console.log('There was a problem with the registration:', error);
-        messageDiv.innerHTML = "An error occured durning registration. Please try again."
-    }
+    await registerFetch(registerForm);
 }
 
 export function showRegistrationSection() {
@@ -145,7 +73,7 @@ export function showRegistrationSection() {
     toggleVisibility("registration-container", true);
 }
 
-function hideRegistrationSection() {
+export function hideRegistrationSection() {
     toggleVisibility('login-container', true);
     toggleVisibility('registration-container', false);
 }   

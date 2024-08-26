@@ -465,7 +465,7 @@ input {
 }
 
 /* Post-Dialog */
-.post-dialog-div {
+.post-dialog-div, .create-new-post-dialog-div {
     position: fixed;
     top: 0;
     left: 0;
@@ -584,7 +584,7 @@ input {
     width: 88%;
 }
 
-#add-comment-button {
+#add-comment-button, .create-new-post-submit-button {
     background: var(--button-color);
     padding: 10px;
     margin-left: 10px;
@@ -595,15 +595,31 @@ input {
     transition: background-color 0.2s;
 }
 
-#add-comment-button:hover {
+#add-comment-button:hover, .create-new-post-submit-button:hover {
     background: var(--button-hover-color);
+    color: white;
 }
 
 /* Create new Post */
 .add-new-post-dialog {
     background: var(--background-color);
-    color: white;
     border-radius: 20px;
+    color: white;
+    border: 1px solid var(--button-color);
+}
+
+.header-and-close-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#create-post-form textarea {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background-color: var(--secondary-color);
+    border: none;
 }
 
 
@@ -626,7 +642,7 @@ input {
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     border-radius: 5px;
     z-index: 999;
-    left: -190px;
+    right: 30px;
     padding: 20px 10px;
 }
 

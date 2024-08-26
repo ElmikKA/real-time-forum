@@ -1,14 +1,18 @@
 import { login, logout, registerUser } from "./services/auth.js";
-import { showAllUsersAtSidebar } from "./components/sidebarUI.js";
+import { showAllUsersAtSidebar } from "./components/sidebar.js";
 import { addNewPostButtonListener, initializePosts } from "./components/posts.js";
-import { openProfileSection } from "./components/userProfileUI.js";
+import { openProfileSection } from "./components/userProfile.js";
 import { dropDownMenu } from "./components/dropdownMenu.js";
 import { messengerWindow } from "./components/messengerWindow.js";
 import { showRegistrationSection} from "./services/auth.js";
-import { showHeaderSection } from "./components/headerUI.js";
+import { showHeaderSection } from "./components/dom/headerUI.js";
+import { createLoginSection } from "./components/dom/loginSectionUI.js";
+import { createRegistrationSection } from "./components/dom/registrationSectionUI.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    createLoginSection();
+    createRegistrationSection();
     showHeaderSection();
     initializePosts();
     addNewPostButtonListener();

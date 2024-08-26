@@ -10,15 +10,16 @@ export async function loginFetch(loginCredentials) {
             body: JSON.stringify(loginCredentials)
         });
 
-        if(!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
-        console.log(data)
-        
-        if(data.login !== 'success') {
-            message.innerHTML = data.message;
+        console.log('Login response:', data);
+
+        if (data.login !== 'success') {
+            message.innerHTML = data.message || 'Login failed. Please check your credentials and try again.';
+            console.warn('Login failed:', data);
         } else {
             localStorage.setItem('loggedInUser', JSON.stringify(data.user));
             hideLoginSection();
@@ -26,37 +27,56 @@ export async function loginFetch(loginCredentials) {
         }
 
     } catch (error) {
-        console.log('There was a problem with the login in:', error);
-        message.innerHTML = "An error occured durning log in. Please try again."
+        if (error.name === 'TypeError') {
+            console.error('Network error or CORS issue:', error);
+            message.innerHTML = 'Network error. Please check your connection and try again.';
+        } else if (error.message.includes('Server error')) {
+            console.error('Server responded with an error:', error);
+            message.innerHTML = 'Server error. Please try again later.';
+        } else {
+            console.error('Unexpected error during login:', error);
+            message.innerHTML = 'An unexpected error occurred during login. Please try again.';
+        }
     }
 }
 
 export async function registerFetch (registerForm) {
+    const messageDiv = document.getElementById('registerMessage');
     try {
-        const response = fetch('/api/register', {
+        const response = await fetch('/api/register', {
             method: 'POST',
             headers: {
-                'Content-Type' : 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(registerForm),
         });
 
-        if(!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
+
         const data = await response.json();
-        
-        if(data.register !== 'success') {
-            messageDiv.innerHTML = data.message;
-            console.log(data)
+
+        if (data.register !== "success") {
+            messageDiv.innerHTML = data.message || 'Registration failed. Please try again.';
+            console.warn('Registration failed:', data);
         } else {
-            messageDiv.innerHTML = "Registration successful!";
             hideRegistrationSection();
         }
-        console.log(data)
-    } catch(error) {
-        console.log('There was a problem with the registration:', error);
-        messageDiv.innerHTML = "An error occured durning registration. Please try again."
+
+        console.log('Registration response:', data);
+
+    } catch (error) {
+        if (error.name === 'TypeError') {
+            console.error('Network error or CORS issue:', error);
+            messageDiv.innerHTML = 'Network error. Please check your connection and try again.';
+        } else if (error.message.includes('Server error')) {
+            console.error('Server responded with an error:', error);
+            messageDiv.innerHTML = 'Server error. Please try again later.';
+        } else {
+            console.error('Unexpected error:', error);
+            messageDiv.innerHTML = 'An unexpected error occurred. Please try again.';
+        }
     }
 }
 
@@ -64,19 +84,28 @@ export async function logoutFetch() {
     try {
         const response = await fetch('/api/logout', {
             method: 'POST',
-        }); 
+        });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
+
         console.log('Logout successful:', response);
 
-        //Cleares user session data
         localStorage.removeItem('loggedInUser');
-        showLoginSection()
-            
-    } catch(error) {
-        console.error('There was a problem with the logout:', error);
+        showLoginSection();
+
+    } catch (error) {
+        if (error.name === 'TypeError') {
+            console.error('Network error or CORS issue:', error);
+            alert('Network error. Please check your connection and try again.');
+        } else if (error.message.includes('Server error')) {
+            console.error('Server responded with an error:', error);
+            alert('Server error during logout. Please try again later.');
+        } else {
+            console.error('Unexpected error during logout:', error);
+            alert('An unexpected error occurred during logout. Please try again.');
+        }
     }
 }
 
@@ -90,13 +119,22 @@ export async function fetchPosts() {
              }
          });
          if (!response.ok) {
-             throw new Error('Network response was not ok ' + response.statusText);
-         }
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
          const data = await response.json();
          console.log(data)
          return data
      } catch (error) {
-         return console.log('There was a problem fetching posts:', error);
+        if (error.name === 'TypeError') {
+            console.error('Network error or CORS issue:', error);
+            alert('Network error. Please check your connection and try again.');
+        } else if (error.message.includes('Server error')) {
+            console.error('Server responded with an error:', error);
+            alert('Server error. The post could not be created. Please try again later.');
+        } else {
+            console.error('Unexpected error creating the post:', error);
+            alert('An unexpected error occurred while creating the post. Please try again.');
+        }
      }
 }
 
@@ -109,12 +147,26 @@ export async function createPostFetch(newPostData) {
             },
             body: JSON.stringify(newPostData)
         });
-        if(!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
-        console.log('The post was successfully created:', data)
-    } catch(error) {
-        console.log('There was a problem creating a new post:', error)
+
+        const data = await response.json();
+
+        console.log('The post was successfully created:', data);
+
+    } catch (error) {
+        if (error.name === 'TypeError') {
+            console.error('Network error or CORS issue:', error);
+            alert('Network error. Please check your connection and try again.');
+        } else if (error.message.includes('Server error')) {
+            console.error('Server responded with an error:', error);
+            alert('Server error. The post could not be created. Please try again later.');
+        } else {
+            console.error('Unexpected error creating the post:', error);
+            alert('An unexpected error occurred while creating the post. Please try again.');
+        }
     }
 }
 
@@ -140,15 +192,24 @@ export async function changeLike(type, post_id, comment_id, like) {
             body: JSON.stringify(likeData)
         });
 
-        if(!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
         console.log(data)
 
     } catch (error) {
-        console.error('There was a problem liking the post:', error);
+        if (error.name === 'TypeError') {
+            console.error('Network error or CORS issue:', error);
+            alert('Network error. Please check your connection and try again.');
+        } else if (error.message.includes('Server error')) {
+            console.error('Server responded with an error:', error);
+            alert('Server error. The post could not be created. Please try again later.');
+        } else {
+            console.error('Unexpected error creating the post:', error);
+            alert('An unexpected error occurred while creating the post. Please try again.');
+        }
     }
 }
 
@@ -166,15 +227,22 @@ export async function deletePostFetch(id) {
             body: JSON.stringify(postId)
         })
         
-        if(!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
-        
-        
         console.log("Post deleted")
         
     } catch(error) {
-        console.error('There was a problem deleting the post:', error);
+        if (error.name === 'TypeError') {
+            console.error('Network error or CORS issue:', error);
+            alert('Network error. Please check your connection and try again.');
+        } else if (error.message.includes('Server error')) {
+            console.error('Server responded with an error:', error);
+            alert('Server error. The post could not be created. Please try again later.');
+        } else {
+            console.error('Unexpected error creating the post:', error);
+            alert('An unexpected error occurred while creating the post. Please try again.');
+        }
     }
 }
 

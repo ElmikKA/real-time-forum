@@ -325,6 +325,7 @@ export function createNewPostDialog(dialogElement) {
 
     // submit button
     const submitButton = document.createElement('button');
+    submitButton.classList.add('create-new-post-submit-button');
     submitButton.type = 'submit';
     submitButton.textContent = 'Create New Post';
 

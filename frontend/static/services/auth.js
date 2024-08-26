@@ -1,4 +1,4 @@
-import { showPostSection } from "./../components/userProfileUI.js";
+import { showPostSection } from "../components/userProfile.js";
 import { loginFetch, logoutFetch, registerFetch } from "./api.js";
 
 //Login Logic
@@ -59,6 +59,8 @@ export async function registerUser() {
         email: registrationFormSection.querySelector('#email').value,
         password: registrationFormSection.querySelector('#password').value,
     }
+
+    console.log(registerForm);
 
     if(!validateForm(registerForm)) {
         messageDiv.innerHTML = "Please fill out all fields correctly.";

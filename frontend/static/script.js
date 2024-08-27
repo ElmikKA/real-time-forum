@@ -2,7 +2,6 @@ import { login, logout, registerUser } from "./services/auth.js";
 import { showAllUsersAtSidebar } from "./components/sidebar.js";
 import { addNewPostButtonListener, initializePosts } from "./components/posts.js";
 import { openProfileSection } from "./components/userProfile.js";
-import { dropDownMenu } from "./components/dropdownMenu.js";
 import { messengerWindow } from "./components/messengerWindow.js";
 import { showRegistrationSection} from "./services/auth.js";
 import { showHeaderSection } from "./components/dom/headerUI.js";
@@ -17,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initializePosts();
     addNewPostButtonListener();
     showAllUsersAtSidebar();
-    dropDownMenu();
     messengerWindow();
 
     document.getElementById('login-form').addEventListener('submit', async (event) => {

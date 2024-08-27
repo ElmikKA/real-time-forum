@@ -1,4 +1,5 @@
 import { hideLoginSection, clearLoginForm, showLoginSection, hideRegistrationSection } from "./auth.js";
+import { showCustomAlert } from "../components/customAlerts.js";
 
 export async function loginFetch(loginCredentials) {
     try {
@@ -18,7 +19,7 @@ export async function loginFetch(loginCredentials) {
         console.log('Login response:', data);
 
         if (data.login !== 'success') {
-            message.innerHTML = data.message || 'Login failed. Please check your credentials and try again.';
+            showCustomAlert(data.message || 'Login failed. Please check your credentials and try again.')
             console.warn('Login failed:', data);
         } else {
             localStorage.setItem('loggedInUser', JSON.stringify(data.user));
@@ -41,7 +42,6 @@ export async function loginFetch(loginCredentials) {
 }
 
 export async function registerFetch (registerForm) {
-    const messageDiv = document.getElementById('registerMessage');
     try {
         const response = await fetch('/api/register', {
             method: 'POST',
@@ -58,9 +58,11 @@ export async function registerFetch (registerForm) {
         const data = await response.json();
 
         if (data.register !== "success") {
-            messageDiv.innerHTML = data.message || 'Registration failed. Please try again.';
+            // messageDiv.innerHTML = data.message || 'Registration failed. Please try again.';
+            showCustomAlert(data.message || 'Registration failed. Please try again.');
             console.warn('Registration failed:', data);
         } else {
+            showCustomAlert('Registration was succesful!')
             hideRegistrationSection();
         }
 
@@ -136,6 +138,34 @@ export async function fetchPosts() {
             alert('An unexpected error occurred while creating the post. Please try again.');
         }
      }
+}
+
+export async function fetchPost(postId) {
+    const requestPost = { id: postId };
+
+    try {
+        const response = await fetch('/api/posts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestPost)
+        });
+
+        // Check if the response is ok (status code 200-299)
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
+
+        // Parse the response body as JSON
+        const data = await response.json();
+        console.log(data);
+        return data; // Return the data to be used by the calling code
+
+    } catch (error) {
+        console.error('Error fetching the post:', error);
+        throw error; // Re-throw the error so it can be handled by the caller
+    }
 }
 
 export async function createPostFetch(newPostData) {

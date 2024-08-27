@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-    <div>
+    <div class="">
 
         <!-- Header Section -->
         <header id="header-section"></header>
@@ -42,25 +42,12 @@
                  <div id="messenger-container" class="hidden"></div>
 
                  <div id="dialog-container" class="hidden"></div>
+
             </main>
         </main>
 
-        <!-- Custome Confirm -->
-        <div id="custom-confirm" class="modal hidden">
-            <div class="modal-content">
-                <p id="confirm-message">Are you sure?</p>
-                <button id="confirm-yes" class="modal-button">Yes</button>
-                <button id="confirm-no" class="modal-button">No</button>
-            </div>
-        </div>
-
-        <!-- Custome Alert -->
-        <div id="custom-alert" class="modal hidden">
-            <div class="modal-content">
-                <p id="alert-message">Alert message here</p>
-                <button id="alert-ok" class="modal-button">OK</button>
-            </div>
-        </div>
+        <div id="custom-confirm-message" class="confirm-modal hidden"></div>
+        <div id="custom-alert-message" class="alert-modal hidden"></div>
     </div>
 
     <script src="./static/script.js" type="module"></script>

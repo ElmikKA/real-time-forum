@@ -1,4 +1,4 @@
-import { createPostFetch, changeLike, fetchPosts, deletePostFetch } from "../services/api.js";
+import { createPostFetch, changeLike, fetchPosts, deletePostFetch, fetchPost } from "../services/api.js";
 import { showCustomConfirm } from "./customAlerts.js"
 import { createDashboardPosts, createFullPostDialog, createNewPostDialog } from "./dom/postsUI.js";
 
@@ -30,14 +30,16 @@ function addPostToUI(post) {
     postGridLayout.appendChild(postElement);
 }
 
-function openFullPost(post) {
+async function openFullPost(post) {
     const postDialogDiv = document.createElement('div');
     postDialogDiv.classList.add('post-dialog-div');
 
     const postDialog = document.createElement('dialog');
     postDialog.classList.add('post-dialog');
 
-    const postContent = createFullPostDialog(post, postDialog);
+    const onePost = await fetchPost(post.id);
+
+    const postContent = createFullPostDialog(onePost, postDialog);
     postDialog.appendChild(postContent);
 
     postDialogDiv.appendChild(postDialog);
@@ -84,7 +86,7 @@ export async function deletePost(postId) {
             }
 
             console.log(`Post with ID ${postId} has been deleted.`);
-            }
+        }
    })
 }
 

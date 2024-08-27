@@ -113,6 +113,8 @@ export function createDashboardPosts(post) {
 }
 
 export function createFullPostDialog(post, postDialog) {
+
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
    
     const postDialogContent = document.createElement('div');
     postDialogContent.classList.add('post-dialog-content');
@@ -128,12 +130,12 @@ export function createFullPostDialog(post, postDialog) {
     profilePictureDiv.classList.add('profile-picture-on-card');
 
     const profileInitial = document.createElement('p');
-    profileInitial.textContent = post.creator[0];
+    profileInitial.textContent = post.onePost.creator[0];
     profilePictureDiv.appendChild(profileInitial);
 
     const creatorName = document.createElement('h2');
     creatorName.classList.add('profile-name');
-    creatorName.textContent = post.creator;
+    creatorName.textContent = post.onePost.creator;
 
     profileAndNameDiv.appendChild(profilePictureDiv);
     profileAndNameDiv.appendChild(creatorName);
@@ -151,13 +153,18 @@ export function createFullPostDialog(post, postDialog) {
     //post title
     const postTitle = document.createElement('h1');
     postTitle.classList.add('post-title');
-    postTitle.textContent = post.title;
+    postTitle.textContent = post.onePost.title;
 
     //post content
     const postContent = document.createElement('p');
-    postContent.textContent = post.content;
+    postContent.textContent = post.onePost.content;
 
     //comment section
+    let comments = [
+        { id: 1, author: 'Alice', content: 'Great post!', likes: 2, dislikes: 0 },
+        { id: 2, author: 'Bob', content: 'I agree with Alice.', likes: 1, dislikes: 0 }
+    ];
+
     const commentSection = document.createElement('div');
     commentSection.classList.add('comment-section');
 
@@ -170,8 +177,10 @@ export function createFullPostDialog(post, postDialog) {
     const commentsList = document.createElement('div');
     commentsList.id = 'comments-list';
 
-    const commentElement = createCommentElement();
-    commentsList.appendChild(commentElement);
+    comments.forEach(comment => {
+        const commentElement = createCommentElement(comment);
+        commentsList.appendChild(commentElement);
+    })
 
     const newCommentDiv = document.createElement('div');
     newCommentDiv.classList.add('new-comment');
@@ -185,7 +194,20 @@ export function createFullPostDialog(post, postDialog) {
     addCommentButton.id = 'add-comment-button';
     addCommentButton.textContent = 'Comment';
     addCommentButton.addEventListener('click', () => {
-        //logic here
+        const commentText = newCommentInput.value;
+        if(commentText.trim()) {
+            const newComment = {
+                id: comments.length,
+                author: user.username,
+                content: commentText, 
+                likes: 0,
+                dislikes: 0,
+            }
+            comments.push(newComment);
+            const commentElement = createCommentElement(newComment);
+            commentsList.appendChild(commentElement);
+            newCommentInput.value = '';
+        }
     });
 
     newCommentDiv.appendChild(newCommentInput);
@@ -207,15 +229,15 @@ export function createFullPostDialog(post, postDialog) {
 function createCommentElement(comment) {
     const commentDiv = document.createElement('div');
     commentDiv.classList.add('comment');
-    commentDiv.setAttribute('data-comment-id', 1);
+    commentDiv.setAttribute('data-comment-id', comment.id);
 
     const commentAuthor = document.createElement('div');
     commentAuthor.classList.add('comment-author');
-    commentAuthor.textContent = 'Meelis Maalt';
+    commentAuthor.textContent = comment.author;
 
     const commentContent = document.createElement('div');
     commentContent.classList.add('comment-content');
-    commentContent.textContent = 'See on ikka raju postitus!';
+    commentContent.textContent = comment.content;
 
     const likeDislikeSection = document.createElement('div');
     likeDislikeSection.classList.add('like-dislike-comment-section');
@@ -233,7 +255,7 @@ function createCommentElement(comment) {
 
     const likeCount = document.createElement('span');
     likeCount.classList.add('like-count');
-    likeCount.textContent = 2;
+    likeCount.textContent = comment.likes;
 
     likeDiv.appendChild(likeButtonDiv);
     likeDiv.appendChild(likeCount);
@@ -251,7 +273,7 @@ function createCommentElement(comment) {
 
     const dislikeCount = document.createElement('span');
     dislikeCount.classList.add('dislike-count');
-    dislikeCount.textContent = 0;
+    dislikeCount.textContent = comment.dislikes;
 
     dislikeDiv.appendChild(dislikeButtonDiv);
     dislikeDiv.appendChild(dislikeCount);

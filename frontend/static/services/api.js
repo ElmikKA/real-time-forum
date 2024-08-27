@@ -152,19 +152,17 @@ export async function fetchPost(postId) {
             body: JSON.stringify(requestPost)
         });
 
-        // Check if the response is ok (status code 200-299)
         if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
 
-        // Parse the response body as JSON
         const data = await response.json();
-        console.log(data);
-        return data; // Return the data to be used by the calling code
+        console.log(data); 
+        return data; 
 
     } catch (error) {
         console.error('Error fetching the post:', error);
-        throw error; // Re-throw the error so it can be handled by the caller
+        throw error; 
     }
 }
 

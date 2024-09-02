@@ -17,11 +17,10 @@ window.onload = async function() {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
     
     if (loggedInUser) {
-        // Optionally, verify with the server that the session is still valid
-        await initializePosts(); // Load posts or other main content
-        showAllUsersAtSidebar(); // Initialize sidebar with users
-        hideLoginSection(); // Show the main app and hide the login
+        await initializePosts();
+        showAllUsersAtSidebar();
+        hideLoginSection();
     } else {
-        showLoginSection(); // Show the login section if no user is logged in
+        showLoginSection();
     }
 };

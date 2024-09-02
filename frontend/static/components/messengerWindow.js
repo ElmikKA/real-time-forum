@@ -1,14 +1,16 @@
-export function messengerWindow() {
-    initializeMessenger();
-}
+import { generateMessengerContainerInnerHTML } from "./dom/messengerWindowUI.js";
+import { toggleVisibility } from "../functions/toggleVisibility.js";
+import { fetchMessages } from "../services/api.js";
 
-function initializeMessenger() {
-    const sidebar = document.getElementById('sidebar');
-
+export function messengerWindow(sidebar, users, mySocket) {
     if (sidebar) {
-        sidebar.addEventListener('click', handleUserClick);
+        sidebar.addEventListener('click', async (event) => await handleUserClick(event, users, mySocket));
     }
 
+    initializeMessenger(mySocket) ;
+}
+
+function initializeMessenger(mySocket) {
     generateMessengerContainerInnerHTML();
 
     const closeMessengerButton = document.getElementById('close-messenger');
@@ -16,101 +18,77 @@ function initializeMessenger() {
     const messengerInput = document.getElementById('messenger-input');
 
     closeMessengerButton.addEventListener('click', closeMessenger);
-    sendMessageButton.addEventListener('click', sendMessage);
+    sendMessageButton.addEventListener('click', () => sendMessage(mySocket));
     messengerInput.addEventListener('keypress', (event) => {
         if (event.key === 'Enter') {
-            sendMessage();
+            sendMessage(mySocket);
         }
     });
 }
 
-function handleUserClick(event) {
-    if (event.target && event.target.closest('li.user')) {
-        const userElement = event.target.closest('li.user');
+async function handleUserClick(event, users, mySocket) {
+    const userElement = event.target.closest('li.user');
+    if(userElement) {
         const username = userElement.getAttribute('data-username');
-        openChat(username);
+        await requestMessages(username, users, mySocket);
     }
 }
 
-function openChat(username) {
+async function requestMessages(username, users){
+    try {
+        const user = users.filter(user => user.username === username);
+        if(user) {
+            const userId = user[0].id;
+            const data = await fetchMessages(userId);
+            openChat(data, username, user);
+        }
+    } catch(error) {
+        console.log('Error requesting messages:', error);
+    }
+}
+
+export function openChat(data, username, user) {
     const messengerContainer = document.getElementById('messenger-container');
     const messengerContent = document.getElementById('messenger-content');
     const chatWith = document.getElementById('chat-with');
 
+    const userId = user[0].id;
+
     chatWith.textContent = `${username}`;
+    chatWith.setAttribute('user-id', userId); 
     messengerContainer.classList.remove('hidden');
     messengerContainer.classList.add('visible');
 
-    // This is for testing
     messengerContent.innerHTML = '';
-    const chatHistory = [
-        { text: `Welcome to the chat with ${username}!`, sender: 'other' },
-        { text: `This is a placeholder message.`, sender: 'other' }
-    ];
-    chatHistory.forEach(message => {
-        const messageElement = document.createElement('div');
-        messageElement.textContent = message.text;
-        messageElement.className = `message ${message.sender}`;
-        messengerContent.appendChild(messageElement);
-    });
+    const chatHistory = data.messages;
 
-    messengerContent.scrollTop = messengerContent.scrollHeight; // Scroll to the bottom
+    if(!chatHistory || chatHistory.length === 0) {
+        appendMessage(messengerContent, 'No chats, but it maybe your first today!');
+        return;
+    } else {
+        chatHistory.forEach(messages => {
+            const messageSender = userId === messages.sender_id ? 'other' : 'user';
+            appendMessage(messengerContent, messages.message, messageSender);
+        });
+    }
+    messengerContent.scrollTop = messengerContent.scrollHeight;
 }
 
-function sendMessage() {
-    const messengerInput = document.getElementById('messenger-input');
-    const messengerContent = document.getElementById('messenger-content');
+function appendMessage(container, message, senderClass = '') {
+    const messageElement = document.createElement('div');
+        messageElement.textContent = message;
+        messageElement.className = `message ${senderClass}`;
+        container.appendChild(messageElement);
+}
 
+function sendMessage(mySocket) {
+    const messengerInput = document.getElementById('messenger-input');
     const messageText = messengerInput.value.trim();
-    if (messageText !== '') {
-        const messageElement = document.createElement('div');
-        messageElement.textContent = messageText;
-        messageElement.className = 'message user'; // User's message
-        messengerContent.appendChild(messageElement);
-        messengerInput.value = '';
-        messengerContent.scrollTop = messengerContent.scrollHeight;
+    if(messageText) {
+        mySocket.sendMessage(messageText);
     }
 }
 
 function closeMessenger() {
-    const messengerContainer = document.getElementById('messenger-container');
-    messengerContainer.classList.remove('visible');
-    messengerContainer.classList.add('hidden');
-}
-
-function generateMessengerContainerInnerHTML() {
-    const messengerContainer = document.getElementById('messenger-container');
-     const messengerHeader = document.createElement('div');
-     messengerHeader.id = 'messenger-header';
- 
-     const chatWithHeader = document.createElement('h3');
-     chatWithHeader.id = 'chat-with';
-     messengerHeader.appendChild(chatWithHeader);
- 
-     const closeMessengerButton = document.createElement('button');
-     closeMessengerButton.id = 'close-messenger';
-     closeMessengerButton.innerHTML = '&times;'; // Close button
-     messengerHeader.appendChild(closeMessengerButton);
- 
-     const messengerContent = document.createElement('div');
-     messengerContent.id = 'messenger-content';
- 
-     const inputContainer = document.createElement('div');
-     inputContainer.id = 'messenger-input-container';
- 
-     const messengerInput = document.createElement('input');
-     messengerInput.type = 'text';
-     messengerInput.id = 'messenger-input';
-     messengerInput.placeholder = 'Type a message...';
- 
-     const sendMessageButton = document.createElement('button');
-     sendMessageButton.id = 'send-message-button';
-     sendMessageButton.textContent = 'Send';
- 
-     inputContainer.appendChild(messengerInput);
-     inputContainer.appendChild(sendMessageButton);
- 
-     messengerContainer.appendChild(messengerHeader);
-     messengerContainer.appendChild(messengerContent);
-     messengerContainer.appendChild(inputContainer);
+    toggleVisibility('messenger-container', false);
 }

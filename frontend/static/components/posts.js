@@ -1,31 +1,34 @@
-import { createPostFetch, changeLike, fetchPosts, deletePostFetch, fetchPost } from "../services/api.js";
+import { createPostFetch, handleLikeDislike, fetchPosts, deletePostFetch, fetchPostById } from "../services/api.js";
 import { showCustomConfirm } from "./customAlerts.js"
 import { createDashboardPosts, createFullPostDialog, createNewPostDialog } from "./dom/postsUI.js";
 
 const postGridLayout = document.getElementById('post-grid-layout');
 
 export async function initializePosts() {
-    const data = await fetchPosts();
-    if(!data) {
+    const allPostData = await fetchPosts();
+    if(!allPostData) {
         return
     }
-    const posts = data.allPosts;
+    const posts = allPostData.allPosts;
+    postGridLayout.innerHTML = '';
 
-    posts.forEach(post => {
-        console.log(post)
-        const postElement = createDashboardPosts(post)
-        postElement.addEventListener('click', () => openFullPost(post))
-        postGridLayout.appendChild(postElement)
-    })
+    if(posts !== undefined) {
+        posts.forEach(post => {
+            const postElement = createDashboardPosts(post, allPostData)
+            postElement.addEventListener('click', () => openFullPost(post))
+            postGridLayout.appendChild(postElement)
+        })
+    }
+    addNewPostButtonListener(allPostData);
 }
 
-export function addNewPostButtonListener() {
+export function addNewPostButtonListener(allPostData) {
     const addNewPostButton = document.getElementById('add-new-button');
-    addNewPostButton.addEventListener('click', () => openNewPostDialog());
+    addNewPostButton.addEventListener('click', () => openNewPostDialog(allPostData));
 }
 
-function addPostToUI(post) {
-    const postElement = createDashboardPosts(post)
+function addPostToUI(post, allPostData) {
+    const postElement = createDashboardPosts(post, allPostData)
     postElement.addEventListener('click', () => openFullPost(post));
     postGridLayout.appendChild(postElement);
 }
@@ -37,7 +40,7 @@ async function openFullPost(post) {
     const postDialog = document.createElement('dialog');
     postDialog.classList.add('post-dialog');
 
-    const onePost = await fetchPost(post.id);
+    const onePost = await fetchPostById(post.id);
 
     const postContent = createFullPostDialog(onePost, postDialog);
     postDialog.appendChild(postContent);
@@ -46,10 +49,14 @@ async function openFullPost(post) {
 
     document.body.appendChild(postDialogDiv);
 
+    requestAnimationFrame(() => {
+        postDialog.scrollTop = 0;
+    });
+
     postDialog.showModal();
 }
 
-export function openNewPostDialog() {
+export function openNewPostDialog(allPostData) {
 
     const createNewPostDialogDiv = document.createElement('div');
     createNewPostDialogDiv.classList.add('create-new-post-dialog-div');
@@ -69,7 +76,7 @@ export function openNewPostDialog() {
     const form = postContent.querySelector('#create-post-form');
     form.addEventListener('submit', (event) => {
         event.preventDefault();
-        createNewPost(form);
+        createNewPost(form, allPostData);
         addNewPostDialog.close();
         createNewPostDialogDiv.remove();
     });
@@ -90,18 +97,12 @@ export async function deletePost(postId) {
    })
 }
 
-async function createNewPost(form) {
+async function createNewPost(form, allPostData) {
     const title = form.title.value;
     const category = form.category.value;
     const content = form.content.value;
 
-    const newPost = {
-        title: title,
-        category: category,
-        content: content
-    };
-
-    await createPostFetch(newPost);
+    await createPostFetch(title, category, content);
 
     const data = await fetchPosts();
     if (!data) {
@@ -111,22 +112,38 @@ async function createNewPost(form) {
 
     const latestPost = posts[posts.length - 1];
 
-    addPostToUI(latestPost);
+    addPostToUI(latestPost, allPostData);
 
     form.reset();
 }
 
-async function likePost() {
-    document.querySelectorAll('.like-dislike-comment').forEach(section => section.addEventListener('click', async (event) => {
-        const actionElement = event.target.closest('.like-dislike-comment');
-        if (actionElement) {
-            event.stopPropagation();
-            const actionType = actionElement.getAttribute('data-action');
-            const postId = postElement.getAttribute('data-post-id');
+export async function handleLikeDislikeUI(postId, likeNumber, likeButton) {
+    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    const post = await fetchPostById(postId);
 
-            if (actionType === 'like') {
-               await changeLike(true, parseInt(postId), 0, 1);
-            } 
+    let userHasLiked = false;
+
+    if(post.post_likes !== null) {
+        userHasLiked = post.post_likes.some(like => like.User_id === loggedInUser.id);
+    }
+
+    if (userHasLiked) {
+        return;
+    } else {
+        console.log('It comes here')
+        let newLikeCount = parseInt(likeNumber.textContent, 10) + 1;
+
+        try {
+            const response = await handleLikeDislike('post', post.id, 0, 1);
+            console.log(response)
+
+            likeNumber.textContent = newLikeCount;
+
+            likeButton.style.pointer = 'none';
+            likeButton.classList.add('liked');
+            likeButton.classList.remove('like-button');
+        } catch (error) {
+            console.error('Error liking the post:', error);
         }
-    }));
+    }
 }

@@ -1,5 +1,7 @@
-import { hideLoginSection, clearLoginForm, showLoginSection, hideRegistrationSection } from "./auth.js";
+import { hideLoginSection, clearLoginForm, hideRegistrationSection } from "./auth.js";
 import { showCustomAlert } from "../components/customAlerts.js";
+import { initializePosts } from "../components/posts.js";
+import { showAllUsersAtSidebar } from "../components/sidebar.js";
 
 export async function loginFetch(loginCredentials) {
     try {
@@ -22,24 +24,20 @@ export async function loginFetch(loginCredentials) {
             showCustomAlert(data.message || 'Login failed. Please check your credentials and try again.')
             console.warn('Login failed:', data);
         } else {
+            localStorage.clear();
             localStorage.setItem('loggedInUser', JSON.stringify(data.user));
             hideLoginSection();
+            await initializePosts();
+            showAllUsersAtSidebar();
             clearLoginForm();
         }
 
     } catch (error) {
-        if (error.name === 'TypeError') {
-            console.error('Network error or CORS issue:', error);
-            message.innerHTML = 'Network error. Please check your connection and try again.';
-        } else if (error.message.includes('Server error')) {
-            console.error('Server responded with an error:', error);
-            message.innerHTML = 'Server error. Please try again later.';
-        } else {
-            console.error('Unexpected error during login:', error);
-            message.innerHTML = 'An unexpected error occurred during login. Please try again.';
-        }
+        console.log('Unexpected error durning login:', error);
+        showCustomAlert('An unexpected error occurred during login. Please try again.');
     }
 }
+
 
 export async function registerFetch (registerForm) {
     try {
@@ -58,27 +56,15 @@ export async function registerFetch (registerForm) {
         const data = await response.json();
 
         if (data.register !== "success") {
-            // messageDiv.innerHTML = data.message || 'Registration failed. Please try again.';
             showCustomAlert(data.message || 'Registration failed. Please try again.');
-            console.warn('Registration failed:', data);
         } else {
             showCustomAlert('Registration was succesful!')
             hideRegistrationSection();
         }
 
-        console.log('Registration response:', data);
-
     } catch (error) {
-        if (error.name === 'TypeError') {
-            console.error('Network error or CORS issue:', error);
-            messageDiv.innerHTML = 'Network error. Please check your connection and try again.';
-        } else if (error.message.includes('Server error')) {
-            console.error('Server responded with an error:', error);
-            messageDiv.innerHTML = 'Server error. Please try again later.';
-        } else {
-            console.error('Unexpected error:', error);
-            messageDiv.innerHTML = 'An unexpected error occurred. Please try again.';
-        }
+        console.error('Unexpected error during registration:', error);
+        showCustomAlert('An unexpected error occurred durning registration. Please try again.');
     }
 }
 
@@ -87,60 +73,67 @@ export async function logoutFetch() {
         const response = await fetch('/api/logout', {
             method: 'POST',
         });
-
         if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
 
         console.log('Logout successful:', response);
-
-        localStorage.removeItem('loggedInUser');
-        showLoginSection();
-
     } catch (error) {
-        if (error.name === 'TypeError') {
-            console.error('Network error or CORS issue:', error);
-            alert('Network error. Please check your connection and try again.');
-        } else if (error.message.includes('Server error')) {
-            console.error('Server responded with an error:', error);
-            alert('Server error during logout. Please try again later.');
-        } else {
-            console.error('Unexpected error during logout:', error);
-            alert('An unexpected error occurred during logout. Please try again.');
-        }
+        console.error('Unexpected error during logout:', error);
+        alert('An unexpected error occurred during logout. Please try again.');
     }
 }
 
-// Fetching post information
+export async function createNewCommentFetch(commentData) {
+
+    try {
+        const response = await fetch('/api/newComment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(commentData)
+        });
+
+        if(!response.ok) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        return data;
+
+    } catch(error) {
+        console.error('Unexpected error creating new comment:', error);
+        showCustomAlert('An unexpected error occurred while creating new comment. Please try again.');
+    }
+}
+
 export async function fetchPosts() {
     try {
+
          const response = await fetch('/api/posts', {
              method: 'GET',
              headers: {
                  'Content-Type': 'application/json'
              }
          });
+         
          if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
+
          const data = await response.json();
-         console.log(data)
+
          return data
+
      } catch (error) {
-        if (error.name === 'TypeError') {
-            console.error('Network error or CORS issue:', error);
-            alert('Network error. Please check your connection and try again.');
-        } else if (error.message.includes('Server error')) {
-            console.error('Server responded with an error:', error);
-            alert('Server error. The post could not be created. Please try again later.');
-        } else {
-            console.error('Unexpected error creating the post:', error);
-            alert('An unexpected error occurred while creating the post. Please try again.');
-        }
+        console.error('Unexpected error fetching posts:', error);
+        showCustomAlert('An unexpected error occurred while fetching posts. Please try again.');
      }
 }
 
-export async function fetchPost(postId) {
+export async function fetchPostById(postId) {
     const requestPost = { id: postId };
 
     try {
@@ -157,23 +150,28 @@ export async function fetchPost(postId) {
         }
 
         const data = await response.json();
-        console.log(data); 
         return data; 
 
     } catch (error) {
-        console.error('Error fetching the post:', error);
-        throw error; 
+        console.error('Unexpected error fetching post by ID:', error);
+        showCustomAlert('An unexpected error occurred while fetching post by ID. Please try again.');
     }
 }
 
-export async function createPostFetch(newPostData) {
+export async function createPostFetch(title, category, content) {
+    const newPost = {
+        title: title,
+        category: category,
+        content: content
+    };
+
     try {
         const response = await fetch('/api/newPost', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(newPostData)
+            body: JSON.stringify(newPost)
         });
 
         if (!response.ok) {
@@ -185,24 +183,12 @@ export async function createPostFetch(newPostData) {
         console.log('The post was successfully created:', data);
 
     } catch (error) {
-        if (error.name === 'TypeError') {
-            console.error('Network error or CORS issue:', error);
-            alert('Network error. Please check your connection and try again.');
-        } else if (error.message.includes('Server error')) {
-            console.error('Server responded with an error:', error);
-            alert('Server error. The post could not be created. Please try again later.');
-        } else {
-            console.error('Unexpected error creating the post:', error);
-            alert('An unexpected error occurred while creating the post. Please try again.');
-        }
+        console.error('Unexpected error creating the post:', error);
+        showCustomAlert('An unexpected error occurred while creating the post. Please try again.');
     }
 }
 
-
-//TODO
-//This dosent add a like to the post
-//Need to be fixed
-export async function changeLike(type, post_id, comment_id, like) {
+export async function handleLikeDislike(type, post_id, comment_id, like) {
     const likeData = {
         post: type === "post" ? true : false,
         post_id: post_id,
@@ -212,7 +198,7 @@ export async function changeLike(type, post_id, comment_id, like) {
     }
 
     try {
-        const response = fetch('/api/changeLikes', {
+        const response = await fetch('/api/changeLikes', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -225,19 +211,12 @@ export async function changeLike(type, post_id, comment_id, like) {
         }
 
         const data = await response.json();
-        console.log(data)
 
-    } catch (error) {
-        if (error.name === 'TypeError') {
-            console.error('Network error or CORS issue:', error);
-            alert('Network error. Please check your connection and try again.');
-        } else if (error.message.includes('Server error')) {
-            console.error('Server responded with an error:', error);
-            alert('Server error. The post could not be created. Please try again later.');
-        } else {
-            console.error('Unexpected error creating the post:', error);
-            alert('An unexpected error occurred while creating the post. Please try again.');
-        }
+        return data;
+
+    } catch(error) {
+        console.error('Unexpected error handling likes and dislikes:', error);
+        showCustomAlert('An unexpected error occurred while handling likes and dislikes. Please try again.');
     }
 }
 
@@ -258,41 +237,41 @@ export async function deletePostFetch(id) {
         if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
+
         console.log("Post deleted")
         
     } catch(error) {
-        if (error.name === 'TypeError') {
-            console.error('Network error or CORS issue:', error);
-            alert('Network error. Please check your connection and try again.');
-        } else if (error.message.includes('Server error')) {
-            console.error('Server responded with an error:', error);
-            alert('Server error. The post could not be created. Please try again later.');
-        } else {
-            console.error('Unexpected error creating the post:', error);
-            alert('An unexpected error occurred while creating the post. Please try again.');
-        }
+        console.error('Unexpected error deleting the post:', error);
+        showCustomAlert('An unexpected error occurred while deleting the post. Please try again.');
     }
 }
 
-// export function fetch() {
+export async function fetchMessages(userId) {
+    const requestMessage = {
+        id: userId
+    };
 
-//     const requestPost = {
-//         id: 1,
-//     };
-    
-//     fetch('/api/posts', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify(requestPost)
-//     })
-//     .then(response => {
-//         if (!response.ok) {
-//             throw new Error('Network response was not ok ' + response.statusText);
-//         }
-//         return response.json();
-//     })
-//     .then(data => console.log(data))
-//     .catch(error => console.error('Error:', error));
-// }
+    try {
+        const response = await fetch('/api/getMessages', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestMessage)
+        });
+
+        console.log('response', response)
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        return data;
+
+    }catch(error) {
+        console.log('Error fetching messages:', error);
+        showCustomAlert('Failed to fetch messages. Please try again later.')
+    }
+}

@@ -1,8 +1,9 @@
+import { toggleVisibility } from "../functions/toggleVisibility.js";
+
 export function showCustomConfirm(message, callback) {
     const customeMessage = document.getElementById('custom-confirm-message');
 
-    customeMessage.classList.remove('hidden');
-    customeMessage.classList.add('visible');
+    toggleVisibility('custom-confirm-message', true)
 
     const modalContent = document.createElement('div');
     modalContent.classList.add('confirm-modal-content');
@@ -37,8 +38,7 @@ export function showCustomConfirm(message, callback) {
     };
 
     function closeConfirm(bool) {
-        customeMessage.classList.remove('visible');
-        customeMessage.classList.add('hidden');
+        toggleVisibility('custom-confirm-message', false);
         customeMessage.removeChild(modalContent)
         callback(bool);
     }
@@ -47,8 +47,7 @@ export function showCustomConfirm(message, callback) {
 export function showCustomAlert(message) {
     const customMessage = document.getElementById('custom-alert-message');
 
-    customMessage.classList.remove('hidden');
-    customMessage.classList.add('visible');
+    toggleVisibility('custom-alert-message', true)
 
     const modalContent = document.createElement('div');
     modalContent.classList.add('alert-modal-content');
@@ -82,8 +81,7 @@ export function showCustomAlert(message) {
     }, 5000);
 
     function closeAlert() {
-        customMessage.classList.remove('visible');
-        customMessage.classList.add('hidden');
+        toggleVisibility('custom-alert-message', false)
         
         setTimeout(() => {
             customMessage.removeChild(modalContent);

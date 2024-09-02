@@ -1,54 +1,39 @@
+import { login } from "../../services/auth.js";
+import { showRegistrationSection } from "../../services/auth.js";
+
 export function createLoginSection() {
     const loginContainer = document.getElementById('login-container');
 
     const loginSection = document.createElement('div');
     loginSection.id = 'login-section';
 
-    const welcomeHeader = document.createElement('h1');
-    welcomeHeader.textContent = 'WELCOME TO THE GULAG!';
+    const welcomeHeader = createElement('h1', 'WELCOME TO THE GULAG!');
     loginSection.appendChild(welcomeHeader);
 
     const loginForm = document.createElement('form');
     loginForm.id = 'login-form';
 
-    const usernameLabel = document.createElement('label');
-    usernameLabel.setAttribute('for', 'login-username');
-    usernameLabel.textContent = 'Username/Email';
+    const usernameInput = createInputField('login-username', 'Username/Email', 'text');
+    const passwordInput = createInputField('login-password', 'Password', 'password');
 
-    const usernameInput = document.createElement('input');
-    usernameInput.type = 'text';
-    usernameInput.id = 'login-username';
-    usernameInput.name = 'login-username';
+    loginForm.appendChild(usernameInput.label);
+    loginForm.appendChild(usernameInput.input);
 
-    loginForm.appendChild(usernameLabel);
-    loginForm.appendChild(usernameInput);
-
-    const passwordLabel = document.createElement('label');
-    passwordLabel.setAttribute('for', 'login-password');
-    passwordLabel.textContent = 'Password';
-
-    const passwordInput = document.createElement('input');
-    passwordInput.type = 'password';
-    passwordInput.id = 'login-password';
-    passwordInput.name = 'login-password';
-
-    loginForm.appendChild(passwordLabel);
-    loginForm.appendChild(passwordInput);
+    loginForm.appendChild(passwordInput.label);
+    loginForm.appendChild(passwordInput.input);
 
     const buttonsDiv = document.createElement('div');
     buttonsDiv.classList.add('login-and-registration-buttons');
 
-    const loginButton = document.createElement('button');
-    loginButton.type = 'submit';
-    loginButton.classList.add('login-button');
-    loginButton.id = 'login-button';
-    loginButton.textContent = 'LogIn';
+    const loginButton = createButton('login-button', 'LogIn', 'submit', async (event) => {
+        event.preventDefault();
+        await login();
+    });
 
-    const registrationButton = document.createElement('button');
-    registrationButton.type = 'button';
-    registrationButton.classList.add('registration-button');
-    registrationButton.id = 'registration-button';
-    registrationButton.textContent = 'Register';
+    const registrationButton = createButton('registration-button', 'Register', 'button', (event) => {
+        event.preventDefault();
+        showRegistrationSection();
+    });
 
     buttonsDiv.appendChild(loginButton);
     buttonsDiv.appendChild(registrationButton);
@@ -62,4 +47,32 @@ export function createLoginSection() {
     loginSection.appendChild(loginMessages);
 
     loginContainer.appendChild(loginSection);
+}
+
+function createElement(tag, textContent = '', className = '') {
+    const element = document.createElement(tag);
+    if (textContent) element.textContent = textContent;
+    if (className) element.classList.add(className);
+    return element;
+}
+
+function createInputField(id, labelText, type) {
+    const label = createElement('label', labelText);
+    label.setAttribute('for', id);
+
+    const input = document.createElement('input');
+    input.type = type;
+    input.id = id;
+    input.name = id;
+
+    return { label, input };
+}
+
+function createButton(id, textContent, type, onClickHandler) {
+    const button = createElement('button', textContent);
+    button.type = type;
+    button.id = id;
+    button.classList.add(id);
+    button.addEventListener('click', onClickHandler);
+    return button;
 }

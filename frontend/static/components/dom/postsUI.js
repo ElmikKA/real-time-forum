@@ -1,12 +1,13 @@
-import { deletePost } from "../posts.js";
+import { deletePost, handleLikeDislikeUI } from "../posts.js";
+import { createNewCommentFetch} from "../../services/api.js";
 
-export function createDashboardPosts(post) {
-    //layout for posts
+export function createDashboardPosts(post, allPostData) {
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+
     const postLayout = document.createElement('div');
     postLayout.classList.add('card-layout');
     postLayout.setAttribute('data-post-id', post.id);
 
-    //profile section
     const showProfileDiv = document.createElement('div');
     showProfileDiv.classList.add('show-profile');
 
@@ -24,7 +25,6 @@ export function createDashboardPosts(post) {
     showProfileDiv.appendChild(profilePictureDiv);
     showProfileDiv.appendChild(profileName);
 
-    // title section
     const titleDiv = document.createElement('div');
     titleDiv.classList.add('title-div');
 
@@ -32,11 +32,9 @@ export function createDashboardPosts(post) {
     title.textContent = post.title;
     titleDiv.appendChild(title);
 
-    // like/dislike/comment section
     const likeDislikeCommentSection = document.createElement('div');
     likeDislikeCommentSection.classList.add('like-dislike-comment-section');
 
-    // like button
     const likeDiv = document.createElement('div');
     likeDiv.classList.add('like-dislike-comment');
     likeDiv.setAttribute('data-action', 'like');
@@ -45,18 +43,36 @@ export function createDashboardPosts(post) {
     likeButtonDiv.classList.add('like-button-div');
 
     const likeButton = document.createElement('span');
-    likeButton.classList.add('like-button');
-    likeButton.id = 'like-button';
+    let userHasLiked = false;
+
+    console.log('allPostData',allPostData)
+    console.log('One post', post)
+    if(allPostData.post_likes !== null) {
+        userHasLiked = allPostData.post_likes.some(like => like.User_id === user.id && like.Post_id === post.id);
+    }
+
+    if(userHasLiked) {
+        likeButton.style.pointerEvents = 'none';
+        likeButton.classList.add('liked');
+    } else {
+        likeButton.classList.add('like-button');
+        likeButton.id = 'like-button';
+    }
+    
     likeButtonDiv.appendChild(likeButton);
 
     const likeNumber = document.createElement('span');
     likeNumber.id = 'like-number';
     likeNumber.textContent = post.likes;
 
+    likeButtonDiv.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        await handleLikeDislikeUI(post.id, likeNumber, likeButton) 
+    });
+
     likeDiv.appendChild(likeButtonDiv);
     likeDiv.appendChild(likeNumber);
 
-    // dislike button
     const dislikeDiv = document.createElement('div');
     dislikeDiv.classList.add('like-dislike-comment');
 
@@ -74,7 +90,6 @@ export function createDashboardPosts(post) {
     dislikeDiv.appendChild(dislikeButtonDiv);
     dislikeDiv.appendChild(dislikeNumber);
 
-    //comment button
     const commentDiv = document.createElement('div');
     commentDiv.classList.add('like-dislike-comment');
 
@@ -87,7 +102,7 @@ export function createDashboardPosts(post) {
 
     const commentNumber = document.createElement('span');
     commentNumber.id = 'comment-number';
-    commentNumber.textContent = '7'; // TODO: replace '7' with the actual comment count
+    commentNumber.textContent = post; // TODO: replace '7' with the actual comment count
 
     commentDiv.appendChild(commentButtonDiv);
     commentDiv.appendChild(commentNumber);
@@ -95,9 +110,9 @@ export function createDashboardPosts(post) {
     const deleteButton = document.createElement('button');
     deleteButton.textContent = 'Delete';
     deleteButton.classList.add('delete-button');
-    deleteButton.addEventListener('click', (event) => {
+    deleteButton.addEventListener('click', async (event) => {
         event.stopPropagation();
-        deletePost(post.id);
+        await deletePost(post.id);
     });
 
     likeDislikeCommentSection.appendChild(likeDiv);
@@ -115,6 +130,7 @@ export function createDashboardPosts(post) {
 export function createFullPostDialog(post, postDialog) {
 
     const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    console.log(user);
    
     const postDialogContent = document.createElement('div');
     postDialogContent.classList.add('post-dialog-content');
@@ -160,11 +176,6 @@ export function createFullPostDialog(post, postDialog) {
     postContent.textContent = post.onePost.content;
 
     //comment section
-    let comments = [
-        { id: 1, author: 'Alice', content: 'Great post!', likes: 2, dislikes: 0 },
-        { id: 2, author: 'Bob', content: 'I agree with Alice.', likes: 1, dislikes: 0 }
-    ];
-
     const commentSection = document.createElement('div');
     commentSection.classList.add('comment-section');
 
@@ -177,10 +188,18 @@ export function createFullPostDialog(post, postDialog) {
     const commentsList = document.createElement('div');
     commentsList.id = 'comments-list';
 
-    comments.forEach(comment => {
-        const commentElement = createCommentElement(comment);
-        commentsList.appendChild(commentElement);
-    })
+    if (Array.isArray(post.comments)) {
+        if (post.comments.length > 0) {
+            post.comments.forEach(comment => {
+                const commentElement = createCommentElement(comment);
+                commentsList.appendChild(commentElement);
+            });
+        } else {
+            const noCommentsMessage = document.createElement('p');
+            noCommentsMessage.textContent = 'No comments yet. Be the first to comment!';
+            commentsList.appendChild(noCommentsMessage);
+        }
+    }
 
     const newCommentDiv = document.createElement('div');
     newCommentDiv.classList.add('new-comment');
@@ -193,20 +212,21 @@ export function createFullPostDialog(post, postDialog) {
     const addCommentButton = document.createElement('button');
     addCommentButton.id = 'add-comment-button';
     addCommentButton.textContent = 'Comment';
-    addCommentButton.addEventListener('click', () => {
-        const commentText = newCommentInput.value;
-        if(commentText.trim()) {
+    addCommentButton.addEventListener('click', async () => {
+        const commentText = newCommentInput.value.trim();
+        if (commentText) {
             const newComment = {
-                id: comments.length,
-                author: user.username,
                 content: commentText, 
-                likes: 0,
-                dislikes: 0,
+                post_id: post.onePost.id,
+            };
+            try {
+                const createdComment = await createNewCommentFetch(newComment);
+                const commentElement = createCommentElement(createdComment.comment);
+                commentsList.appendChild(commentElement);
+                newCommentInput.value = '';
+            } catch (error) {
+                console.error('Error creating new comment:', error);
             }
-            comments.push(newComment);
-            const commentElement = createCommentElement(newComment);
-            commentsList.appendChild(commentElement);
-            newCommentInput.value = '';
         }
     });
 
@@ -233,7 +253,7 @@ function createCommentElement(comment) {
 
     const commentAuthor = document.createElement('div');
     commentAuthor.classList.add('comment-author');
-    commentAuthor.textContent = comment.author;
+    commentAuthor.textContent = comment.creator;
 
     const commentContent = document.createElement('div');
     commentContent.classList.add('comment-content');
@@ -370,6 +390,3 @@ function closeDialog(dialogElement) {
     dialogElement.close();
     postDialogDiv.remove();
 }
-
-
-

@@ -1,3 +1,5 @@
+import { registerUser } from "../../services/auth.js";
+
 export function createRegistrationSection() {
     const registrationContainer = document.getElementById('registration-container');
 
@@ -59,6 +61,12 @@ export function createRegistrationSection() {
     submitButton.type = 'submit';
     submitButton.name = 'register-user-button';
     submitButton.id = 'register-user-button';
+
+    registrationForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        registerUser();
+    });
+
     registrationForm.appendChild(submitButton);
 
     const registerMessage = document.createElement('p');

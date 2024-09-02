@@ -1,12 +1,39 @@
-import { getUsers } from "../data/data.js";
+import { MySocket } from '../services/MySocket.js';
+import { messengerWindow } from './messengerWindow.js';
+
+let mySocket = null;
 
 export function showAllUsersAtSidebar() {
-    const siderbar = document.getElementById('sidebar')
-    const userLists = generateUsersList();
-    generateSidebarContent(siderbar, userLists)
+    if (!mySocket) {
+        mySocket = new MySocket();
+        mySocket.connectSocket();
+    }
 }
 
-function generateSidebarContent(sidebar, userLists) {
+export function closeWebSocket() {
+    if(mySocket) {
+        mySocket.closeSocket();
+    }
+}
+
+export function addWebsocketUsers(usersData) {
+    console.log("Adding users", usersData);
+    const users = usersData.allUsers;
+    console.log(users);
+
+    const onlineUsers = users.filter(user => user.online === "1");
+    const offlineUsers = users.filter(user => user.online !== "1");
+
+    const onlineListItems = onlineUsers.map(user => createUserListItem(user, true));
+    const offlineListItems = offlineUsers.map(user => createUserListItem(user, false));
+
+    const sidebar = document.getElementById('sidebar');
+    generateSidebarContent(sidebar, { online: onlineListItems, offline: offlineListItems }, users);
+}
+
+function generateSidebarContent(sidebar, userLists, users) {
+    sidebar.innerHTML = '';
+
     const onlineSection = document.createElement('div');
     onlineSection.classList.add('section');
 
@@ -31,34 +58,21 @@ function generateSidebarContent(sidebar, userLists) {
 
     sidebar.appendChild(onlineSection);
     sidebar.appendChild(offlineSection);
-}
 
-function generateUsersList() {
-    const users = getUsers();
-
-    const onlineUsers = users.filter(user => user.online);
-    const offlineUsers = users.filter(user => !user.online);
-
-    const onlineListItems = onlineUsers.map(user => createUserListItem(user, true));
-    const offlineListItems = offlineUsers.map(user => createUserListItem(user, false));
-
-    return {
-        online: onlineListItems,
-        offline: offlineListItems
-    };
+    messengerWindow(sidebar, users, mySocket);
 }
 
 function createUserListItem(user, isOnline) {
     const listItem = document.createElement('li');
     listItem.classList.add('user');
-    listItem.setAttribute('data-username', user.nickname);
+    listItem.setAttribute('data-username', user.username);
 
     const statusSpan = document.createElement('span');
     statusSpan.classList.add('status', isOnline ? 'online' : 'offline');
     listItem.appendChild(statusSpan);
 
     const userLink = document.createElement('a');
-    userLink.textContent = user.nickname;
+    userLink.textContent = user.username;
     listItem.appendChild(userLink);
 
     return listItem;

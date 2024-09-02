@@ -1,5 +1,7 @@
 import { showPostSection } from "../components/userProfile.js";
 import { loginFetch, logoutFetch, registerFetch } from "./api.js";
+import { toggleVisibility } from '../functions/toggleVisibility.js'
+import { closeWebSocket } from "../components/sidebar.js";
 
 //Login Logic
 export async function login() {
@@ -14,7 +16,11 @@ export async function login() {
         return;
     }
 
-    await loginFetch(loginCredentials);
+    try {
+        await loginFetch(loginCredentials);
+    } catch(error) {
+        console.log('Login failed:', error)
+    }
 }
 
 export function clearLoginForm() {
@@ -43,7 +49,15 @@ export async function logout() {
     //If user logsout in user profile section, it reverses to post section
     const userProfileSection = document.getElementById('user-profile');
     if(userProfileSection.classList.contains('visible')) showPostSection(userProfileSection);
-    await logoutFetch();
+
+    try {
+        closeWebSocket();
+        showLoginSection();
+        await logoutFetch();
+    } catch(error) {
+        console.log('Logout failed:', error);
+    }
+    localStorage.removeItem('loggedInUser');
 }
 
 //Register User Logic
@@ -67,7 +81,11 @@ export async function registerUser() {
         return;
     }
 
-    await registerFetch(registerForm);
+    try {
+        await registerFetch(registerForm);
+    } catch(error) {
+        console.log('Registration failed:', error)
+    }
 }
 
 export function showRegistrationSection() {
@@ -85,10 +103,4 @@ function validateForm(form) {
         return false;
     }
     return true;
-}
-
-function toggleVisibility(elementId, isVisible) {
-    const element = document.getElementById(elementId);
-    element.classList.toggle('visible', isVisible);
-    element.classList.toggle('hidden', !isVisible);
 }

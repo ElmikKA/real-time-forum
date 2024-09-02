@@ -1,6 +1,22 @@
+import { logout } from "../../services/auth.js";
+import { openProfileSection } from "../userProfile.js";
+import { toggleVisibility } from "../../functions/toggleVisibility.js";
+
 export function showHeaderSection() {
     const headerSection = document.getElementById('header-section');
     
+    const logoDiv = createLogoDiv();
+    const profileAndAddNewButtonDiv = createProfileAndAddNewButtonDiv();
+
+    headerSection.appendChild(logoDiv);
+    headerSection.appendChild(profileAndAddNewButtonDiv);
+
+    if (localStorage.getItem('loggedInUser')) {
+        createDropDownMenu();
+    }
+}
+
+function createLogoDiv() {
     const logoDiv = document.createElement('div');
     logoDiv.id = 'logo-div';
 
@@ -11,70 +27,85 @@ export function showHeaderSection() {
 
     logoDiv.appendChild(image);
 
+    return logoDiv;
+}
+
+function createProfileAndAddNewButtonDiv() {
     const profileAndAddNewButtonDiv = document.createElement('div');
     profileAndAddNewButtonDiv.id = 'profile-and-add-new-button-div';
     profileAndAddNewButtonDiv.classList.add('hidden');
 
-    const addNewButton = document.createElement('button');
-    addNewButton.id = 'add-new-button';
-    addNewButton.textContent = 'NEW POST';
+    const addNewPostButton = document.createElement('button');
+    addNewPostButton.id = 'add-new-button';
+    addNewPostButton.textContent = 'NEW POST';
 
     const dropdown = document.createElement('div');
     dropdown.id = 'dropdown';
 
-    profileAndAddNewButtonDiv.appendChild(addNewButton);
+    profileAndAddNewButtonDiv.appendChild(addNewPostButton);
     profileAndAddNewButtonDiv.appendChild(dropdown);
 
-    headerSection.appendChild(logoDiv);
-    headerSection.appendChild(profileAndAddNewButtonDiv);
-
-    createDropDownMenu();
+    return profileAndAddNewButtonDiv;
 }
 
 function createDropDownMenu() {
     const dropdown = document.getElementById('dropdown');
-    const user = JSON.parse(localStorage.getItem('loggedInUser'))
-    if(user) {
-        const dropdownToggle = document.createElement('button');
-        dropdownToggle.id = 'dropdown-toggle';
-        dropdownToggle.classList.add('dropdown-toggle');
-        dropdownToggle.textContent = user.username[0];
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
 
-        const dropdownMenu = document.createElement('div');
-        dropdownMenu.classList.add('dropdown-menu');
-        dropdownMenu.id = 'dropdown-menu';
+    const dropdownToggle = createDropdownToggle(user);
+    const dropdownMenu = createDropdownMenu();
 
-        const homeButton = document.createElement('button');
-        homeButton.id = 'home-button';
-        homeButton.textContent = 'Home';
+    dropdown.appendChild(dropdownToggle);
+    dropdown.appendChild(dropdownMenu);
 
-        const profileButton = document.createElement('button');
-        profileButton.id = 'user-profile-button';
-        profileButton.textContent = 'Profile';
-
-        const logoutButton = document.createElement('button');
-        logoutButton.id = 'logout-button';
-        logoutButton.textContent = 'Logout';
-
-        dropdownMenu.appendChild(homeButton);
-        dropdownMenu.appendChild(profileButton);
-        dropdownMenu.appendChild(logoutButton);
-
-        dropdown.appendChild(dropdownToggle);
-        dropdown.appendChild(dropdownMenu);
-
-        dropDownMenu();
-    }
+    initializeDropDownMenuEvents();
 }
 
-export function dropDownMenu() {
+function createDropdownToggle(user) {
+    const dropdownToggle = document.createElement('button');
+    dropdownToggle.id = 'dropdown-toggle';
+    dropdownToggle.classList.add('dropdown-toggle');
+    dropdownToggle.textContent = user.username[0];
+    return dropdownToggle;
+}
+
+function createDropdownMenu() {
+    const dropdownMenu = document.createElement('div');
+    dropdownMenu.classList.add('dropdown-menu');
+    dropdownMenu.id = 'dropdown-menu';
+
+    const homeButton = createButton('home-button', 'Home', showHomePage);
+    const profileButton = createButton('user-profile-button', 'Profile', openProfileSection);
+    const logoutButton = createButton('logout-button', 'Logout', async () => {
+        await logout();
+    });
+
+    dropdownMenu.appendChild(homeButton);
+    dropdownMenu.appendChild(profileButton);
+    dropdownMenu.appendChild(logoutButton);
+
+    return dropdownMenu;
+}
+
+function createButton(id, textContent, onClickHandler) {
+    const button = document.createElement('button');
+    button.id = id;
+    button.textContent = textContent;
+    button.addEventListener('click', (event) => {
+        event.preventDefault();
+        onClickHandler();
+    });
+    return button;
+}
+
+function initializeDropDownMenuEvents() {
     const dropdownToggle = document.getElementById('dropdown-toggle');
     const dropdownMenu = document.getElementById('dropdown-menu');
-    const homeButton = document.getElementById('home-button');
+
     dropdownToggle.addEventListener('click', () => {
         dropdownMenu.classList.toggle('show');
     });
-    // Close the dropdown if the user clicks outside of it
+
     window.addEventListener('click', (event) => {
         if (!event.target.matches('.dropdown-toggle')) {
             if (dropdownMenu.classList.contains('show')) {
@@ -82,15 +113,9 @@ export function dropDownMenu() {
             }
         }
     });
-
-    homeButton.addEventListener('click', () => {
-        toggleVisiblity(true, "main-content-for-posts");
-        toggleVisiblity(false, "user-profile");
-    })
 }
 
-function toggleVisiblity(isVisible, elementId) {
-    const element = document.getElementById(elementId);
-    element.classList.toggle('visible', isVisible);
-    element.classList.toggle('hidden', !isVisible);
+function showHomePage() {
+    toggleVisibility("main-content-for-posts", true);
+    toggleVisibility("user-profile", false);
 }

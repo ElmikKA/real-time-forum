@@ -2,6 +2,7 @@ import { hideLoginSection, clearLoginForm, hideRegistrationSection } from "./aut
 import { showCustomAlert } from "../components/customAlerts.js";
 import { initializePosts } from "../components/posts.js";
 import { showAllUsersAtSidebar } from "../components/sidebar.js";
+// import { ifLoginSuccessful } from "../components/dom/headerUI.js";
 
 export async function loginFetch(loginCredentials) {
     try {
@@ -30,7 +31,11 @@ export async function loginFetch(loginCredentials) {
             await initializePosts();
             showAllUsersAtSidebar();
             clearLoginForm();
+
+            console.log(localStorage)
         }
+
+        return data;
 
     } catch (error) {
         console.log('Unexpected error durning login:', error);
@@ -76,7 +81,8 @@ export async function logoutFetch() {
         if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
-
+        localStorage.removeItem('loggedInUser');
+        console.log(localStorage)
         console.log('Logout successful:', response);
     } catch (error) {
         console.error('Unexpected error during logout:', error);
@@ -197,6 +203,8 @@ export async function handleLikeDislike(type, post_id, comment_id, like) {
         like: like,
     }
 
+    console.log(likeData)
+
     try {
         const response = await fetch('/api/changeLikes', {
             method: 'POST',
@@ -259,8 +267,6 @@ export async function fetchMessages(userId) {
             },
             body: JSON.stringify(requestMessage)
         });
-
-        console.log('response', response)
 
         if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);

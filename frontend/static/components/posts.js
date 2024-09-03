@@ -24,7 +24,10 @@ export async function initializePosts() {
 
 export function addNewPostButtonListener(allPostData) {
     const addNewPostButton = document.getElementById('add-new-button');
-    addNewPostButton.addEventListener('click', () => openNewPostDialog(allPostData));
+    if(addNewPostButton) {
+        
+        addNewPostButton.addEventListener('click', () => openNewPostDialog(allPostData));
+    }
 }
 
 function addPostToUI(post, allPostData) {
@@ -130,11 +133,10 @@ export async function handleLikeDislikeUI(postId, likeNumber, likeButton) {
     if (userHasLiked) {
         return;
     } else {
-        console.log('It comes here')
         let newLikeCount = parseInt(likeNumber.textContent, 10) + 1;
 
         try {
-            const response = await handleLikeDislike('post', post.id, 0, 1);
+            const response = await handleLikeDislike('post', postId, 0, 1);
             console.log(response)
 
             likeNumber.textContent = newLikeCount;

@@ -2,14 +2,20 @@ import { logout } from "../../services/auth.js";
 import { openProfileSection } from "../userProfile.js";
 import { toggleVisibility } from "../../functions/toggleVisibility.js";
 
-export function showHeaderSection() {
+export function showInitialHeaderSection() {
     const headerSection = document.getElementById('header-section');
     
     const logoDiv = createLogoDiv();
-    const profileAndAddNewButtonDiv = createProfileAndAddNewButtonDiv();
-
     headerSection.appendChild(logoDiv);
+}
+
+export function setupPostLoginHeaderSection() {
+    const headerSection = document.getElementById('header-section');
+
+    const profileAndAddNewButtonDiv = createProfileAndAddNewButtonDiv();
     headerSection.appendChild(profileAndAddNewButtonDiv);
+
+    toggleVisibility('profile-and-add-new-button-div', true)
 
     if (localStorage.getItem('loggedInUser')) {
         createDropDownMenu();
@@ -33,7 +39,7 @@ function createLogoDiv() {
 function createProfileAndAddNewButtonDiv() {
     const profileAndAddNewButtonDiv = document.createElement('div');
     profileAndAddNewButtonDiv.id = 'profile-and-add-new-button-div';
-    profileAndAddNewButtonDiv.classList.add('hidden');
+    profileAndAddNewButtonDiv.classList.add('visible');
 
     const addNewPostButton = document.createElement('button');
     addNewPostButton.id = 'add-new-button';

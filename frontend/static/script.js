@@ -1,5 +1,5 @@
 import { showAllUsersAtSidebar } from "./components/sidebar.js";
-import { showHeaderSection } from "./components/dom/headerUI.js";
+import { showInitialHeaderSection } from "./components/dom/headerUI.js";
 
 import { createLoginSection } from "./components/dom/loginSectionUI.js";
 import { createRegistrationSection } from "./components/dom/registrationSectionUI.js";
@@ -10,7 +10,7 @@ import { initializePosts } from "./components/posts.js";
 document.addEventListener('DOMContentLoaded', () => {
     createLoginSection();
     createRegistrationSection();
-    showHeaderSection();
+    showInitialHeaderSection();
 });
 
 window.onload = async function() {

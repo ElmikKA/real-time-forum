@@ -45,8 +45,6 @@ export function createDashboardPosts(post, allPostData) {
     const likeButton = document.createElement('span');
     let userHasLiked = false;
 
-    console.log('allPostData',allPostData)
-    console.log('One post', post)
     if(allPostData.post_likes !== null) {
         userHasLiked = allPostData.post_likes.some(like => like.User_id === user.id && like.Post_id === post.id);
     }
@@ -102,7 +100,7 @@ export function createDashboardPosts(post, allPostData) {
 
     const commentNumber = document.createElement('span');
     commentNumber.id = 'comment-number';
-    commentNumber.textContent = post; // TODO: replace '7' with the actual comment count
+    commentNumber.textContent = '0'; // TODO: replace '7' with the actual comment count
 
     commentDiv.appendChild(commentButtonDiv);
     commentDiv.appendChild(commentNumber);

@@ -17,9 +17,8 @@ export function closeWebSocket() {
 }
 
 export function addWebsocketUsers(usersData) {
-    console.log("Adding users", usersData);
+    // console.log("Adding users", usersData);
     const users = usersData.allUsers;
-    console.log(users);
 
     const onlineUsers = users.filter(user => user.online === "1");
     const offlineUsers = users.filter(user => user.online !== "1");
@@ -42,6 +41,7 @@ function generateSidebarContent(sidebar, userLists, users) {
     onlineSection.appendChild(onlineHeader);
 
     const onlineList = document.createElement('ul');
+    onlineList.className = 'online-list';
     userLists.online.forEach(userItem => onlineList.appendChild(userItem));
     onlineSection.appendChild(onlineList);
 
@@ -53,6 +53,7 @@ function generateSidebarContent(sidebar, userLists, users) {
     offlineSection.appendChild(offlineHeader);
 
     const offlineList = document.createElement('ul');
+    offlineList.className = 'offline-list';
     userLists.offline.forEach(userItem => offlineList.appendChild(userItem));
     offlineSection.appendChild(offlineList);
 

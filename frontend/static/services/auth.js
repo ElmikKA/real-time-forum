@@ -2,6 +2,7 @@ import { showPostSection } from "../components/userProfile.js";
 import { loginFetch, logoutFetch, registerFetch } from "./api.js";
 import { toggleVisibility } from '../functions/toggleVisibility.js'
 import { closeWebSocket } from "../components/sidebar.js";
+import { setupPostLoginHeaderSection } from "../components/dom/headerUI.js";
 
 //Login Logic
 export async function login() {
@@ -17,7 +18,13 @@ export async function login() {
     }
 
     try {
-        await loginFetch(loginCredentials);
+       const loginSuccess = await loginFetch(loginCredentials);
+       console.log(loginSuccess)
+
+       if(loginSuccess) {
+        setupPostLoginHeaderSection();
+       }
+
     } catch(error) {
         console.log('Login failed:', error)
     }
@@ -33,20 +40,17 @@ function validateLoginForm(credentials) {
 }
 
 export function hideLoginSection() {
-    toggleVisibility('profile-and-add-new-button-div', true);
     toggleVisibility('login-container', false);
     toggleVisibility('main-section', true);
 }
 
 export function showLoginSection() {
-    toggleVisibility('profile-and-add-new-button-div', false);
     toggleVisibility('login-container', true);
     toggleVisibility('main-section', false);
 }
 
 //Logout Logic
 export async function logout() {
-    //If user logsout in user profile section, it reverses to post section
     const userProfileSection = document.getElementById('user-profile');
     if(userProfileSection.classList.contains('visible')) showPostSection(userProfileSection);
 
@@ -57,7 +61,6 @@ export async function logout() {
     } catch(error) {
         console.log('Logout failed:', error);
     }
-    localStorage.removeItem('loggedInUser');
 }
 
 //Register User Logic
@@ -73,8 +76,6 @@ export async function registerUser() {
         email: registrationFormSection.querySelector('#email').value,
         password: registrationFormSection.querySelector('#password').value,
     }
-
-    console.log(registerForm);
 
     if(!validateForm(registerForm)) {
         messageDiv.innerHTML = "Please fill out all fields correctly.";

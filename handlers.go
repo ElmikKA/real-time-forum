@@ -833,3 +833,17 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func checkLoggedIn(w http.ResponseWriter, r *http.Request) {
+
+	responseData := make(map[string]interface{})
+
+	if r.Method == "GET" {
+		id, username, loggedIn := functions.CheckLogin(w, r)
+		responseData["loggedIn"] = loggedIn
+		responseData["id"] = id
+		responseData["username"] = username
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+	}
+}

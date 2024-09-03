@@ -18,9 +18,11 @@ export class MySocket {
             try {
                 const responseData = JSON.parse(event.data);
                 console.log("Received response:", responseData);
-        
-                if (responseData.message) {
-                   this.displayNewMessages(responseData);
+
+                if (responseData.statusChange) {
+                    this.changeOnlineStatues(responseData)
+                } else {
+                    this.displayNewMessages(responseData);
                 }
 
             } catch (e) {
@@ -32,15 +34,33 @@ export class MySocket {
             if (event.wasClean) {
                 console.log("Socket closed cleanly.");
             } else {
-                console.log('Connection unexpectedly closed. Reconnecting...');
+                console.log('Connection unexpectedly closed.');
                 this.mysocket = null;
-                setTimeout(() => this.connectSocket(), 5000); // Attempt to reconnect after 5 seconds
             }
         };
 
         this.mysocket.onerror = (event) => {
             console.error(`WebSocket error:`, event);
         };
+    }
+
+    changeOnlineStatues(responseData) {
+        const username = responseData.statusChangeUsername;
+        const newStatus = responseData.online;
+        
+        const userItem = document.querySelector(`li[data-username="${username}"]`);
+
+        if(userItem) {
+            const statusSpan = userItem.querySelector('.status');
+
+            if(newStatus === 1) {
+                statusSpan.classList.remove('offline');
+                statusSpan.classList.add('online');
+            } else if(newStatus === -1) {
+                statusSpan.classList.remove('online');
+                statusSpan.classList.add('offline');
+            }
+        }
     }
 
     displayNewMessages(responseData) {  
@@ -98,25 +118,3 @@ export class MySocket {
         }
     }
 }
-
-
-
-
-    // displayNewMessage(responseData) {
-    //     console.log("Displaying message:", responseData);
-
-    //     const messageContainer = document.getElementById('messageContainer');
-    //     const msgDiv = messageContainer.querySelector('#messageDiv');
-
-    //     if (responseData.username === responseData.written_by || msgDiv.classList.contains(responseData.written_by)) {
-    //         let div = document.createElement('div');
-    //         div.textContent = responseData.message;
-    //         div.style.float = responseData.receiver ? 'left' : 'right';
-
-    //         msgDiv.appendChild(div);
-    //         msgDiv.appendChild(document.createElement('br'));
-    //     } else {
-    //         console.log("Private message not opened, send a notification. Sent by:", responseData.written_by);
-    //         // Add code to send notification (pending)
-    //     }
-    // }

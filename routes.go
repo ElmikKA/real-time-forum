@@ -21,6 +21,7 @@ func Routes() http.Handler {
 	mux.HandleFunc("/api/getUsers", getUsers)
 	mux.HandleFunc("/api/getMessages", getMessages)
 	mux.HandleFunc("/api/deletePost", deletePost)
+	mux.HandleFunc("/api/checkLoggedIn", checkLoggedIn)
 
 	// so js scripts works
 	mux.Handle("/static/", http.StripPrefix("/static", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

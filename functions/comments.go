@@ -29,15 +29,16 @@ func GetComments(id int, user_id int) ([]Comment, error) {
 		c.post_id,
 		c.content,
 		c.created_at,
-		(SELECT COUNT(*) FROM comment_likes WHERE post_id = c.id AND like = 1) AS likes,
-		(SELECT COUNT(*) FROM comment_likes WHERE post_id = c.id AND like = -1) AS dislikes,
-		EXISTS (SELECT 1 FROM comment_likes WHERE user_id = ? AND like = 1) AS liked,
-		EXISTS (SELECT 1 FROM comment_likes WHERE user_id = ? AND like = -1) AS disliked
+		(SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND like = 1) AS likes,
+		(SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND like = -1) AS dislikes,
+		EXISTS (SELECT 1 FROM comment_likes WHERE user_id = ? AND comment_id = c.id AND like = 1) AS liked,
+		EXISTS (SELECT 1 FROM comment_likes WHERE user_id = ? AND comment_id = c.id AND like = -1) AS disliked
 	FROM 
 		comments c 
 	LEFT JOIN 
 		users u ON c.user_id = u.id
-	WHERE post_id = ?
+	WHERE 
+		c.post_id = ?
 	`
 	var comments []Comment
 	rows, err := Db.Query(query, user_id, user_id, id)

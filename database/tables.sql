@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS comment_likes (
     post_id INTEGER NOT NULL,
     comment_id INTEGER NOT NULL,
     like integer,
-    PRIMARY KEY (post_id, user_id)
+    PRIMARY KEY (post_id, user_id, comment_id)
 );
 
 CREATE TABLE IF NOT EXISTS messages (

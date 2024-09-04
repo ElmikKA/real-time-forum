@@ -19,16 +19,16 @@ export async function initializePosts() {
             postGridLayout.appendChild(postElement)
         })
     }
-    addNewPostButtonListener(allPostData);
 }
 
-export function addNewPostButtonListener(allPostData) {
-    const addNewPostButton = document.getElementById('add-new-button');
-    if(addNewPostButton) {
+// export function addNewPostButtonListener(allPostData) {
+//     console.log('call me once')
+//     const addNewPostButton = document.getElementById('add-new-button');
+//     if(addNewPostButton) {
         
-        addNewPostButton.addEventListener('click', () => openNewPostDialog(allPostData));
-    }
-}
+//         addNewPostButton.addEventListener('click', () => openNewPostDialog(allPostData));
+//     }
+// }
 
 function addPostToUI(post, allPostData) {
     const postElement = createDashboardPosts(post, allPostData)
@@ -77,9 +77,9 @@ export function openNewPostDialog(allPostData) {
     addNewPostDialog.showModal();
 
     const form = postContent.querySelector('#create-post-form');
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        createNewPost(form, allPostData);
+        await createNewPost(form, allPostData);
         addNewPostDialog.close();
         createNewPostDialogDiv.remove();
     });
@@ -120,30 +120,77 @@ async function createNewPost(form, allPostData) {
     form.reset();
 }
 
-export async function handleLikeDislikeUI(postId, likeNumber, likeButton) {
+export async function handleLikeUI(postOrComment, postId, commentId, likeNumber, likeButton) {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
     const post = await fetchPostById(postId);
 
+    console.log('it goes here')
+
     let userHasLiked = false;
 
-    if(post.post_likes !== null) {
-        userHasLiked = post.post_likes.some(like => like.User_id === loggedInUser.id);
+    if(postOrComment === 'post') {
+        if(post.post_likes !== null) {
+            userHasLiked = post.post_likes.some(like => like.User_id === loggedInUser.id && like.Like === 1);
+        }
+    } else {
+        if(post.comment_likes !== null) {
+            userHasLiked = post.comment_likes.some(like => like.User_id === loggedInUser.id && like.Comment_id === commentId && like.Like === 1);
+        }
     }
+
+    console.log('comment_likes', post.comment_likes);
+    console.log('commentId', commentId)
+
 
     if (userHasLiked) {
         return;
     } else {
         let newLikeCount = parseInt(likeNumber.textContent, 10) + 1;
+        console.log(newLikeCount)
 
         try {
-            const response = await handleLikeDislike('post', postId, 0, 1);
+            const response = await handleLikeDislike(postOrComment, postId, commentId, 1);
             console.log(response)
 
+            console.log('likeNumber', likeNumber);
             likeNumber.textContent = newLikeCount;
+            if(postOrComment === 'post') {
+                likeButton.classList.add('liked');
+                likeButton.classList.remove('like-button');
+            } else {
+                likeButton.classList.add('comment-liked');
+                likeButton.classList.remove('comment-like-button');
+            }
 
-            likeButton.style.pointer = 'none';
-            likeButton.classList.add('liked');
-            likeButton.classList.remove('like-button');
+        } catch (error) {
+            console.error('Error liking the post:', error);
+        }
+    }
+}
+
+export async function handleDislikeUI(postOrComment, postId, commentId, dislikeNumber, dislikeButton) {
+    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    const post = await fetchPostById(postId);
+
+    let userHasDisliked = false;
+
+    if(post.post_likes !== null) {
+        userHasDisliked = post.post_likes.some(like => like.User_id === loggedInUser.id && like.Like === -1);
+    }
+
+    if (userHasDisliked) {
+        return;
+    } else {
+        let newDislikeCount = parseInt(dislikeNumber.textContent, 10) + 1;
+
+        try {
+            const response = await handleLikeDislike(postOrComment, postId, commentId, -1);
+            console.log(response)
+
+            dislikeNumber.textContent = newDislikeCount;
+
+            dislikeButton.classList.add('disliked');
+            dislikeButton.classList.remove('dislike-button');
         } catch (error) {
             console.error('Error liking the post:', error);
         }

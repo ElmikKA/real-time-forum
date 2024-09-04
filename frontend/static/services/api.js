@@ -203,7 +203,7 @@ export async function handleLikeDislike(type, post_id, comment_id, like) {
         like: like,
     }
 
-    console.log(likeData)
+    console.log('likeData', likeData)
 
     try {
         const response = await fetch('/api/changeLikes', {

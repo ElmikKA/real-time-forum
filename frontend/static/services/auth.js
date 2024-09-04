@@ -1,4 +1,4 @@
-import { showPostSection } from "../components/userProfile.js";
+import { showPostSection } from "../components/dom/userProfileUI.js"
 import { loginFetch, logoutFetch, registerFetch } from "./api.js";
 import { toggleVisibility } from '../functions/toggleVisibility.js'
 import { closeWebSocket } from "../components/sidebar.js";
@@ -53,6 +53,13 @@ export function showLoginSection() {
 export async function logout() {
     const userProfileSection = document.getElementById('user-profile');
     if(userProfileSection.classList.contains('visible')) showPostSection(userProfileSection);
+
+    const profileAndAddNewButtonDiv = document.getElementById('profile-and-add-new-button-div');
+
+    if(profileAndAddNewButtonDiv) {
+        profileAndAddNewButtonDiv.remove();
+    }
+
 
     try {
         closeWebSocket();

@@ -7,6 +7,7 @@ import { createRegistrationSection } from "./components/dom/registrationSectionU
 import { hideLoginSection, showLoginSection } from "./services/auth.js";
 import { initializePosts } from "./components/posts.js";
 
+import { setupPostLoginHeaderSection } from "./components/dom/headerUI.js";
 document.addEventListener('DOMContentLoaded', () => {
     createLoginSection();
     createRegistrationSection();
@@ -20,6 +21,7 @@ window.onload = async function() {
         await initializePosts();
         showAllUsersAtSidebar();
         hideLoginSection();
+        setupPostLoginHeaderSection();
     } else {
         showLoginSection();
     }

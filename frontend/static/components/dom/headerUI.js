@@ -1,6 +1,8 @@
 import { logout } from "../../services/auth.js";
-import { openProfileSection } from "../userProfile.js";
+import { openProfileSection } from "./userProfileUI.js";
 import { toggleVisibility } from "../../functions/toggleVisibility.js";
+import { fetchPosts } from "../../services/api.js";
+import { openNewPostDialog } from "../posts.js";
 
 export function showInitialHeaderSection() {
     const headerSection = document.getElementById('header-section');
@@ -44,6 +46,11 @@ function createProfileAndAddNewButtonDiv() {
     const addNewPostButton = document.createElement('button');
     addNewPostButton.id = 'add-new-button';
     addNewPostButton.textContent = 'NEW POST';
+
+    addNewPostButton.addEventListener('click', async () => {
+        const allPostData = await fetchPosts()
+        openNewPostDialog(allPostData)
+    })
 
     const dropdown = document.createElement('div');
     dropdown.id = 'dropdown';

@@ -65,9 +65,13 @@ export class MySocket {
 
     displayNewMessages(responseData) {  
         const messengerContent = document.getElementById('messenger-content');
+        const messengerInput = document.getElementById('messenger-input');
         const messageElement = document.createElement('div');
         messageElement.textContent = responseData.message;
-        messageElement.className = 'message user';
+        console.log('display message response', responseData)
+        const messageSender = responseData.sender_id !== responseData.receiver_id ? 'user' : 'other';
+        console.log(messageSender)
+        messageElement.className = `message ${messageSender}`;
         messengerContent.appendChild(messageElement);
         messengerContent.scrollTop = messengerContent.scrollHeight;
     }

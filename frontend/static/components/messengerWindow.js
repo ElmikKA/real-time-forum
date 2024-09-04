@@ -51,7 +51,7 @@ export function openChat(data, username, user) {
     const messengerContainer = document.getElementById('messenger-container');
     const messengerContent = document.getElementById('messenger-content');
     const chatWith = document.getElementById('chat-with');
-
+    console.log(user, user[0].id)
     const userId = user[0].id;
 
     chatWith.textContent = `${username}`;
@@ -67,7 +67,10 @@ export function openChat(data, username, user) {
         return;
     } else {
         chatHistory.forEach(messages => {
-            const messageSender = userId === messages.sender_id ? 'other' : 'user';
+            console.log('userID:', userId, 'sender_id', messages.sender_id)
+            const messageSender = userId !== messages.sender_id ? 'user' : 'other';
+            console.log(messageSender)
+
             appendMessage(messengerContent, messages.message, messageSender);
         });
     }
@@ -76,9 +79,9 @@ export function openChat(data, username, user) {
 
 function appendMessage(container, message, senderClass = '') {
     const messageElement = document.createElement('div');
-        messageElement.textContent = message;
-        messageElement.className = `message ${senderClass}`;
-        container.appendChild(messageElement);
+    messageElement.textContent = message;
+    messageElement.className = `message ${senderClass}`;
+    container.appendChild(messageElement);
 }
 
 function sendMessage(mySocket) {
@@ -86,6 +89,7 @@ function sendMessage(mySocket) {
     const messageText = messengerInput.value.trim();
     if(messageText) {
         mySocket.sendMessage(messageText);
+        messengerInput.value = '';
     }
 }
 

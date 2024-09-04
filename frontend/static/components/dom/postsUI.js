@@ -1,5 +1,6 @@
-import { deletePost, handleLikeDislikeUI } from "../posts.js";
+import { deletePost, handleDislikeUI, handleLikeUI } from "../posts.js";
 import { createNewCommentFetch} from "../../services/api.js";
+import { showCustomAlert } from "../customAlerts.js";
 
 export function createDashboardPosts(post, allPostData) {
     const user = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -10,6 +11,9 @@ export function createDashboardPosts(post, allPostData) {
 
     const showProfileDiv = document.createElement('div');
     showProfileDiv.classList.add('show-profile');
+
+    const profileNameAndPictureDiv = document.createElement('div');
+    profileNameAndPictureDiv.className = 'profile-picture-and-name-div';
 
     const profilePictureDiv = document.createElement('div');
     profilePictureDiv.classList.add('profile-picture-on-card');
@@ -22,8 +26,33 @@ export function createDashboardPosts(post, allPostData) {
     profileName.classList.add('profile-name');
     profileName.textContent = post.creator;
 
-    showProfileDiv.appendChild(profilePictureDiv);
-    showProfileDiv.appendChild(profileName);
+    profileNameAndPictureDiv.appendChild(profilePictureDiv);
+    profileNameAndPictureDiv.appendChild(profileName);
+
+    const postMenuDiv = document.createElement('div')
+    postMenuDiv.className = 'post-menu-div';
+
+    const postMenuButton = document.createElement('span')
+    postMenuButton.classList.add('post-menu-button');
+
+    const postMenuView = createPostDropDownMenu(post, user); 
+
+    postMenuDiv.appendChild(postMenuButton)
+    postMenuDiv.appendChild(postMenuView);
+
+    postMenuDiv.addEventListener('click', (event) => {
+        event.stopPropagation();
+        postMenuView.classList.toggle('hidden');
+    })
+
+    document.addEventListener('click', (event) => {
+        if (!postMenuDiv.contains(event.target)) {
+            postMenuView.classList.add('hidden');
+        }
+    });
+
+    showProfileDiv.appendChild(profileNameAndPictureDiv);
+    showProfileDiv.appendChild(postMenuDiv);
 
     const titleDiv = document.createElement('div');
     titleDiv.classList.add('title-div');
@@ -46,7 +75,7 @@ export function createDashboardPosts(post, allPostData) {
     let userHasLiked = false;
 
     if(allPostData.post_likes !== null) {
-        userHasLiked = allPostData.post_likes.some(like => like.User_id === user.id && like.Post_id === post.id);
+        userHasLiked = allPostData.post_likes.some(like => like.User_id === user.id && like.Post_id === post.id && like.Like === 1);
     }
 
     if(userHasLiked) {
@@ -65,7 +94,13 @@ export function createDashboardPosts(post, allPostData) {
 
     likeButtonDiv.addEventListener('click', async (event) => {
         event.stopPropagation();
-        await handleLikeDislikeUI(post.id, likeNumber, likeButton) 
+        if(dislikeButton.classList.contains('disliked')) {
+            dislikeButton.classList.remove('disliked');
+            dislikeButton.classList.add('dislike-button');
+            let newDislikeCount = parseInt(dislikeNumber.textContent, 10) - 1;
+            dislikeNumber.textContent = newDislikeCount;
+        }
+        await handleLikeUI('post', post.id, 0, likeNumber, likeButton) 
     });
 
     likeDiv.appendChild(likeButtonDiv);
@@ -78,12 +113,37 @@ export function createDashboardPosts(post, allPostData) {
     dislikeButtonDiv.classList.add('dislike-button-div');
 
     const dislikeButton = document.createElement('span');
-    dislikeButton.classList.add('dislike-button');
+    let userHasDisliked = false;
+
+    if(allPostData.post_likes !== null) {
+        userHasDisliked = allPostData.post_likes.some(like => like.User_id === user.id && like.Post_id === post.id && like.Like === -1);
+    }
+
+    if(userHasDisliked) {
+        dislikeButton.style.pointerEvents = 'none';
+        dislikeButton.classList.add('disliked');
+    } else {
+        dislikeButton.classList.add('dislike-button');
+        dislikeButton.id = 'dislike-button';
+    }
+
     dislikeButtonDiv.appendChild(dislikeButton);
 
     const dislikeNumber = document.createElement('span');
     dislikeNumber.id = 'dislike-number';
     dislikeNumber.textContent = post.dislikes;
+
+
+    dislikeButton.addEventListener('click', async(event) => {
+        event.stopPropagation();
+        if(likeButton.classList.contains('liked')) {
+            likeButton.classList.remove('liked');
+            likeButton.classList.add('like-button');
+            let newLikeCount = parseInt(likeNumber.textContent, 10) -1;
+            likeNumber.textContent = newLikeCount;
+        }
+        await handleDislikeUI('post', post.id, 0, dislikeNumber, dislikeButton);
+    })
 
     dislikeDiv.appendChild(dislikeButtonDiv);
     dislikeDiv.appendChild(dislikeNumber);
@@ -105,14 +165,6 @@ export function createDashboardPosts(post, allPostData) {
     commentDiv.appendChild(commentButtonDiv);
     commentDiv.appendChild(commentNumber);
 
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete';
-    deleteButton.classList.add('delete-button');
-    deleteButton.addEventListener('click', async (event) => {
-        event.stopPropagation();
-        await deletePost(post.id);
-    });
-
     likeDislikeCommentSection.appendChild(likeDiv);
     likeDislikeCommentSection.appendChild(dislikeDiv);
     likeDislikeCommentSection.appendChild(commentDiv);
@@ -120,12 +172,34 @@ export function createDashboardPosts(post, allPostData) {
     postLayout.appendChild(showProfileDiv);
     postLayout.appendChild(titleDiv);
     postLayout.appendChild(likeDislikeCommentSection);
-    postLayout.appendChild(deleteButton);
 
     return postLayout;
 }
 
+function createPostDropDownMenu(post, user) {
+    const postMenu = document.createElement('div');
+    postMenu.classList.add('post-dropdown-menu', 'hidden');90
+
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add('delete-button');
+    deleteButton.textContent = 'Delete Post';
+    deleteButton.addEventListener('click', async (event) => {
+        if(post.user_id === user.id) {
+                event.stopPropagation();
+                await deletePost(post.id);
+                postMenu.classList.add('hidden');
+            } else {
+                showCustomAlert('You can \'t delete this post. You need to be user that created this post to delete it.')
+            }
+        });
+    postMenu.appendChild(deleteButton);
+    return postMenu;
+}
+
 export function createFullPostDialog(post, postDialog) {
+
+    console.log(post)
+    console.log(postDialog)
 
     const user = JSON.parse(localStorage.getItem('loggedInUser'));
     console.log(user);
@@ -189,7 +263,7 @@ export function createFullPostDialog(post, postDialog) {
     if (Array.isArray(post.comments)) {
         if (post.comments.length > 0) {
             post.comments.forEach(comment => {
-                const commentElement = createCommentElement(comment);
+                const commentElement = createCommentElement(comment, post, user);
                 commentsList.appendChild(commentElement);
             });
         } else {
@@ -219,7 +293,7 @@ export function createFullPostDialog(post, postDialog) {
             };
             try {
                 const createdComment = await createNewCommentFetch(newComment);
-                const commentElement = createCommentElement(createdComment.comment);
+                const commentElement = createCommentElement(createdComment.comment, post, user);
                 commentsList.appendChild(commentElement);
                 newCommentInput.value = '';
             } catch (error) {
@@ -244,7 +318,7 @@ export function createFullPostDialog(post, postDialog) {
     return postDialogContent;
 }
 
-function createCommentElement(comment) {
+function createCommentElement(comment, post, user) {
     const commentDiv = document.createElement('div');
     commentDiv.classList.add('comment');
     commentDiv.setAttribute('data-comment-id', comment.id);
@@ -265,15 +339,44 @@ function createCommentElement(comment) {
     likeDiv.setAttribute('data-action', 'like');
 
     const likeButtonDiv = document.createElement('div');
-    likeButtonDiv.classList.add('like-button-div');
+    likeButtonDiv.classList.add('comment-like-button-div');
 
     const likeButton = document.createElement('span');
-    likeButton.classList.add('like-button');
     likeButtonDiv.appendChild(likeButton);
 
+    let userHasLiked = false;
+    // console.log('Comment', comment)
+
+    if(post.comment_likes !== null) {
+        userHasLiked = post.comment_likes.some(like => like.User_id === user.id && like.Comment_id === comment.id && like.Like === 1);
+    }
+
+    if(userHasLiked) {
+        likeButton.style.pointerEvents = 'none';
+        likeButton.classList.add('liked');
+    } else {
+        likeButton.classList.add('comment-like-button');
+        likeButton.id = 'comment-like-button';
+    }
+    
+    likeButtonDiv.appendChild(likeButton);
+
+    console.log(comment)
+
     const likeCount = document.createElement('span');
-    likeCount.classList.add('like-count');
+    likeCount.classList.add('comment-like-count');
     likeCount.textContent = comment.likes;
+
+    likeButtonDiv.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        if(dislikeButton.classList.contains('comment-disliked')) {
+            dislikeButton.classList.remove('comment-disliked');
+            dislikeButton.classList.add('comment-dislike-button');
+            let newDislikeCount = parseInt(dislikeCount.textContent, 10) - 1;
+            dislikeCount.textContent = newDislikeCount;
+        }
+        await handleLikeUI('comment', post.onePost.id, comment.id, likeCount, likeButton) 
+    })
 
     likeDiv.appendChild(likeButtonDiv);
     likeDiv.appendChild(likeCount);
@@ -283,14 +386,14 @@ function createCommentElement(comment) {
     dislikeDiv.setAttribute('data-action', 'dislike');
 
     const dislikeButtonDiv = document.createElement('div');
-    dislikeButtonDiv.classList.add('dislike-button-div');
+    dislikeButtonDiv.classList.add('comment-dislike-button-div');
 
     const dislikeButton = document.createElement('span');
-    dislikeButton.classList.add('dislike-button');
+    dislikeButton.classList.add('comment-dislike-button');
     dislikeButtonDiv.appendChild(dislikeButton);
 
     const dislikeCount = document.createElement('span');
-    dislikeCount.classList.add('dislike-count');
+    dislikeCount.classList.add('comment-dislike-count');
     dislikeCount.textContent = comment.dislikes;
 
     dislikeDiv.appendChild(dislikeButtonDiv);

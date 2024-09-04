@@ -311,12 +311,19 @@ input {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     height: 50px;
 }
 
 .show-profile h2 {
     font-size: 1em;
     color: var(--secondary-color);
+}
+
+.profile-picture-and-name-div {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
 }
 
 .profile-picture-on-card {
@@ -329,6 +336,30 @@ input {
     border-radius: 50px;
     background-color: var(--button-color);
     margin: 10px; 
+}
+
+.post-menu-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
+    transition: background-color 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.post-menu-div:hover {
+    height: 27px;
+    width: 27px;
+    border-radius: 50px;
+    background-color: rgba(255, 255, 255, 0.522);
+}
+
+.post-menu-button {
+    background-image: url("./assets/Menu-dots.png");
+    width: 24px; 
+    height: 24px; 
+    display: inline-block;
+    background-size: contain;
 }
 
 .title-div {
@@ -362,7 +393,7 @@ input {
     transition: color 0.2s;
 }
 
-.liked {
+.liked, .comment-liked {
     background-image: url("../static/assets/Like_hover.png");
     width: 24px;
     height: 24px;
@@ -376,7 +407,7 @@ input {
 }
 
 /* Like Button */
-.like-button {
+.like-button, .comment-like-button {
     background-image: url("./assets/Like.png");
     width: 24px;
     height: 24px;
@@ -406,8 +437,17 @@ input {
     color: var(--button-color); 
 }
 
+.disliked, .comment-disliked {
+    background-image: url("../static/assets/Dislike_hover.png");
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-size: contain;
+    pointer-events: none;
+}
+
 /* Dislike Button */
-.dislike-button {
+.dislike-button, .comment-dislike-button {
     background-image: url("./assets/Dislike.png");
     width: 24px; 
     height: 24px; 
@@ -566,7 +606,65 @@ input {
     margin-left: 5px;
 }
 
-.comment .like-dislike-comment-section .like-dislike-comment[data-action="like"] .like-button {
+.comment-like-button {
+    background-image: url("./assets/Like.png");
+    margin: 0px 5px;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    background-size: contain;
+}
+
+.comment-like-button-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35px;
+    width: 35px;
+    transition: background-color 0.3s, border-radius 0.5s;
+}
+
+.like-dislike-comment:hover .comment-like-button-div {
+    border-radius: 10px;
+    background-color: var(--secondary-color);
+}
+
+#comment-like-number {
+    transition: color 0.3s; 
+}
+
+.like-dislike-comment:hover #comment-like-number {
+    color: var(--button-color); 
+}
+
+.comment-disliked {
+    background-image: url("../static/assets/Dislike_hover.png");
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-size: contain;
+    pointer-events: none;
+}
+
+/* Dislike Button */
+.comment-dislike-button {
+    background-image: url("./assets/Dislike.png");
+    width: 24px; 
+    height: 24px; 
+    display: inline-block;
+    background-size: contain;
+}
+
+.comment-dislike-button-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35px;
+    width: 35px;
+    transition: background-color 0.3s, border-radius 0.5s;
+}
+
+/* .comment .like-dislike-comment-section .like-dislike-comment[data-action="like"] .like-button {
     margin: 0px 5px;
     width: 16px;
     height: 16px;
@@ -601,7 +699,7 @@ input {
 
 .comment .like-dislike-comment-section {
     width: 30px;
-}
+} */
 
 .new-comment {
     display: flex;
@@ -701,6 +799,35 @@ input {
 
 .show {
     display: block;
+}
+
+/* Post DropDown Menu */
+.post-dropdown-menu {
+    flex-direction: column;
+    position: absolute;
+    right: 20px;
+    top: 50px;
+    background-color: var(--secondary-color);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 4px;
+    min-width: 100px;
+    padding: 5px 0;
+    color: white;
+}
+
+.delete-button {
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    color: white;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+}
+
+.delete-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* User Profile Section */

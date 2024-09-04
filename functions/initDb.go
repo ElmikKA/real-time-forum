@@ -27,5 +27,7 @@ func InitDb() error {
 		return err
 	}
 
+	resetOnline()
+
 	return nil
 }

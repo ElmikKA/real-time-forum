@@ -571,6 +571,7 @@ func newWebsocket(w http.ResponseWriter, r *http.Request) {
 		"username": username,
 	}
 	mu.Unlock()
+
 	for {
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {

@@ -739,7 +739,7 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		fmt.Println()
+		limit := 10
 
 		var requestMessage functions.RequestMessage
 
@@ -752,7 +752,7 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(responseData)
 			return
 		}
-		messages, err := functions.GetAllMessages(id, requestMessage.Id)
+		messages, err := functions.GetLimitMessages(id, requestMessage.Id, limit, requestMessage.Offset)
 
 		if err != nil {
 			fmt.Println("error getMessages", err)
@@ -761,7 +761,6 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(responseData)
 			return
 		}
-		fmt.Println(messages)
 
 		msgPartner, _ := functions.GetUser(requestMessage.Id)
 

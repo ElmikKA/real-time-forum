@@ -6,6 +6,7 @@ import (
 )
 
 type Messages struct {
+	Id          int       `json:"id"`
 	Sender_id   int       `json:"sender_id"`
 	Receiver_id int       `json:"receiver_id"`
 	Message     string    `json:"message"`
@@ -13,7 +14,8 @@ type Messages struct {
 }
 
 type RequestMessage struct {
-	Id int `json:"id"`
+	Id     int `json:"id"`
+	Offset int `json:"offset"`
 }
 
 type MessageData struct {
@@ -53,7 +55,7 @@ func GetLatestMessages(user int) ([]Messages, error) {
 	var messages []Messages
 	for rows.Next() {
 		var msg Messages
-		if err := rows.Scan(&msg.Sender_id, &msg.Receiver_id, &msg.Message, &msg.Written_at); err != nil {
+		if err := rows.Scan(&msg.Id, &msg.Sender_id, &msg.Receiver_id, &msg.Message, &msg.Written_at); err != nil {
 			fmt.Println("error rows.next latest messages", err)
 			return nil, err
 		}
@@ -86,7 +88,7 @@ func GetAllMessages(user1 int, user2 int) ([]Messages, error) {
 
 	for rows.Next() {
 		var message Messages
-		err := rows.Scan(&message.Sender_id, &message.Receiver_id, &message.Message, &message.Written_at)
+		err := rows.Scan(&message.Id, &message.Sender_id, &message.Receiver_id, &message.Message, &message.Written_at)
 		if err != nil {
 			fmt.Println("error all messages rows.next", err)
 			return messages, err
@@ -106,4 +108,35 @@ func AddMessage(message string, receiver int, sender int) error {
 		return err
 	}
 	return nil
+}
+
+func GetLimitMessages(user1, user2, limit, offset int) ([]Messages, error) {
+	var messages []Messages
+	query := `
+	SELECT * FROM messages 
+	WHERE 
+	(sender_id = ? AND receiver_id = ?) 
+	OR 
+	(sender_id = ? AND receiver_id = ?) 
+	ORDER BY 
+	written_at DESC,
+	id DESC
+	LIMIT ? OFFSET ?`
+
+	rows, err := Db.Query(query, user1, user2, user2, user1, limit, offset)
+	if err != nil {
+		fmt.Println("error getting limited messages", err)
+		return messages, err
+	}
+	for rows.Next() {
+		var message Messages
+		rows.Scan(&message)
+		err := rows.Scan(&message.Id, &message.Sender_id, &message.Receiver_id, &message.Message, &message.Written_at)
+		if err != nil {
+			fmt.Println("error all messages rows.next", err)
+			return messages, err
+		}
+		messages = append(messages, message)
+	}
+	return messages, nil
 }

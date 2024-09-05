@@ -20,45 +20,36 @@ export function addWebsocketUsers(usersData) {
     // console.log("Adding users", usersData);
     const users = usersData.allUsers;
 
-    const onlineUsers = users.filter(user => user.online === "1");
-    const offlineUsers = users.filter(user => user.online !== "1");
+    console.log(users)
 
-    const onlineListItems = onlineUsers.map(user => createUserListItem(user, true));
-    const offlineListItems = offlineUsers.map(user => createUserListItem(user, false));
+    // const onlineUsers = users.filter(user => user.online === "1");
+    // const offlineUsers = users.filter(user => user.online !== "1");
+
+    // const onlineListItems = onlineUsers.map(user => createUserListItem(user, true));
+    // const offlineListItems = offlineUsers.map(user => createUserListItem(user, false));
+
+    const combinedListItems = {}
 
     const sidebar = document.getElementById('sidebar');
-    generateSidebarContent(sidebar, { online: onlineListItems, offline: offlineListItems }, users);
+    generateSidebarContent(sidebar, combinedListItems, users);
 }
 
 function generateSidebarContent(sidebar, userLists, users) {
     sidebar.innerHTML = '';
 
-    const onlineSection = document.createElement('div');
-    onlineSection.classList.add('section');
+    const usersSection = document.createElement('div');
+    usersSection.classList.add('section');
 
-    const onlineHeader = document.createElement('h2');
-    onlineHeader.textContent = 'ONLINE';
-    onlineSection.appendChild(onlineHeader);
+    const usersHeader = document.createElement('h2');
+    usersHeader.textContent = 'USERS';
+    usersSection.appendChild(usersHeader);
 
-    const onlineList = document.createElement('ul');
-    onlineList.className = 'online-list';
-    userLists.online.forEach(userItem => onlineList.appendChild(userItem));
-    onlineSection.appendChild(onlineList);
+    const usersList = document.createElement('ul');
+    usersList.className = 'users-list';
+    // userLists.forEach(userItem => usersList.appendChild(userItem));
+    // usersSection.appendChild(usersList);
 
-    const offlineSection = document.createElement('div');
-    offlineSection.classList.add('section');
-
-    const offlineHeader = document.createElement('h2');
-    offlineHeader.textContent = 'OFFLINE';
-    offlineSection.appendChild(offlineHeader);
-
-    const offlineList = document.createElement('ul');
-    offlineList.className = 'offline-list';
-    userLists.offline.forEach(userItem => offlineList.appendChild(userItem));
-    offlineSection.appendChild(offlineList);
-
-    sidebar.appendChild(onlineSection);
-    sidebar.appendChild(offlineSection);
+    sidebar.appendChild(usersSection);
 
     messengerWindow(sidebar, users, mySocket);
 }

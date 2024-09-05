@@ -72,11 +72,11 @@ export function openChat(data, username, user) {
         return;
     } else {
         chatHistory.forEach(messages => {
-            console.log('userID:', userId, 'sender_id', messages.sender_id)
+            console.log(messages)
             const messageSender = userId !== messages.sender_id ? 'user' : 'other';
             console.log(messageSender)
 
-            appendMessage(messengerContent, messages.message, messageSender);
+            appendMessage(messengerContent, messages, messageSender);
         });
     }
     console.log("scrolltop", messengerContent.scrollTop)
@@ -112,15 +112,28 @@ function appendChat(data, userId) {
     } else {
         chatHistory.forEach(messages => {
             const messageSender = userId !== messages.sender_id ? 'user' : 'other';
-            appendMessage(messengerContent, messages.message, messageSender);
+            appendMessage(messengerContent, messages, messageSender);
         });
     }
 }
 
-function appendMessage(container, message, senderClass = '') {
+function appendMessage(container, messages, senderClass = '') {
     const messageElement = document.createElement('div');
-    messageElement.textContent = message;
+
+    const messageContent = document.createElement('p');
+    messageContent.textContent = messages.message;
+
+
+    const messageDate = document.createElement('span');
+    messageDate.classList.add('message-date')
+    const messageDateObject = new Date(messages.written_at);
+    messageDate.textContent = messageDateObject.toLocaleString();
+
     messageElement.className = `message ${senderClass}`;
+
+    messageElement.appendChild(messageDate);
+    messageElement.appendChild(messageContent);
+
     container.prepend(messageElement);
 }
 

@@ -21,7 +21,7 @@ export async function login() {
        const loginSuccess = await loginFetch(loginCredentials);
        console.log(loginSuccess)
 
-       if(loginSuccess) {
+       if(loginSuccess.login === 'success') {
         setupPostLoginHeaderSection();
        }
 

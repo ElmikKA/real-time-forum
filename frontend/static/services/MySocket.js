@@ -83,6 +83,7 @@ export class MySocket {
             .then(response => response.json())
             .then(data => {
                 addWebsocketUsers(data); // Ensure this function is defined or bound correctly
+                console.log('data', data)
             })
             .catch(error => console.error("Error fetching users:", error));
     }

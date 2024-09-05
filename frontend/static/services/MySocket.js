@@ -47,23 +47,23 @@ export class MySocket {
     changeOnlineStatues(responseData) {
         const username = responseData.statusChangeUsername;
         const newStatus = responseData.online;
-        
+
         const userItem = document.querySelector(`li[data-username="${username}"]`);
 
-        if(userItem) {
+        if (userItem) {
             const statusSpan = userItem.querySelector('.status');
 
-            if(newStatus === 1) {
+            if (newStatus === 1) {
                 statusSpan.classList.remove('offline');
                 statusSpan.classList.add('online');
-            } else if(newStatus === -1) {
+            } else if (newStatus === -1) {
                 statusSpan.classList.remove('online');
                 statusSpan.classList.add('offline');
             }
         }
     }
 
-    displayNewMessages(responseData) {  
+    displayNewMessages(responseData) {
         const messengerContent = document.getElementById('messenger-content');
         const messengerInput = document.getElementById('messenger-input');
         const messageElement = document.createElement('div');
@@ -73,9 +73,12 @@ export class MySocket {
         console.log(messageSender)
         messageElement.className = `message ${messageSender}`;
         messengerContent.appendChild(messageElement);
-        messengerContent.scrollTop = messengerContent.scrollHeight;
+        // scrolls the message div down only if a new message comes when you're looking at the latest message
+        if (messengerContent.scrollHeight - messengerContent.scrollTop < 650) {
+            messengerContent.scrollTop = messengerContent.scrollHeight;
+        }
     }
-    
+
     fetchUsers() {
         fetch('/api/getUsers', {
             method: 'GET'
@@ -108,7 +111,7 @@ export class MySocket {
             try {
                 this.mysocket.send(JSON.stringify(msgData));
                 console.log("Message sent:", msgData);
-        
+
             } catch (error) {
                 console.error("Error sending message:", error);
             }

@@ -44,7 +44,7 @@ export async function loginFetch(loginCredentials) {
 }
 
 
-export async function registerFetch (registerForm) {
+export async function registerFetch(registerForm) {
     try {
         const response = await fetch('/api/register', {
             method: 'POST',
@@ -101,7 +101,7 @@ export async function createNewCommentFetch(commentData) {
             body: JSON.stringify(commentData)
         });
 
-        if(!response.ok) {
+        if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
 
@@ -109,7 +109,7 @@ export async function createNewCommentFetch(commentData) {
 
         return data;
 
-    } catch(error) {
+    } catch (error) {
         console.error('Unexpected error creating new comment:', error);
         showCustomAlert('An unexpected error occurred while creating new comment. Please try again.');
     }
@@ -118,25 +118,25 @@ export async function createNewCommentFetch(commentData) {
 export async function fetchPosts() {
     try {
 
-         const response = await fetch('/api/posts', {
-             method: 'GET',
-             headers: {
-                 'Content-Type': 'application/json'
-             }
-         });
-         
-         if (!response.ok) {
+        const response = await fetch('/api/posts', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
 
-         const data = await response.json();
+        const data = await response.json();
 
-         return data
+        return data
 
-     } catch (error) {
+    } catch (error) {
         console.error('Unexpected error fetching posts:', error);
         showCustomAlert('An unexpected error occurred while fetching posts. Please try again.');
-     }
+    }
 }
 
 export async function fetchPostById(postId) {
@@ -156,7 +156,7 @@ export async function fetchPostById(postId) {
         }
 
         const data = await response.json();
-        return data; 
+        return data;
 
     } catch (error) {
         console.error('Unexpected error fetching post by ID:', error);
@@ -222,7 +222,7 @@ export async function handleLikeDislike(type, post_id, comment_id, like) {
 
         return data;
 
-    } catch(error) {
+    } catch (error) {
         console.error('Unexpected error handling likes and dislikes:', error);
         showCustomAlert('An unexpected error occurred while handling likes and dislikes. Please try again.');
     }
@@ -232,7 +232,7 @@ export async function deletePostFetch(id) {
     const postId = {
         id: id
     }
-    
+
     try {
         const response = await fetch("/api/deletePost", {
             method: 'POST',
@@ -241,22 +241,23 @@ export async function deletePostFetch(id) {
             },
             body: JSON.stringify(postId)
         })
-        
+
         if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
 
         console.log("Post deleted")
-        
-    } catch(error) {
+
+    } catch (error) {
         console.error('Unexpected error deleting the post:', error);
         showCustomAlert('An unexpected error occurred while deleting the post. Please try again.');
     }
 }
 
-export async function fetchMessages(userId) {
+export async function fetchMessages(userId, offset) {
     const requestMessage = {
-        id: userId
+        id: userId,
+        offset: offset
     };
 
     try {
@@ -276,7 +277,7 @@ export async function fetchMessages(userId) {
 
         return data;
 
-    }catch(error) {
+    } catch (error) {
         console.log('Error fetching messages:', error);
         showCustomAlert('Failed to fetch messages. Please try again later.')
     }

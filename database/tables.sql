@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 );
 
 CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY NOT NULL,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
     message TEXT NOT NULL,

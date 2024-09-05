@@ -20,80 +20,72 @@ export function userProfileSection(userProfileSection) {
     profilePictureAndNameDiv.appendChild(userPicture);
     profilePictureAndNameDiv.appendChild(userName);
 
-    const saveChangesButton = document.createElement('button');
-    saveChangesButton.id = 'save-user-profile-changes-button';
-    saveChangesButton.textContent = 'SAVE CHANGES';
-
     profileHeader.appendChild(profilePictureAndNameDiv);
-    profileHeader.appendChild(saveChangesButton);
 
-    //Form
-    const form = document.createElement('form');
-    form.id = 'change-profile-information-form';
+    // Displaying user information (instead of form)
+    const userInfoDiv = document.createElement('div');
+    userInfoDiv.id = 'user-profile-info';
 
-    const formGroups = [
+    const userGroups = [
         [
-            {id: 'user-email', label: 'Email', type: 'email', placeholder: user.email},
-            {id: 'user-username', label: 'Username', type: 'text', placeholder: user.username}
+            {label: 'Email', value: user.email},
+            {label: 'Username', value: user.username},
+        ],
+
+        [
+            {label: 'First Name', value: user.fname},
+            {label: 'Last Name', value: user.lname},
         ],
         [
-            {id: 'user-first-name', label: 'First Name', type: 'text', placeholder: user.fname},
-            {id: 'user-last-name', label: 'Last Name', type: 'text', placeholder: user.lname}
-        ],
-        [
-            {id: 'user-age', label: 'Age', type: 'number', placeholder: user.age},
-            {id: 'user-gender', label: 'Gender', type: 'text', placeholder: user.gender}
+            {label: 'Age', value: user.age},
+            {label: 'Gender', value: user.gender},
         ]
     ];
 
-    formGroups.forEach(group => {
-        const formGroup = document.createElement('div');
-        formGroup.classList.add('form-group');
+    userGroups.forEach(group => {
+        const userGroup= document.createElement('div');
+        userGroup.classList.add('user-profile-group');
 
         group.forEach(field => {
-            const formField = document.createElement('div');
-            formField.classList.add('form-field');
+            const userFieldDiv = document.createElement('div');
+            userFieldDiv.classList.add('user-profile-field');
+    
+            const label = document.createElement('span');
+            label.classList.add('user-profile-label');
+            label.textContent = `${field.label}:`;
+    
+            const value = document.createElement('span');
+            value.classList.add('user-profile-value');
+            value.textContent = field.value;
+    
+            userFieldDiv.appendChild(label);
+            userFieldDiv.appendChild(value);
+            userGroup.appendChild(userFieldDiv);
+        });
 
-            const label = document.createElement('label');
-            label.setAttribute('for', field.id);
-            label.textContent = field.label;
-
-            const input = document.createElement('input');
-            input.type = field.type;
-            input.id = field.id;
-            input.name = field.id;
-            input.placeholder = field.placeholder;
-
-            formField.appendChild(label);
-            formField.appendChild(input);
-            formGroup.appendChild(formField);
-        })
-        form.appendChild(formGroup);
+        userInfoDiv.appendChild(userGroup);
     })
 
-    const passwordFieldGroup = document.createElement('div');
-    passwordFieldGroup.classList.add('password-field-for-user-profile');
 
-    const passwordField = document.createElement('div');
-    passwordField.classList.add('form-field');
+    const passwordFieldDiv = document.createElement('div');
+    passwordFieldDiv.classList.add('user-profile-field');
 
-    const passwordLabel = document.createElement('label');
-    passwordLabel.setAttribute('for', 'user-password');
-    passwordLabel.textContent = 'Password';
+    const passwordLabel = document.createElement('span');
+    passwordLabel.classList.add('user-profile-label');
+    passwordLabel.textContent = 'Password:';
 
-    const passwordInput = document.createElement('input');
-    passwordInput.type = 'password';
-    passwordInput.id = 'user-password';
-    passwordInput.name = 'user-password';
+    const passwordValue = document.createElement('span');
+    passwordValue.classList.add('user-profile-value');
+    passwordValue.textContent = '********';  // Mask the password field for display purposes
 
-    passwordField.appendChild(passwordLabel);
-    passwordField.appendChild(passwordInput);
-    passwordFieldGroup.appendChild(passwordField);
+    passwordFieldDiv.appendChild(passwordLabel);
+    passwordFieldDiv.appendChild(passwordValue);
 
-    form.appendChild(passwordFieldGroup);
+    userInfoDiv.appendChild(passwordFieldDiv);
 
+    // Append to userProfileSection
     userProfileSection.appendChild(profileHeader);
-    userProfileSection.appendChild(form);
+    userProfileSection.appendChild(userInfoDiv);
 }
 
 export function openProfileSection() {

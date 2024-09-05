@@ -1,9 +1,12 @@
 import { deletePost, handleDislikeUI, handleLikeUI } from "../posts.js";
 import { createNewCommentFetch} from "../../services/api.js";
 import { showCustomAlert } from "../customAlerts.js";
+import { fetchPostById } from "../../services/api.js";
 
-export function createDashboardPosts(post, allPostData) {
+export async function createDashboardPosts(post, allPostData) {
     const user = JSON.parse(localStorage.getItem('loggedInUser'));
+
+    const onePost = await fetchPostById(post.id);
 
     const postLayout = document.createElement('div');
     postLayout.classList.add('card-layout');
@@ -92,7 +95,8 @@ export function createDashboardPosts(post, allPostData) {
     likeNumber.id = 'like-number';
     likeNumber.textContent = post.likes;
 
-    likeButtonDiv.addEventListener('click', async (event) => {
+    likeDiv.addEventListener('click', async (event) => {
+        event.preventDefault();
         event.stopPropagation();
         if(dislikeButton.classList.contains('disliked')) {
             dislikeButton.classList.remove('disliked');
@@ -100,7 +104,7 @@ export function createDashboardPosts(post, allPostData) {
             let newDislikeCount = parseInt(dislikeNumber.textContent, 10) - 1;
             dislikeNumber.textContent = newDislikeCount;
         }
-        await handleLikeUI('post', post.id, 0, likeNumber, likeButton) 
+        await handleLikeUI('post', post.id, 0, likeNumber, likeButton);
     });
 
     likeDiv.appendChild(likeButtonDiv);
@@ -134,7 +138,8 @@ export function createDashboardPosts(post, allPostData) {
     dislikeNumber.textContent = post.dislikes;
 
 
-    dislikeButton.addEventListener('click', async(event) => {
+    dislikeDiv.addEventListener('click', async(event) => {
+        event.preventDefault();
         event.stopPropagation();
         if(likeButton.classList.contains('liked')) {
             likeButton.classList.remove('liked');
@@ -158,9 +163,11 @@ export function createDashboardPosts(post, allPostData) {
     commentButton.classList.add('comment-button');
     commentButtonDiv.appendChild(commentButton);
 
+    console.log(onePost.comments.length)
+
     const commentNumber = document.createElement('span');
     commentNumber.id = 'comment-number';
-    commentNumber.textContent = '0'; // TODO: replace '7' with the actual comment count
+    commentNumber.textContent = onePost.comments.length; // TODO: replace '7' with the actual comment count
 
     commentDiv.appendChild(commentButtonDiv);
     commentDiv.appendChild(commentNumber);
@@ -197,17 +204,12 @@ function createPostDropDownMenu(post, user) {
 }
 
 export function createFullPostDialog(post, postDialog) {
-
-    console.log(post)
-    console.log(postDialog)
-
     const user = JSON.parse(localStorage.getItem('loggedInUser'));
     console.log(user);
    
     const postDialogContent = document.createElement('div');
     postDialogContent.classList.add('post-dialog-content');
 
-    //author and close button section
     const authorAndCloseDiv = document.createElement('div');
     authorAndCloseDiv.classList.add('author-and-close-button');
 
@@ -231,23 +233,22 @@ export function createFullPostDialog(post, postDialog) {
     const closeButton = document.createElement('span');
     closeButton.classList.add('close-dialog-button');
     closeButton.innerHTML = '&times;';
-    closeButton.addEventListener('click', (event) => {
+    closeButton.addEventListener('click', () => {
         closeDialog(postDialog)
     })
+
+    closeWithEscape(postDialog);
 
     authorAndCloseDiv.appendChild(profileAndNameDiv);
     authorAndCloseDiv.appendChild(closeButton);
 
-    //post title
     const postTitle = document.createElement('h1');
     postTitle.classList.add('post-title');
     postTitle.textContent = post.onePost.title;
 
-    //post content
     const postContent = document.createElement('p');
     postContent.textContent = post.onePost.content;
 
-    //comment section
     const commentSection = document.createElement('div');
     commentSection.classList.add('comment-section');
 
@@ -299,6 +300,16 @@ export function createFullPostDialog(post, postDialog) {
             } catch (error) {
                 console.error('Error creating new comment:', error);
             }
+
+            const postId = post.onePost.id;
+            const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+
+            const commentCountElement = postElement.querySelector('#comment-number');
+            console.log(commentCountElement)
+    
+            let newCommentCount = parseInt(commentCountElement.textContent, 10) + 1;
+
+            commentCountElement.textContent = newCommentCount;
         }
     });
 
@@ -345,7 +356,6 @@ function createCommentElement(comment, post, user) {
     likeButtonDiv.appendChild(likeButton);
 
     let userHasLiked = false;
-    // console.log('Comment', comment)
 
     if(post.comment_likes !== null) {
         userHasLiked = post.comment_likes.some(like => like.User_id === user.id && like.Comment_id === comment.id && like.Like === 1);
@@ -353,15 +363,13 @@ function createCommentElement(comment, post, user) {
 
     if(userHasLiked) {
         likeButton.style.pointerEvents = 'none';
-        likeButton.classList.add('liked');
+        likeButton.classList.add('comment-liked');
     } else {
         likeButton.classList.add('comment-like-button');
         likeButton.id = 'comment-like-button';
     }
     
     likeButtonDiv.appendChild(likeButton);
-
-    console.log(comment)
 
     const likeCount = document.createElement('span');
     likeCount.classList.add('comment-like-count');
@@ -389,12 +397,37 @@ function createCommentElement(comment, post, user) {
     dislikeButtonDiv.classList.add('comment-dislike-button-div');
 
     const dislikeButton = document.createElement('span');
-    dislikeButton.classList.add('comment-dislike-button');
+    
+    let userHasDisliked = false;
+    
+    if(post.comment_likes !== null) {
+        userHasDisliked = post.comment_likes.some(like => like.User_id === user.id && like.Comment_id === comment.id && like.Like === -1);
+    }
+    
+    if(userHasDisliked) {
+        dislikeButton.style.pointerEvents = 'none';
+        dislikeButton.classList.add('comment-disliked');
+    } else {
+        dislikeButton.classList.add('comment-dislike-button');
+        dislikeButton.id = 'comment-dislike-button';
+    }
+    
     dislikeButtonDiv.appendChild(dislikeButton);
 
     const dislikeCount = document.createElement('span');
     dislikeCount.classList.add('comment-dislike-count');
     dislikeCount.textContent = comment.dislikes;
+
+    dislikeButtonDiv.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        if(likeButton.classList.contains('comment-liked')) {
+            likeButton.classList.remove('comment-liked');
+            likeButton.classList.add('comment-like-button');
+            let newLikeCount = parseInt(likeCount.textContent, 10) -1;
+            likeCount.textContent = newLikeCount;
+        }
+        await handleDislikeUI('comment', post.onePost.id, comment.id, dislikeCount, dislikeButton) 
+    })    
 
     dislikeDiv.appendChild(dislikeButtonDiv);
     dislikeDiv.appendChild(dislikeCount);
@@ -413,7 +446,6 @@ export function createNewPostDialog(dialogElement) {
     const dialogContainer = document.createElement('div');
     dialogContainer.classList.add('create-new-post-container');
 
-    // header and close button section
     const headerAndCloseDiv = document.createElement('div');
     headerAndCloseDiv.classList.add('header-and-close-button');
 
@@ -427,14 +459,14 @@ export function createNewPostDialog(dialogElement) {
         closeDialog(dialogElement);
     });
 
+    closeWithEscape(dialogElement);
+
     headerAndCloseDiv.appendChild(headerTitle);
     headerAndCloseDiv.appendChild(closeButton);
 
-    // form element
     const form = document.createElement('form');
     form.id = 'create-post-form';
 
-    // title input
     const titleLabel = document.createElement('label');
     titleLabel.setAttribute('for', 'title');
     titleLabel.textContent = 'Title';
@@ -445,7 +477,6 @@ export function createNewPostDialog(dialogElement) {
     titleInput.name = 'title';
     titleInput.required = true;
 
-    // category input
     const categoryLabel = document.createElement('label');
     categoryLabel.setAttribute('for', 'category');
     categoryLabel.textContent = 'Category';
@@ -455,7 +486,6 @@ export function createNewPostDialog(dialogElement) {
     categoryInput.id = 'category';
     categoryInput.name = 'category';
 
-    // content textarea
     const contentLabel = document.createElement('label');
     contentLabel.setAttribute('for', 'content');
     contentLabel.textContent = 'Content';
@@ -466,7 +496,6 @@ export function createNewPostDialog(dialogElement) {
     contentTextarea.rows = 4;
     contentTextarea.required = true;
 
-    // submit button
     const submitButton = document.createElement('button');
     submitButton.classList.add('create-new-post-submit-button');
     submitButton.type = 'submit';
@@ -490,4 +519,14 @@ function closeDialog(dialogElement) {
     const postDialogDiv = dialogElement.parentElement; 
     dialogElement.close();
     postDialogDiv.remove();
+}
+
+function closeWithEscape(dialogElement) {
+    document.addEventListener('keydown', (event) => {
+        if(event.key === 'Escape') {
+            const postDialogDiv = dialogElement.parentElement;
+            dialogElement.close();
+            postDialogDiv.remove();
+        }
+    })
 }

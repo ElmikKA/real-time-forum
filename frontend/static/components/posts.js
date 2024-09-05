@@ -13,25 +13,16 @@ export async function initializePosts() {
     postGridLayout.innerHTML = '';
 
     if(posts !== undefined) {
-        posts.forEach(post => {
-            const postElement = createDashboardPosts(post, allPostData)
+        posts.forEach(async post => {
+            const postElement = await createDashboardPosts(post, allPostData)
             postElement.addEventListener('click', () => openFullPost(post))
             postGridLayout.appendChild(postElement)
         })
     }
 }
 
-// export function addNewPostButtonListener(allPostData) {
-//     console.log('call me once')
-//     const addNewPostButton = document.getElementById('add-new-button');
-//     if(addNewPostButton) {
-        
-//         addNewPostButton.addEventListener('click', () => openNewPostDialog(allPostData));
-//     }
-// }
-
-function addPostToUI(post, allPostData) {
-    const postElement = createDashboardPosts(post, allPostData)
+async function addPostToUI(post, allPostData) {
+    const postElement = await createDashboardPosts(post, allPostData)
     postElement.addEventListener('click', () => openFullPost(post));
     postGridLayout.appendChild(postElement);
 }
@@ -71,8 +62,7 @@ export function openNewPostDialog(allPostData) {
     addNewPostDialog.appendChild(postContent);
 
     createNewPostDialogDiv.appendChild(addNewPostDialog);
-    //TODO:
-    //Add the dialog to the main-content section
+    
     document.body.appendChild(createNewPostDialogDiv);
     addNewPostDialog.showModal();
 
@@ -115,7 +105,7 @@ async function createNewPost(form, allPostData) {
 
     const latestPost = posts[posts.length - 1];
 
-    addPostToUI(latestPost, allPostData);
+    await addPostToUI(latestPost, allPostData);
 
     form.reset();
 }
@@ -138,10 +128,6 @@ export async function handleLikeUI(postOrComment, postId, commentId, likeNumber,
         }
     }
 
-    console.log('comment_likes', post.comment_likes);
-    console.log('commentId', commentId)
-
-
     if (userHasLiked) {
         return;
     } else {
@@ -152,7 +138,6 @@ export async function handleLikeUI(postOrComment, postId, commentId, likeNumber,
             const response = await handleLikeDislike(postOrComment, postId, commentId, 1);
             console.log(response)
 
-            console.log('likeNumber', likeNumber);
             likeNumber.textContent = newLikeCount;
             if(postOrComment === 'post') {
                 likeButton.classList.add('liked');
@@ -174,8 +159,14 @@ export async function handleDislikeUI(postOrComment, postId, commentId, dislikeN
 
     let userHasDisliked = false;
 
-    if(post.post_likes !== null) {
-        userHasDisliked = post.post_likes.some(like => like.User_id === loggedInUser.id && like.Like === -1);
+    if(postOrComment === 'post') {
+        if(post.post_likes !== null) {
+            userHasDisliked = post.post_likes.some(like => like.User_id === loggedInUser.id && like.Like === -1);
+        }
+    } else {
+        if(post.comment_likes !== null) {
+            userHasDisliked = post.comment_likes.some(like => like.User_id === loggedInUser.id && like.Comment_id === commentId && like.Like === -1);
+        }
     }
 
     if (userHasDisliked) {
@@ -188,11 +179,15 @@ export async function handleDislikeUI(postOrComment, postId, commentId, dislikeN
             console.log(response)
 
             dislikeNumber.textContent = newDislikeCount;
-
-            dislikeButton.classList.add('disliked');
-            dislikeButton.classList.remove('dislike-button');
+            if(postOrComment === 'post') {
+                dislikeButton.classList.add('disliked');
+                dislikeButton.classList.remove('dislike-button');
+            } else {
+                dislikeButton.classList.add('comment-disliked');
+                dislikeButton.classList.remove('comment-dislike-button');
+            }
         } catch (error) {
-            console.error('Error liking the post:', error);
+            console.error('Error disliking the post:', error);
         }
     }
 }

@@ -8,10 +8,17 @@ import { hideLoginSection, showLoginSection } from "./services/auth.js";
 import { initializePosts } from "./components/posts.js";
 
 import { setupPostLoginHeaderSection } from "./components/dom/headerUI.js";
+
+import { openFilterDropDownMenu } from "./components/filterPosts.js";
 document.addEventListener('DOMContentLoaded', () => {
     createLoginSection();
     createRegistrationSection();
     showInitialHeaderSection();
+
+    const filterButton = document.getElementById('filter-posts-button');
+    filterButton.addEventListener('click', () => {
+        openFilterDropDownMenu();
+    })
 });
 
 window.onload = async function() {

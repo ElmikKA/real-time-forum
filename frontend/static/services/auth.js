@@ -60,11 +60,12 @@ export async function logout() {
         profileAndAddNewButtonDiv.remove();
     }
 
-
     try {
         closeWebSocket();
-        showLoginSection();
         await logoutFetch();
+        localStorage.removeItem('loggedInUser');
+        showLoginSection();
+        window.location.reload();
     } catch(error) {
         console.log('Logout failed:', error);
     }

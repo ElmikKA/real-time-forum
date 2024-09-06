@@ -81,9 +81,6 @@ export async function logoutFetch() {
         if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
-        localStorage.removeItem('loggedInUser');
-        console.log(localStorage)
-        console.log('Logout successful:', response);
     } catch (error) {
         console.error('Unexpected error during logout:', error);
         alert('An unexpected error occurred during logout. Please try again.');
@@ -117,7 +114,6 @@ export async function createNewCommentFetch(commentData) {
 
 export async function fetchPosts() {
     try {
-
         const response = await fetch('/api/posts', {
             method: 'GET',
             headers: {

@@ -170,7 +170,7 @@ input {
     flex-direction: column;
     position: fixed;
     width: 225px;
-    height: 90vh;
+    height: 100vh;
     padding: 40px;
     overflow-y: auto;
     box-sizing: border-box;
@@ -704,7 +704,7 @@ input {
 
 .comment .like-dislike-comment-section {
     width: 30px;
-} */
+}
 
 .new-comment {
     display: flex;

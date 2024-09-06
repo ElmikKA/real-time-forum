@@ -25,6 +25,7 @@ export function setupPostLoginHeaderSection() {
 }
 
 function createLogoDiv() {
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
     const logoDiv = document.createElement('div');
     logoDiv.id = 'logo-div';
 
@@ -32,6 +33,17 @@ function createLogoDiv() {
     image.src = './static/assets/logo.png';
     image.alt = 'logo-for-real-forum';
     image.classList.add('logo');
+
+    if(user) {
+        console.log('user is here')
+        logoDiv.style.cursor = 'pointer';
+        logoDiv.addEventListener('click', () => {
+            toggleVisibility('user-profile', false);
+            toggleVisibility('main-content-for-posts', true);
+        })
+    }
+
+
 
     logoDiv.appendChild(image);
 

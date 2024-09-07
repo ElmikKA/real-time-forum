@@ -34,7 +34,3 @@ To find audit steps press HERE [HERE](https://github.com/01-edu/public/tree/mast
     ```
 
 _<sup>Made by: [KElmik](https://01.kood.tech/git/kelmik), [ureinkub](https://01.kood.tech/git/ureinkub)_</sup>
-
-
-
-

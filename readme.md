@@ -1,8 +1,9 @@
 # REAL-TIME-FORUM
-
+do
 ``
-do git pull to get the latest version
-``
+git pull
+`` 
+to get the latest version
 
 ## Overview
 This project is a web application with real-time chat, user profiles, posts, comments, and likes/dislikes functionality. The backend is powered by **Golang**, with WebSocket support for real-time updates and status management. It also includes basic user authentication and post filtering.

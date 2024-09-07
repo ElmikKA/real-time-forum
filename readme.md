@@ -10,8 +10,8 @@ This project is a web application with real-time chat, user profiles, posts, com
 - **Post Filtering**: Sort posts by likes, dislikes.
 
 ## Tech Stack
-- **Frontend**: HTML, CSS, JavaScript (ES6+)
-- **Backend**: Go (Golang) with WebSocket support
+- **Frontend**: HTML, CSS, JavaScript
+- **Backend**: Go with WebSocket support
 - **Database**: SQLite3
 - **Real-Time Communication**: WebSocket
 

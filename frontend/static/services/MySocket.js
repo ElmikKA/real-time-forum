@@ -65,17 +65,69 @@ export class MySocket {
 
     displayNewMessages(responseData) {
         const messengerContent = document.getElementById('messenger-content');
-        const messengerInput = document.getElementById('messenger-input');
         const messageElement = document.createElement('div');
-        messageElement.textContent = responseData.message;
-        console.log('display message response', responseData)
+
+        const messageContent = document.createElement('p');
+        messageContent.textContent = responseData.message;
+        
+
+        this.addNotificationToMessagesReceiver(responseData)
         const messageSender = responseData.sender_id !== responseData.receiver_id ? 'user' : 'other';
-        console.log(messageSender)
+
+        const messageDate = document.createElement('span');
+        messageDate.classList.add('message-date')
+        const messageDateObject = new Date(responseData.written_at);
+        messageDate.textContent = messageDateObject.toLocaleString();
+
         messageElement.className = `message ${messageSender}`;
+
+        messageElement.appendChild(messageDate);
+        messageElement.appendChild(messageContent);
+
         messengerContent.appendChild(messageElement);
+
         // scrolls the message div down only if a new message comes when you're looking at the latest message
         if (messengerContent.scrollHeight - messengerContent.scrollTop < 650) {
             messengerContent.scrollTop = messengerContent.scrollHeight;
+        }
+    }
+
+    addNotificationToMessagesReceiver(responseData) {
+        const isReceiver = responseData.receiver;
+        const username = responseData.written_by;
+        const writeId = responseData.writer_id;
+        if(isReceiver) {
+            const sidebarUserDiv = document.querySelector(`li[data-username="${username}"]`);
+            const notificationDiv = sidebarUserDiv.querySelector('div.notification-div');
+            const messangerContainer = document.getElementById('messenger-container');
+            const chatWithElement = document.getElementById('chat-with');
+            const userId = chatWithElement.getAttribute('user-id');
+            console.log('users', userId, writeId)
+            console.log(userId === writeId)
+
+            if(notificationDiv) {
+                let notificationCount = parseInt(notificationDiv.textContent, 10) + 1;
+                notificationDiv.textContent = notificationCount;
+            } else if(messangerContainer.classList.contains('visible') && parseInt(userId) === writeId) {
+                return;
+            } else {
+                const notificationDiv = document.createElement('div');
+                notificationDiv.classList.add('notification-div');
+
+                notificationDiv.style.height = '20px';
+                notificationDiv.style.width = '20px';
+                notificationDiv.style.backgroundColor = 'red';
+                notificationDiv.style.borderRadius = '50px';    
+                notificationDiv.textContent = '1';
+                notificationDiv.style.display = 'flex';
+                notificationDiv.style.justifyContent = 'center';
+                notificationDiv.style.alignItems = 'center';
+                notificationDiv.style.color = 'white';
+                sidebarUserDiv.appendChild(notificationDiv);
+            }
+            
+            
+
         }
     }
 

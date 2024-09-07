@@ -22,7 +22,7 @@ export async function createDashboardPosts(post, allPostData) {
     profilePictureDiv.classList.add('profile-picture-on-card');
 
     const profilePictureText = document.createElement('p');
-    profilePictureText.textContent = post.creator[0];
+    profilePictureText.textContent = post.creator[0].toUpperCase();
     profilePictureDiv.appendChild(profilePictureText);
 
     const profileName = document.createElement('h2');

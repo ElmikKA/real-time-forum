@@ -56,8 +56,8 @@ export function openChat(data, username, user) {
     const messengerContainer = document.getElementById('messenger-container');
     const messengerContent = document.getElementById('messenger-content');
     const chatWith = document.getElementById('chat-with');
-    console.log(user, user[0].id)
     const userId = user[0].id;
+    checkForNotificationDiv(username);
 
     chatWith.textContent = `${username}`;
     chatWith.setAttribute('user-id', userId);
@@ -67,14 +67,14 @@ export function openChat(data, username, user) {
     messengerContent.innerHTML = '';
     const chatHistory = data.messages;
 
-    if (!chatHistory || chatHistory.length === 0) {
+    console.log('Chat History', chatHistory)
+
+    if (!chatHistory || chatHistory === null) {
         appendMessage(messengerContent, 'No chats, but it maybe your first today!');
         return;
     } else {
         chatHistory.forEach(messages => {
-            console.log(messages)
             const messageSender = userId !== messages.sender_id ? 'user' : 'other';
-            console.log(messageSender)
 
             appendMessage(messengerContent, messages, messageSender);
         });
@@ -85,6 +85,14 @@ export function openChat(data, username, user) {
     messageUserId = userId
 
     messengerContent.addEventListener('scroll', requestMoreMessages);
+}
+
+function checkForNotificationDiv(username) {
+    const sidebarUserDiv = document.querySelector(`li[data-username="${username}"]`);
+    const notificationDiv = sidebarUserDiv.querySelector('div.notification-div');
+    if(notificationDiv) {
+        notificationDiv.remove();
+    }
 }
 
 async function requestMoreMessages() {

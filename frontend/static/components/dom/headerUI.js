@@ -34,7 +34,6 @@ function addEventListenerToLogo() {
     })
 }
 
-
 function createLogoDiv() {
     const logoDiv = document.createElement('div');
     logoDiv.innerHTML = '';

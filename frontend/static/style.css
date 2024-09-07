@@ -225,6 +225,12 @@ input {
     background-color: #f44336;
 }
 
+.users-list .user {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 /* Main Content */
 #main-content {
     width: 100%;
@@ -920,12 +926,12 @@ input {
     width: 600px;
 }
 
-.user-profile-group {
+.user-profile-group, .form-group {
     display: flex;
     justify-content: space-between;
 }
 
-.user-profile-field {
+.user-profile-field, .form-field {
     display: flex;
     flex-direction: column;
     width: 48%
@@ -940,6 +946,8 @@ input {
     color: var(--secondary-color);
     font-size: 30px;
 }
+
+
 
 .password-field-for-user-profile {
     display: flex;

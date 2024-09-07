@@ -12,7 +12,7 @@ export function userProfileSection(userProfileSection) {
 
     const userPicture = document.createElement('div');
     userPicture.id = 'user-profile-picture';
-    userPicture.textContent = user.username[0];
+    userPicture.textContent = user.username[0].toUpperCase();
 
     const userName = document.createElement('h2');
     userName.textContent = user.username;

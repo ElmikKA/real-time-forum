@@ -17,18 +17,18 @@ export function closeWebSocket() {
 }
 
 export function addWebsocketUsers(usersData) {
-    // console.log("Adding users", usersData);
+    console.log("Adding users", usersData);
     const users = usersData.allUsers;
 
     console.log(usersData)
 
-    // const onlineUsers = users.filter(user => user.online === "1");
-    // const offlineUsers = users.filter(user => user.online !== "1");
+    const onlineUsers = users.filter(user => user.online === "1");
+    const offlineUsers = users.filter(user => user.online !== "1");
 
-    // const onlineListItems = onlineUsers.map(user => createUserListItem(user, true));
-    // const offlineListItems = offlineUsers.map(user => createUserListItem(user, false));
+    const onlineListItems = onlineUsers.map(user => createUserListItem(user, true));
+    const offlineListItems = offlineUsers.map(user => createUserListItem(user, false));
 
-    const combinedListItems = {}
+    const combinedListItems = onlineListItems.concat(offlineListItems)
 
     const sidebar = document.getElementById('sidebar');
     generateSidebarContent(sidebar, combinedListItems, users);
@@ -46,8 +46,8 @@ function generateSidebarContent(sidebar, userLists, users) {
 
     const usersList = document.createElement('ul');
     usersList.className = 'users-list';
-    // userLists.forEach(userItem => usersList.appendChild(userItem));
-    // usersSection.appendChild(usersList);
+    userLists.forEach(userItem => usersList.appendChild(userItem));
+    usersSection.appendChild(usersList);
 
     sidebar.appendChild(usersSection);
 
@@ -59,13 +59,17 @@ function createUserListItem(user, isOnline) {
     listItem.classList.add('user');
     listItem.setAttribute('data-username', user.username);
 
+    const userStatusAndName = document.createElement('div');
+
     const statusSpan = document.createElement('span');
     statusSpan.classList.add('status', isOnline ? 'online' : 'offline');
-    listItem.appendChild(statusSpan);
-
+    
     const userLink = document.createElement('a');
     userLink.textContent = user.username;
-    listItem.appendChild(userLink);
+
+    userStatusAndName.appendChild(statusSpan);
+    userStatusAndName.appendChild(userLink);
+    listItem.appendChild(userStatusAndName);
 
     return listItem;
 }

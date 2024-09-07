@@ -3,6 +3,7 @@ package functions
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -110,22 +111,29 @@ func SortUsers(users []Users, latestMessages []Messages, id int) ([]Users, error
 			latestMessageTimes[otherUserID] = msg.Written_at
 		}
 	}
+	fmt.Println("latest messages:", latestMessageTimes)
 
 	sort.SliceStable(users, func(i, j int) bool {
 		timeI, hasTimeI := latestMessageTimes[users[i].Id]
 		timeJ, hasTimeJ := latestMessageTimes[users[j].Id]
 
 		if hasTimeI && hasTimeJ {
+			if timeI.Equal(timeJ) {
+				return users[i].Name < users[j].Name
+			}
 			return timeI.After(timeJ)
 		}
+
 		if hasTimeI {
 			return true
 		}
 		if hasTimeJ {
 			return false
 		}
-		return users[i].Name < users[j].Name
+
+		return strings.ToLower(users[i].Name) < strings.ToLower(users[j].Name)
 	})
+	fmt.Println("users:", users)
 
 	return users, nil
 }

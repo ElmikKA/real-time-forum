@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Forum</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jockey+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="">
+
+        <!-- Header Section -->
+        <header id="header-section"></header>
+
+        <div class="login-container visible" id="login-container"></div>
+
+        <div id="registration-container" class="hidden"></div>
+
+        <!-- Main Section -->
+        <main id="main-section" class="hidden">
+            <!-- Aside Section -->
+            <aside id="sidebar"></aside>
+
+            <!-- Main Section for Posts -->
+            <main id="main-content">
+                <!-- Main content heading -->
+                 <div id="main-content-for-posts" class="visible">
+                    <div id="heading-class-for-main-content">
+                         <h2>Find the REAL truth about everything!</h2>
+                         <div id="filter-posts-button-div">
+                             <button id="filter-posts-button">FILTER</button>
+                         </div>
+                     </div>
+                     <!-- Posts Section -->
+                     <div id="post-grid-layout"></div>
+                 </div>
+                 <div id="user-profile" class="hidden"></div>
+
+                 <div id="messenger-container" class="hidden"></div>
+
+                 <div id="dialog-container" class="hidden"></div>
+
+            </main>
+        </main>
+
+        <div id="custom-confirm-message" class="confirm-modal hidden"></div>
+        <div id="custom-alert-message" class="alert-modal hidden"></div>
+    </div>
+
+    <script src="./static/script.js" type="module"></script>
+</body>
+</html>

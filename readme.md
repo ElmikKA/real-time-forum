@@ -1,8 +1,8 @@
 # REAL-TIME-FORUM
 do
-``
+```
 git pull
-`` 
+```
 to get the latest version
 
 ## Overview

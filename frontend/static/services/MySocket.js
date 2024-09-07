@@ -68,9 +68,9 @@ export class MySocket {
         const messageElement = document.createElement('div');
 
         const messageContent = document.createElement('p');
+        messageContent.classList.add('message-content');
         messageContent.textContent = responseData.message;
         
-
         this.addNotificationToMessagesReceiver(responseData)
         const messageSender = responseData.sender_id !== responseData.receiver_id ? 'user' : 'other';
 
@@ -83,7 +83,6 @@ export class MySocket {
 
         messageElement.appendChild(messageDate);
         messageElement.appendChild(messageContent);
-
         messengerContent.appendChild(messageElement);
 
         // scrolls the message div down only if a new message comes when you're looking at the latest message
@@ -102,32 +101,18 @@ export class MySocket {
             const messangerContainer = document.getElementById('messenger-container');
             const chatWithElement = document.getElementById('chat-with');
             const userId = chatWithElement.getAttribute('user-id');
-            console.log('users', userId, writeId)
-            console.log(userId === writeId)
 
-            if(notificationDiv) {
+            if(messangerContainer.classList.contains('visible') && parseInt(userId) === writeId) {
+                return;
+            } else if(notificationDiv) {
                 let notificationCount = parseInt(notificationDiv.textContent, 10) + 1;
                 notificationDiv.textContent = notificationCount;
-            } else if(messangerContainer.classList.contains('visible') && parseInt(userId) === writeId) {
-                return;
             } else {
                 const notificationDiv = document.createElement('div');
                 notificationDiv.classList.add('notification-div');
-
-                notificationDiv.style.height = '20px';
-                notificationDiv.style.width = '20px';
-                notificationDiv.style.backgroundColor = 'red';
-                notificationDiv.style.borderRadius = '50px';    
                 notificationDiv.textContent = '1';
-                notificationDiv.style.display = 'flex';
-                notificationDiv.style.justifyContent = 'center';
-                notificationDiv.style.alignItems = 'center';
-                notificationDiv.style.color = 'white';
                 sidebarUserDiv.appendChild(notificationDiv);
             }
-            
-            
-
         }
     }
 

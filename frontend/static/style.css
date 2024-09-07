@@ -231,6 +231,17 @@ input {
     align-items: center;
 }
 
+.notification-div {
+    height: 20px;
+    width: 20px;
+    background-color: red;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
 /* Main Content */
 #main-content {
     width: 100%;
@@ -1057,7 +1068,11 @@ input {
 }
 
 .message-date {
-    font-size: 15px;
+    font-size: 12px;
+}
+
+.message-content {
+    margin: 5px 0px;
 }
 
 #custom-alert-message{

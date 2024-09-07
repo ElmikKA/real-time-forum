@@ -29,6 +29,8 @@ function initializeMessenger(mySocket) {
 
 async function handleUserClick(event, users, mySocket) {
     const userElement = event.target.closest('li.user');
+    const messageInput = document.getElementById('messenger-input');
+    messageInput.value = '';
     if (userElement) {
         const username = userElement.getAttribute('data-username');
         await requestMessages(username, users, mySocket);
@@ -129,13 +131,17 @@ function appendMessage(container, messages, senderClass = '') {
     const messageElement = document.createElement('div');
 
     const messageContent = document.createElement('p');
+    messageContent.classList.add('message-content');
     messageContent.textContent = messages.message;
-
 
     const messageDate = document.createElement('span');
     messageDate.classList.add('message-date')
     const messageDateObject = new Date(messages.written_at);
-    messageDate.textContent = messageDateObject.toLocaleString();
+    if(messageDateObject !== null) {
+        messageDate.textContent = messageDateObject.toLocaleString();
+    } else {
+        return;
+    }
 
     messageElement.className = `message ${senderClass}`;
 

@@ -21,29 +21,29 @@ export function setupPostLoginHeaderSection() {
 
     if (localStorage.getItem('loggedInUser')) {
         createDropDownMenu();
+        addEventListenerToLogo();
     }
 }
 
+function addEventListenerToLogo() {
+    const logoDiv = document.getElementById('logo-div');
+    logoDiv.style.cursor = 'pointer';
+    logoDiv.addEventListener('click', () => {
+        toggleVisibility('user-profile', false);
+        toggleVisibility('main-content-for-posts', true);
+    })
+}
+
+
 function createLogoDiv() {
-    const user = JSON.parse(localStorage.getItem('loggedInUser'));
     const logoDiv = document.createElement('div');
+    logoDiv.innerHTML = '';
     logoDiv.id = 'logo-div';
 
     const image = document.createElement('img');
     image.src = './static/assets/logo.png';
     image.alt = 'logo-for-real-forum';
     image.classList.add('logo');
-
-    if(user) {
-        console.log('user is here')
-        logoDiv.style.cursor = 'pointer';
-        logoDiv.addEventListener('click', () => {
-            toggleVisibility('user-profile', false);
-            toggleVisibility('main-content-for-posts', true);
-        })
-    }
-
-
 
     logoDiv.appendChild(image);
 

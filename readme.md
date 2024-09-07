@@ -30,7 +30,7 @@ To find audit steps press HERE [HERE](https://github.com/01-edu/public/tree/mast
 
 3. Start the project: 
     ```bash
-    go run main.go
+    go run .
     ```
 
 _<sup>Made by: [KElmik](https://01.kood.tech/git/kelmik), [ureinkub](https://01.kood.tech/git/ureinkub)_</sup>

@@ -19,9 +19,7 @@ export function closeWebSocket() {
 export function addWebsocketUsers(usersData) {
     console.log("Adding users", usersData);
     const users = usersData.allUsers;
-
-    console.log(usersData)
-
+    
     const onlineUsers = users.filter(user => user.online === "1");
     const offlineUsers = users.filter(user => user.online !== "1");
 

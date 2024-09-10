@@ -19,7 +19,6 @@ export async function login() {
 
     try {
        const loginSuccess = await loginFetch(loginCredentials);
-       console.log(loginSuccess)
 
        if(loginSuccess.login === 'success') {
         setupPostLoginHeaderSection();

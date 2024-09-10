@@ -163,8 +163,6 @@ export async function createDashboardPosts(post, allPostData) {
     commentButton.classList.add('comment-button');
     commentButtonDiv.appendChild(commentButton);
 
-    console.log(onePost)
-
     const commentNumber = document.createElement('span');
     commentNumber.id = 'comment-number';
     if(onePost.comments !== null) {

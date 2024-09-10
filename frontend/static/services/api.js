@@ -31,8 +31,6 @@ export async function loginFetch(loginCredentials) {
             await initializePosts();
             showAllUsersAtSidebar();
             clearLoginForm();
-
-            console.log(localStorage)
         }
 
         return data;
@@ -198,8 +196,6 @@ export async function handleLikeDislike(type, post_id, comment_id, like) {
         comment_id: comment_id,
         like: like,
     }
-
-    console.log('likeData', likeData)
 
     try {
         const response = await fetch('/api/changeLikes', {

@@ -19,6 +19,8 @@ export class MySocket {
                 const responseData = JSON.parse(event.data);
                 console.log("Received response:", responseData);
 
+                console.log('Response-data', responseData)
+
                 if (responseData.statusChange) {
                     this.changeOnlineStatues(responseData)
                 } else {
@@ -63,32 +65,41 @@ export class MySocket {
         }
     }
 
-    displayNewMessages(responseData) {
+    displayNewMessages(responseData) { 
+        
         const messengerContent = document.getElementById('messenger-content');
         const messageElement = document.createElement('div');
+        const chatWithElement = document.getElementById('chat-with');
+        const userId = chatWithElement.getAttribute('user-id');
 
-        const messageContent = document.createElement('p');
-        messageContent.classList.add('message-content');
-        messageContent.textContent = responseData.message;
-        
-        this.addNotificationToMessagesReceiver(responseData)
-        const messageSender = responseData.sender_id !== responseData.receiver_id ? 'user' : 'other';
+        if(responseData.writer_id === parseInt(userId)) {
+            const messageContent = document.createElement('p');
+            messageContent.classList.add('message-content');
+            messageContent.textContent = responseData.message;
+            
+            this.addNotificationToMessagesReceiver(responseData)
+            const messageSender = responseData.sender_id !== responseData.receiver_id ? 'user' : 'other';
 
-        const messageDate = document.createElement('span');
-        messageDate.classList.add('message-date')
-        const messageDateObject = new Date(responseData.written_at);
-        messageDate.textContent = messageDateObject.toLocaleString();
+            const messageDate = document.createElement('span');
+            messageDate.classList.add('message-date')
+            const messageDateObject = new Date(responseData.written_at);
+            messageDate.textContent = messageDateObject.toLocaleString();
 
-        messageElement.className = `message ${messageSender}`;
+            messageElement.className = `message ${messageSender}`;
 
-        messageElement.appendChild(messageDate);
-        messageElement.appendChild(messageContent);
-        messengerContent.appendChild(messageElement);
+            messageElement.appendChild(messageDate);
+            messageElement.appendChild(messageContent);
+            messengerContent.appendChild(messageElement);
 
-        // scrolls the message div down only if a new message comes when you're looking at the latest message
-        if (messengerContent.scrollHeight - messengerContent.scrollTop < 650) {
-            messengerContent.scrollTop = messengerContent.scrollHeight;
+            // scrolls the message div down only if a new message comes when you're looking at the latest message
+            if (messengerContent.scrollHeight - messengerContent.scrollTop < 650) {
+                messengerContent.scrollTop = messengerContent.scrollHeight;
+            }
+        } else {
+            this.addNotificationToMessagesReceiver(responseData);
         }
+
+        
     }
 
     addNotificationToMessagesReceiver(responseData) {
@@ -122,8 +133,7 @@ export class MySocket {
         })
             .then(response => response.json())
             .then(data => {
-                addWebsocketUsers(data); // Ensure this function is defined or bound correctly
-                console.log('data', data)
+                addWebsocketUsers(data);
             })
             .catch(error => console.error("Error fetching users:", error));
     }
@@ -136,8 +146,6 @@ export class MySocket {
             message: messageText,
             receiver: parseInt(userId),
         };
-
-        console.log(msgData)
 
         if (this.mysocket.readyState !== WebSocket.OPEN) {
             console.error('WebSocket is not open. ReadyState:', this.mysocket.readyState);

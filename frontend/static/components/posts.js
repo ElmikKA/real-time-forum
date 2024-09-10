@@ -113,9 +113,6 @@ async function createNewPost(form, allPostData) {
 export async function handleLikeUI(postOrComment, postId, commentId, likeNumber, likeButton) {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
     const post = await fetchPostById(postId);
-
-    console.log('it goes here')
-
     let userHasLiked = false;
 
     if(postOrComment === 'post') {
@@ -132,7 +129,6 @@ export async function handleLikeUI(postOrComment, postId, commentId, likeNumber,
         return;
     } else {
         let newLikeCount = parseInt(likeNumber.textContent, 10) + 1;
-        console.log(newLikeCount)
 
         try {
             const response = await handleLikeDislike(postOrComment, postId, commentId, 1);

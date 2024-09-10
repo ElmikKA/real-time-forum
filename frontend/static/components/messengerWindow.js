@@ -69,8 +69,6 @@ export function openChat(data, username, user) {
     messengerContent.innerHTML = '';
     const chatHistory = data.messages;
 
-    console.log('Chat History', chatHistory)
-
     if (!chatHistory || chatHistory === null) {
         appendMessage(messengerContent, 'No chats, but it maybe your first today!');
         return;
@@ -81,9 +79,7 @@ export function openChat(data, username, user) {
             appendMessage(messengerContent, messages, messageSender);
         });
     }
-    console.log("scrolltop", messengerContent.scrollTop)
     messengerContent.scrollTop = messengerContent.scrollHeight;
-    console.log("scrolltop", messengerContent.scrollTop)
     messageUserId = userId
 
     messengerContent.addEventListener('scroll', requestMoreMessages);

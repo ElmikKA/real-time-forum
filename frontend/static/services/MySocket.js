@@ -66,13 +66,17 @@ export class MySocket {
     }
 
     displayNewMessages(responseData) { 
-        
         const messengerContent = document.getElementById('messenger-content');
         const messageElement = document.createElement('div');
         const chatWithElement = document.getElementById('chat-with');
         const userId = chatWithElement.getAttribute('user-id');
 
-        if(responseData.writer_id === parseInt(userId)) {
+        console.log(responseData)
+
+        console.log(responseData.writer_id, userId)
+
+        if(responseData.writer_id === parseInt(userId) || !responseData.receiver) {
+            console.log(responseData.writer_id, userId)
             const messageContent = document.createElement('p');
             messageContent.classList.add('message-content');
             messageContent.textContent = responseData.message;

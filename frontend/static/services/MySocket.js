@@ -71,10 +71,6 @@ export class MySocket {
         const chatWithElement = document.getElementById('chat-with');
         const userId = chatWithElement.getAttribute('user-id');
 
-        console.log(responseData)
-
-        console.log(responseData.writer_id, userId)
-
         if(responseData.writer_id === parseInt(userId) || !responseData.receiver) {
             console.log(responseData.writer_id, userId)
             const messageContent = document.createElement('p');
